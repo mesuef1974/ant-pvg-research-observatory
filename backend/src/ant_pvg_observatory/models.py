@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import enum
 from datetime import datetime
+from enum import StrEnum
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,13 +9,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
 
-class SourceLayer(str, enum.Enum):
+class SourceLayer(StrEnum):
     ENCYCLOPEDIA = "ENCYCLOPEDIA"
     MODEL_SYNTHESIS = "MODEL_SYNTHESIS"
     LITERATURE = "LITERATURE"
 
 
-class ClaimStatus(str, enum.Enum):
+class ClaimStatus(StrEnum):
     KNOWN = "KNOWN"
     KNOWN_EQUIVALENT = "KNOWN-IN-EQUIVALENT-FORM"
     SPECIALIZATION = "SPECIALIZATION-OF-KNOWN"
