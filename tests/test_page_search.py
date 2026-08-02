@@ -1,6 +1,3 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-
 from ant_pvg_observatory.db import Base
 from ant_pvg_observatory.models import (
     Document,
@@ -9,6 +6,8 @@ from ant_pvg_observatory.models import (
     SourceLayer,
 )
 from ant_pvg_observatory.search import search_pages
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 
 def _add_document(
