@@ -45,3 +45,25 @@ class PageIndexSummary(BaseModel):
     extracted_count: int
     empty_count: int
     failed_count: int
+
+
+class PageSearchResultView(BaseModel):
+    document_id: int
+    document_title: str
+    source_layer: SourceLayer
+    page_number: int
+    snippet: str
+    char_count: int
+    extraction_status: ExtractionStatus
+
+    model_config = {"from_attributes": True}
+
+
+class PageSearchResponseView(BaseModel):
+    query: str
+    total: int
+    limit: int
+    offset: int
+    results: list[PageSearchResultView]
+
+    model_config = {"from_attributes": True}
