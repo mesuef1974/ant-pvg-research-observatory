@@ -23,6 +23,8 @@ class SourceLayer(StrEnum):
     ENCYCLOPEDIA = "ENCYCLOPEDIA"
     MODEL_SYNTHESIS = "MODEL_SYNTHESIS"
     LITERATURE = "LITERATURE"
+    #: بحث المؤلف نفسه: داخلي ومنقح لكن غير منشور ولا مُراجَع خارجيًا.
+    PVG_RESEARCH = "PVG_RESEARCH"
 
 
 class ClaimStatus(StrEnum):
@@ -430,3 +432,37 @@ class EvidenceRecord(Base):
     doi: Mapped[str | None] = mapped_column(String(300), index=True)
     cutoff_date: Mapped[str | None] = mapped_column(String(40))
     imported_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class PvgDocument(Base):
+    """مستند من مدونة بحث PVG، بكتله المهيكلة وبصمته."""
+
+    __tablename__ = "pvg_documents"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(1000))
+    body: Mapped[str] = mapped_column(Text)
+    search_text: Mapped[str] = mapped_column(Text)
+    blocks_json: Mapped[str] = mapped_column(Text)
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    char_count: Mapped[int] = mapped_column(Integer)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class PvgResult(Base):
+    """نتيجة معرَّفة في مدونة PVG.
+
+    ``is_proven`` محسوب من مفردات حالة المدونة نفسها: ``FINITE-VERIFIED`` و
+    ``INTERPRETATION`` و``HYPOTHESIS`` ليست براهين، والأرشيف يعلن ذلك بنفسه.
+    """
+
+    __tablename__ = "pvg_results"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    result_key: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    statement: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str | None] = mapped_column(String(200), index=True)
+    is_proven: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    source_file: Mapped[str] = mapped_column(String(300), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

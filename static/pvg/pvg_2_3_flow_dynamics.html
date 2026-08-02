@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ديناميكا التدفق على وجه 2–3 في PVG</title>
+<style>
+:root{
+  --bg:#08101d;--panel:#101a2b;--panel2:#16243a;--text:#eef4ff;
+  --muted:#a9b7cd;--border:#2b3d58;--accent:#70a9ff;--hot:#ffd166;
+  --flow:#66d9b2;--danger:#ff8c8c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(circle at 50% 0,#172743 0,#08101d 55%);
+  color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh
+}
+header{max-width:1500px;margin:auto;padding:18px 20px 7px}
+h1{font-size:1.35rem;margin:0 0 7px}
+.subtitle{color:var(--muted);line-height:1.7;font-size:.93rem}
+main{
+  max-width:1500px;margin:auto;padding:12px 18px 28px;
+  display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px
+}
+.panel{background:rgba(16,26,43,.95);border:1px solid var(--border);border-radius:17px}
+.controls{padding:15px;display:flex;flex-direction:column;gap:15px}
+label{display:block;margin-bottom:7px;font-size:.92rem}
+input[type=range],select{width:100%}
+select,input[type=number]{
+  background:var(--panel2);color:var(--text);border:1px solid var(--border);
+  border-radius:10px;padding:9px
+}
+input[type=range]{accent-color:var(--accent)}
+.row{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.82rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{
+  padding:10px;border-radius:10px;border:1px solid var(--border);cursor:pointer;
+  background:var(--accent);color:#06101e;font-weight:700
+}
+button.secondary{background:var(--panel2);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:9px}
+.metric small{color:var(--muted)}
+.metric strong{display:block;margin-top:5px;font-size:1rem}
+.visuals{display:grid;grid-template-rows:minmax(530px,1fr) 260px;gap:14px}
+.stage,.chart{position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#flowCanvas{min-height:530px;cursor:grab;background:linear-gradient(#0c1628,#08101d)}
+#flowCanvas:active{cursor:grabbing}
+#chartCanvas{min-height:260px;background:#0b1424}
+.overlay{
+  position:absolute;background:rgba(7,14,26,.82);border:1px solid var(--border);
+  border-radius:10px;padding:9px 11px;font-size:.8rem;color:var(--muted);line-height:1.65
+}
+.hint{left:12px;bottom:12px}
+.legend{right:12px;top:12px;min-width:195px}
+.swatch{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:-2px}
+.note{border-top:1px solid var(--border);padding-top:11px;color:var(--muted);line-height:1.7;font-size:.85rem}
+.section-title{font-weight:700;margin-bottom:8px}
+.target-fields{display:none}
+.target-fields.active{display:grid}
+@media(max-width:920px){
+  main{grid-template-columns:1fr}
+  .visuals{grid-template-rows:520px 250px}
+  #flowCanvas{min-height:520px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>ديناميكا التدفق على الوجه \(2\!-\!3\)</h1>
+  <div class="subtitle">
+    شاهد كيف تنتشر الكتلة، كيف يتحرك مركزها، كيف يختار الوزن شعاعًا غالبًا،
+    وكيف يتشكل التدفق نحو هدف محدد. جميع الحسابات محلية داخل هذا الملف.
+  </div>
+</header>
+
+<main>
+<aside class="panel controls">
+  <div>
+    <label for="mode">نمط التدفق</label>
+    <select id="mode">
+      <option value="free">تدفق حر على الطبقات</option>
+      <option value="target">تدفق نحو هدف محدد</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="weightMode">اختيار الوزن</label>
+    <select id="weightMode">
+      <option value="balanced">متوازن: p = 1/2</option>
+      <option value="arithmetic">حسابي: أوزان 2 و3</option>
+      <option value="dirichlet">ديريشليه: n^(-s)</option>
+      <option value="custom">مخصص: p يدوي</option>
+    </select>
+  </div>
+
+  <div id="sWrap" style="display:none">
+    <label for="s">معلمة ديريشليه s: <span id="sVal">1.00</span></label>
+    <input id="s" type="range" min="-4" max="4" step=".05" value="1">
+  </div>
+
+  <div id="pWrap" style="display:none">
+    <label for="p">احتمال خطوة 2: <span id="pVal">0.50</span></label>
+    <input id="p" type="range" min=".02" max=".98" step=".01" value=".5">
+  </div>
+
+  <div>
+    <label for="K">الطبقة الزمنية k: <span id="Kval">24</span></label>
+    <input id="K" type="range" min="2" max="70" value="24">
+  </div>
+
+  <div class="target-fields grid2" id="targetFields">
+    <div>
+      <label for="A">A = ν₂ للهدف</label>
+      <input id="A" type="number" min="1" max="70" value="16">
+    </div>
+    <div>
+      <label for="B">B = ν₃ للهدف</label>
+      <input id="B" type="number" min="1" max="70" value="20">
+    </div>
+  </div>
+
+  <div>
+    <label for="height">تضخيم كثافة التدفق: <span id="heightVal">1.5×</span></label>
+    <input id="height" type="range" min="0" max="35" value="15">
+  </div>
+
+  <div>
+    <label><input id="showVectors" type="checkbox" checked> إظهار متجه السرعة</label>
+    <label><input id="showRay" type="checkbox" checked> إظهار الشعاع الغالب</label>
+    <label><input id="showMesh" type="checkbox" checked> إظهار شبكة الوجه</label>
+    <label><input id="autorotate" type="checkbox"> دوران تلقائي</label>
+  </div>
+
+  <div class="grid2">
+    <button id="reset" class="secondary">إعادة المنظور</button>
+    <button id="animate">تشغيل الزمن</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><small>p لخطوة 2</small><strong id="mP">0.500</strong></div>
+    <div class="metric"><small>q لخطوة 3</small><strong id="mQ">0.500</strong></div>
+    <div class="metric"><small>مركز الكتلة</small><strong id="mCenter">(12.0،12.0)</strong></div>
+    <div class="metric"><small>الشعاع الغالب</small><strong id="mRay">1 : 1</strong></div>
+    <div class="metric"><small>التشتت σ</small><strong id="mSigma">2.449</strong></div>
+    <div class="metric"><small>الضغط Σρ²</small><strong id="mPressure">—</strong></div>
+  </div>
+
+  <div class="note" id="explain">
+    في التدفق المتوازن يتحرك مركز الكتلة على القطر \(a=b\)، بينما يضيق الحزام نسبيًا كلما كبرت الطبقة.
+  </div>
+</aside>
+
+<section class="visuals">
+  <div class="panel stage">
+    <canvas id="flowCanvas"></canvas>
+    <div class="overlay legend">
+      <div><span class="swatch" style="background:var(--accent)"></span>كثافة منخفضة</div>
+      <div><span class="swatch" style="background:var(--hot)"></span>كثافة مرتفعة</div>
+      <div><span class="swatch" style="background:var(--flow)"></span>الشعاع الغالب</div>
+    </div>
+    <div class="overlay hint">
+      اسحب للدوران · عجلة الفأرة للتكبير<br>
+      انقر نقطة لعرضها · نقرتان لإعادة المنظور
+    </div>
+  </div>
+  <div class="panel chart">
+    <canvas id="chartCanvas"></canvas>
+  </div>
+</section>
+</main>
+
+<script>
+(() => {
+const $=id=>document.getElementById(id);
+const c=$('flowCanvas'),ctx=c.getContext('2d');
+const cc=$('chartCanvas'),cctx=cc.getContext('2d');
+
+const st={
+  mode:'free',weightMode:'balanced',K:24,p:.5,s:1,A:16,B:20,height:1.5,
+  yaw:-.85,pitch:.72,zoom:1,drag:false,lastX:0,lastY:0,auto:false,
+  vectors:true,ray:true,mesh:true,selected:null,timer:null
+};
+
+function resize(){
+  for(const cv of [c,cc]){
+    const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
+    cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);
+    cv.getContext('2d').setTransform(d,0,0,d,0,0);
+  }
+  draw();
+}
+function logGamma(z){
+  const q=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-logGamma(1-z);
+  z-=1;let x=.99999999999980993;
+  for(let i=0;i<q.length;i++)x+=q[i]/(z+i+1);
+  const t=z+q.length-.5;
+  return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x);
+}
+function logC(n,k){if(k<0||k>n)return -Infinity;return logGamma(n+1)-logGamma(k+1)-logGamma(n-k+1)}
+function getP(){
+  if(st.weightMode==='balanced')return .5;
+  if(st.weightMode==='arithmetic')return 2/5;
+  if(st.weightMode==='dirichlet'){
+    const u=Math.pow(2,-st.s),v=Math.pow(3,-st.s);return u/(u+v);
+  }
+  return st.p;
+}
+function densityFree(a,b){
+  const k=a+b,p=getP(),q=1-p;
+  return Math.exp(logC(k,a)+a*Math.log(p)+b*Math.log(q));
+}
+function densityTarget(a,b){
+  const A=st.A,B=st.B;
+  if(a<0||b<0||a>A||b>B)return 0;
+  return Math.exp(logC(a+b,a)+logC(A+B-a-b,A-a)-logC(A+B,A));
+}
+function density(a,b){return st.mode==='free'?densityFree(a,b):densityTarget(a,b)}
+function domain(){
+  const arr=[];
+  if(st.mode==='free'){
+    for(let a=0;a<=st.K;a++)for(let b=0;b<=st.K-a;b++)arr.push({a,b,rho:density(a,b)});
+  }else{
+    for(let a=0;a<=st.A;a++)for(let b=0;b<=st.B;b++)arr.push({a,b,rho:density(a,b)});
+  }
+  return arr;
+}
+function project(a,b,z,maxCoord,maxZ){
+  let x=a-maxCoord*.34,y=b-maxCoord*.34,zz=(maxZ?z/maxZ:0)*maxCoord*.72*st.height;
+  const cy=Math.cos(st.yaw),sy=Math.sin(st.yaw),cp=Math.cos(st.pitch),sp=Math.sin(st.pitch);
+  const x1=x*cy-y*sy,y1=x*sy+y*cy,y2=y1*cp-zz*sp,z2=y1*sp+zz*cp;
+  const w=c.clientWidth,h=c.clientHeight,scale=Math.min(w,h)/(maxCoord*2.1)*st.zoom;
+  const persp=1/(1+Math.max(-.72,z2/(maxCoord*3.8)));
+  return{x:w/2+x1*scale*persp,y:h*.64-y2*scale*persp,depth:z2,persp};
+}
+function col(t,a=1){
+  t=Math.max(0,Math.min(1,t));
+  let r,g,b;
+  if(t<.58){const u=t/.58;r=70+(105-70)*u;g=120+(180-120)*u;b=235+(255-235)*u}
+  else{const u=(t-.58)/.42;r=105+(255-105)*u;g=180+(209-180)*u;b=255+(102-255)*u}
+  return`rgba(${r|0},${g|0},${b|0},${a})`;
+}
+let proj=[];
+function draw3D(){
+  const pts=domain(),maxCoord=st.mode==='free'?st.K:Math.max(st.A,st.B),maxZ=Math.max(1e-12,...pts.map(x=>x.rho));
+  proj=pts.map(x=>({...x,...project(x.a,x.b,x.rho,maxCoord,maxZ),t:x.rho/maxZ})).sort((u,v)=>u.depth-v.depth);
+  ctx.clearRect(0,0,c.clientWidth,c.clientHeight);
+
+  if(st.mesh){
+    ctx.lineWidth=.7;ctx.strokeStyle='rgba(130,150,185,.24)';
+    const aMax=st.mode==='free'?st.K:st.A,bMax=st.mode==='free'?st.K:st.B;
+    for(let a=0;a<=aMax;a++){
+      const ar=proj.filter(p=>p.a===a).sort((x,y)=>x.b-y.b);
+      if(ar.length>1){ctx.beginPath();ctx.moveTo(ar[0].x,ar[0].y);for(let i=1;i<ar.length;i++)ctx.lineTo(ar[i].x,ar[i].y);ctx.stroke()}
+    }
+    for(let b=0;b<=bMax;b++){
+      const ar=proj.filter(p=>p.b===b).sort((x,y)=>x.a-y.a);
+      if(ar.length>1){ctx.beginPath();ctx.moveTo(ar[0].x,ar[0].y);for(let i=1;i<ar.length;i++)ctx.lineTo(ar[i].x,ar[i].y);ctx.stroke()}
+    }
+  }
+
+  if(st.ray){
+    const p=getP(),q=1-p;
+    let endA,endB;
+    if(st.mode==='free'){endA=st.K*p;endB=st.K*q}
+    else{endA=st.A;endB=st.B}
+    const o=project(0,0,0,maxCoord,maxZ),e=project(endA,endB,0,maxCoord,maxZ);
+    ctx.strokeStyle='rgba(102,217,178,.95)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(e.x,e.y);ctx.stroke();
+  }
+
+  for(const p of proj){
+    const sel=st.selected&&p.a===st.selected.a&&p.b===st.selected.b;
+    const r=2.5+5.5*Math.sqrt(p.t)+(sel?3:0);
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle=sel?'#fff':col(p.t,.9);ctx.fill();
+    if(sel){ctx.beginPath();ctx.arc(p.x,p.y,r+5,0,Math.PI*2);ctx.strokeStyle='#ffd166';ctx.lineWidth=2.2;ctx.stroke()}
+  }
+
+  if(st.vectors){
+    const p=getP(),q=1-p;
+    const base=st.mode==='free'?Math.min(st.K,8):Math.min(st.A+st.B,8);
+    const starts=[[0,0],[base*.25,base*.25],[base*.5,base*.2]];
+    for(const [a,b] of starts){
+      const s=project(a,b,0,maxCoord,maxZ),e=project(a+p*3,b+q*3,0,maxCoord,maxZ);
+      arrow(ctx,s.x,s.y,e.x,e.y,'rgba(112,169,255,.95)');
+    }
+  }
+
+  const o=project(0,0,0,maxCoord,maxZ);
+  const ax=project(st.mode==='free'?st.K:st.A,0,0,maxCoord,maxZ);
+  const bx=project(0,st.mode==='free'?st.K:st.B,0,maxCoord,maxZ);
+  ctx.strokeStyle='rgba(238,244,255,.8)';ctx.lineWidth=1.7;
+  ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(ax.x,ax.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(bx.x,bx.y);ctx.stroke();
+  ctx.fillStyle='#eef4ff';ctx.font='15px Tahoma';ctx.fillText('ν₂',ax.x+7,ax.y);ctx.fillText('ν₃',bx.x-22,bx.y);
+}
+function arrow(g,x1,y1,x2,y2,color){
+  const ang=Math.atan2(y2-y1,x2-x1),h=9;
+  g.strokeStyle=color;g.fillStyle=color;g.lineWidth=2;
+  g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+  g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-h*Math.cos(ang-.45),y2-h*Math.sin(ang-.45));g.lineTo(x2-h*Math.cos(ang+.45),y2-h*Math.sin(ang+.45));g.closePath();g.fill();
+}
+function distribution(){
+  const arr=[];
+  if(st.mode==='free'){
+    for(let a=0;a<=st.K;a++)arr.push({a,b:st.K-a,rho:densityFree(a,st.K-a)});
+  }else{
+    const t=Math.min(st.K,st.A+st.B);
+    const lo=Math.max(0,t-st.B),hi=Math.min(st.A,t);
+    for(let a=lo;a<=hi;a++)arr.push({a,b:t-a,rho:densityTarget(a,t-a)});
+  }
+  const s=arr.reduce((x,y)=>x+y.rho,0)||1;
+  arr.forEach(x=>x.rho/=s);
+  return arr;
+}
+function drawChart(){
+  const w=cc.clientWidth,h=cc.clientHeight;cctx.clearRect(0,0,w,h);
+  const arr=distribution(),m=Math.max(1e-12,...arr.map(x=>x.rho));
+  const pad={l:45,r:18,t:28,b:38},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  cctx.strokeStyle='rgba(170,190,220,.35)';cctx.lineWidth=1;
+  cctx.beginPath();cctx.moveTo(pad.l,pad.t);cctx.lineTo(pad.l,h-pad.b);cctx.lineTo(w-pad.r,h-pad.b);cctx.stroke();
+  const bw=pw/Math.max(1,arr.length);
+  arr.forEach((x,i)=>{
+    const bh=ph*x.rho/m,xx=pad.l+i*bw+2,yy=h-pad.b-bh;
+    cctx.fillStyle=col(x.rho/m,.9);cctx.fillRect(xx,yy,Math.max(1,bw-4),bh);
+  });
+  cctx.fillStyle='#eef4ff';cctx.font='13px Tahoma';
+  cctx.fillText(st.mode==='free'?`توزيع الكتلة على الطبقة k=${st.K}`:`مقطع التدفق عند الطبقة t=${Math.min(st.K,st.A+st.B)}`,pad.l,pad.t-8);
+  cctx.fillStyle='#a9b7cd';cctx.fillText('a = ν₂',w/2-20,h-10);
+}
+function updateMetrics(){
+  const p=getP(),q=1-p;
+  let centerA,centerB,sigma;
+  if(st.mode==='free'){
+    centerA=st.K*p;centerB=st.K*q;sigma=Math.sqrt(st.K*p*q);
+  }else{
+    const t=Math.min(st.K,st.A+st.B);
+    centerA=t*st.A/(st.A+st.B);centerB=t*st.B/(st.A+st.B);
+    sigma=Math.sqrt(t*(st.A/(st.A+st.B))*(st.B/(st.A+st.B))*((st.A+st.B-t)/(Math.max(1,st.A+st.B-1))));
+  }
+  const arr=distribution(),pressure=arr.reduce((s,x)=>s+x.rho*x.rho,0);
+  $('mP').textContent=p.toFixed(3);$('mQ').textContent=q.toFixed(3);
+  $('mCenter').textContent=`(${centerA.toFixed(1)}، ${centerB.toFixed(1)})`;
+  $('mRay').textContent=st.mode==='free'?`${p.toFixed(2)} : ${q.toFixed(2)}`:`${st.A} : ${st.B}`;
+  $('mSigma').textContent=sigma.toFixed(3);$('mPressure').textContent=pressure.toFixed(4);
+}
+function updateExplain(){
+  const p=getP();
+  if(st.mode==='target'){
+    $('explain').textContent=`التدفق الآن مشروط بالوصول إلى الهدف (${st.A}، ${st.B}). مركز كل مقطع زمني يتحرك على الشعاع a:b = ${st.A}:${st.B}.`;
+  }else if(st.weightMode==='dirichlet'){
+    $('explain').textContent=`عند الوزن n^(-s) ومع s=${st.s.toFixed(2)} يصبح p=${p.toFixed(3)}. المعلمة s تحرك الشعاع الغالب بسلاسة بين محوري 2 و3.`;
+  }else if(st.weightMode==='arithmetic'){
+    $('explain').textContent='الوزن الحسابي 2^a3^b يعطي p=2/5 وq=3/5، لذلك ينتقل مركز التدفق من القطر إلى الشعاع a:b=2:3.';
+  }else{
+    $('explain').textContent='في التدفق المتوازن يتحرك مركز الكتلة على القطر a=b، بينما يضيق الحزام نسبيًا كلما كبرت الطبقة.';
+  }
+}
+function draw(){draw3D();drawChart();updateMetrics();updateExplain()}
+function syncWeightUI(){
+  $('sWrap').style.display=st.weightMode==='dirichlet'?'block':'none';
+  $('pWrap').style.display=st.weightMode==='custom'?'block':'none';
+}
+$('mode').addEventListener('change',e=>{st.mode=e.target.value;$('targetFields').classList.toggle('active',st.mode==='target');draw()});
+$('weightMode').addEventListener('change',e=>{st.weightMode=e.target.value;syncWeightUI();draw()});
+$('s').addEventListener('input',e=>{st.s=+e.target.value;$('sVal').textContent=st.s.toFixed(2);draw()});
+$('p').addEventListener('input',e=>{st.p=+e.target.value;$('pVal').textContent=st.p.toFixed(2);draw()});
+$('K').addEventListener('input',e=>{st.K=+e.target.value;$('Kval').textContent=st.K;draw()});
+$('height').addEventListener('input',e=>{st.height=+e.target.value/10;$('heightVal').textContent=st.height.toFixed(1)+'×';draw()});
+$('A').addEventListener('input',e=>{st.A=Math.max(1,+e.target.value||1);draw()});
+$('B').addEventListener('input',e=>{st.B=Math.max(1,+e.target.value||1);draw()});
+$('showVectors').addEventListener('change',e=>{st.vectors=e.target.checked;draw()});
+$('showRay').addEventListener('change',e=>{st.ray=e.target.checked;draw()});
+$('showMesh').addEventListener('change',e=>{st.mesh=e.target.checked;draw()});
+$('autorotate').addEventListener('change',e=>st.auto=e.target.checked);
+function reset(){st.yaw=-.85;st.pitch=.72;st.zoom=1;draw()}
+$('reset').addEventListener('click',reset);c.addEventListener('dblclick',reset);
+c.addEventListener('pointerdown',e=>{st.drag=true;st.lastX=e.clientX;st.lastY=e.clientY;c.setPointerCapture(e.pointerId)});
+c.addEventListener('pointermove',e=>{if(!st.drag)return;const dx=e.clientX-st.lastX,dy=e.clientY-st.lastY;st.lastX=e.clientX;st.lastY=e.clientY;st.yaw+=dx*.009;st.pitch=Math.max(-1.3,Math.min(1.3,st.pitch+dy*.009));draw()});
+c.addEventListener('pointerup',e=>{st.drag=false;c.releasePointerCapture(e.pointerId)});
+c.addEventListener('wheel',e=>{e.preventDefault();st.zoom=Math.max(.45,Math.min(3,st.zoom*Math.exp(-e.deltaY*.001)));draw()},{passive:false});
+c.addEventListener('click',e=>{
+  const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,d=1e9;
+  for(const p of proj){const q=(p.x-x)**2+(p.y-y)**2;if(q<d){d=q;best=p}}
+  if(best&&d<450){st.selected={a:best.a,b:best.b};draw()}
+});
+$('animate').addEventListener('click',()=>{
+  if(st.timer){clearInterval(st.timer);st.timer=null;$('animate').textContent='تشغيل الزمن';return}
+  st.K=2;$('K').value=2;$('Kval').textContent=2;$('animate').textContent='إيقاف';
+  st.timer=setInterval(()=>{
+    st.K++;const lim=st.mode==='free'?70:st.A+st.B;
+    if(st.K>lim){clearInterval(st.timer);st.timer=null;$('animate').textContent='تشغيل الزمن';return}
+    $('K').value=Math.min(70,st.K);$('Kval').textContent=st.K;draw();
+  },230);
+});
+function loop(){if(st.auto&&!st.drag){st.yaw+=.003;draw()}requestAnimationFrame(loop)}
+window.addEventListener('resize',resize);syncWeightUI();resize();loop();
+})();
+</script>
+</body>
+</html>

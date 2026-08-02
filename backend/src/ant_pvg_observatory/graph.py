@@ -14,6 +14,7 @@ from pathlib import Path
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from . import pvg
 from .models import (
     Claim,
     EncyclopediaResult,
@@ -21,6 +22,8 @@ from .models import (
     LiteratureGate,
     ModelSynthesisNote,
     ObservatoryReference,
+    PvgDocument,
+    PvgResult,
 )
 
 #: نمط المفتاح لكل نوع، ويُستدل به على النوع حين لا يُصرَّح به.
@@ -30,6 +33,9 @@ KEY_PATTERNS: dict[str, re.Pattern[str]] = {
     "claim": re.compile(r"^CLAIM-"),
     "gate": re.compile(r"^GATE-"),
     "reference": re.compile(r"^REF-"),
+    "pvg_result": re.compile(r"^(?:PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)$"),
+    # المرئية طرفٌ في الشبكة لا زينة: تُربط بالنتيجة التي ترسمها.
+    "visual": re.compile(r"^[\w-]+\.html$"),
 }
 
 
@@ -105,6 +111,28 @@ def resolve_node(session: Session, node_type: str, key: str) -> ResolvedNode:
             return ResolvedNode(
                 node_type, key, True, label=row.title, status=row.kind, citable=False
             )
+    elif node_type == "pvg_result":
+        row = session.scalars(
+            select(PvgResult).where(PvgResult.result_key == key)
+        ).one_or_none()
+        if row:
+            # ``citable`` هنا تعني «يجوز البناء عليها كبرهان»، لا أكثر: حتى
+            # المبرهنة منها غير منشورة، فلا ترفع ادعاءً إلى KNOWN.
+            return ResolvedNode(
+                node_type, key, True,
+                label=(row.statement or "")[:160] or key,
+                status=row.status,
+                citable=bool(row.is_proven),
+            )
+    elif node_type == "pvg_document":
+        row = session.scalars(
+            select(PvgDocument).where(PvgDocument.slug == key)
+        ).one_or_none()
+        if row:
+            return ResolvedNode(node_type, key, True, label=row.title)
+    elif node_type == "visual":
+        if (pvg.VISUALS_DIR / key).is_file():
+            return ResolvedNode(node_type, key, True, label=key)
     return ResolvedNode(node_type, key, False)
 
 

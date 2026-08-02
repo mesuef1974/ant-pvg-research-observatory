@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PVFC — الليف (1) ثلاثي الأبعاد</title>
+<style>
+:root{
+  --bg:#07111d;--panel:#0d1b2a;--panel2:#102238;--text:#eef7ff;
+  --muted:#9eb2c7;--line:#29445e;--accent:#59d5ff;--accent2:#b791ff;
+  --result:#5be1a1;--warn:#ffc96a
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:var(--text);
+  background:radial-gradient(circle at 20% 0%,rgba(89,213,255,.08),transparent 28%),var(--bg)
+}
+.app{max-width:1500px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+h1{margin:0;font-size:clamp(25px,3.5vw,42px)}
+header p{margin:7px 0 0;color:var(--muted)}
+.badge{border:1px solid var(--line);border-radius:999px;padding:9px 13px;color:#dff8ff;white-space:nowrap}
+.layout{display:grid;grid-template-columns:310px minmax(0,1fr) 340px;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.panel h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:17px}
+.body{padding:15px}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.control{margin-bottom:13px}
+select,button,input[type=range]{width:100%}
+select,button{
+  background:#091726;color:var(--text);border:1px solid #31516c;border-radius:11px;
+  padding:10px 11px;font-size:15px
+}
+button{cursor:pointer}
+button.primary{background:linear-gradient(135deg,#167998,#6549bb);border:0;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.switch{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin:10px 0}
+.switch input{accent-color:var(--accent)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.metric{background:#091725;border:1px solid #233d56;border-radius:12px;padding:10px}
+.metric small{display:block;color:var(--muted);margin-bottom:4px}
+.metric strong{font-size:17px}
+.formula{
+  direction:ltr;text-align:center;background:#071421;border:1px solid #24415a;border-radius:13px;
+  padding:12px;margin-top:10px;font:19px Cambria,"Times New Roman",serif;line-height:1.6
+}
+.viewer{position:relative;height:760px;background:#050d16}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.hud{
+  position:absolute;left:13px;bottom:13px;background:rgba(5,14,24,.82);
+  border:1px solid #29445e;border-radius:13px;padding:9px 11px;color:var(--muted);font-size:12px
+}
+.hud b{color:var(--text)}
+.top-hud{
+  position:absolute;right:13px;top:13px;background:rgba(5,14,24,.82);
+  border:1px solid #29445e;border-radius:13px;padding:9px 11px;font-size:12px;color:var(--muted)
+}
+.info{background:#091725;border:1px solid #233d56;border-radius:13px;padding:12px;margin-bottom:11px}
+.info h3{font-size:15px;margin:0 0 7px}
+.info p{margin:0;color:var(--muted);line-height:1.75;font-size:14px}
+.legend{display:grid;gap:8px}
+.legend span{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.dot{width:11px;height:11px;border-radius:50%}
+kbd{background:#071421;border:1px solid #2d4a64;border-radius:6px;padding:2px 6px;color:#dff7ff}
+@media(max-width:1120px){
+ .layout{grid-template-columns:1fr}
+ .viewer{height:650px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <h1>الليف \((1)\) في فضاء PVG ثلاثي الأبعاد</h1>
+    <p>من متجه أولي واحد إلى التفرع \((2)\) أو \((1,1)\) داخل مشهد فضائي قابل للدوران.</p>
+  </div>
+  <div class="badge">WebGL محلي • ملف واحد</div>
+</header>
+
+<div class="layout">
+<section class="panel">
+<h2>التحكم</h2>
+<div class="body">
+  <div class="control">
+    <label for="pSel">الأولي الابتدائي \(p\)</label>
+    <select id="pSel"></select>
+  </div>
+  <div class="control">
+    <label for="qSel">الأولي المضروب \(q\)</label>
+    <select id="qSel"></select>
+  </div>
+  <div class="control">
+    <label for="progress">مرحلة الانتقال</label>
+    <input id="progress" type="range" min="0" max="100" value="0">
+  </div>
+  <div class="row">
+    <button id="play" class="primary">تشغيل</button>
+    <button id="reset">إعادة</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button id="cameraHome">الكاميرا الأصلية</button>
+    <button id="autoRotate">دوران تلقائي</button>
+  </div>
+
+  <label class="switch"><input id="showGrid" type="checkbox" checked> إظهار الشبكة الأرضية</label>
+  <label class="switch"><input id="showAllAxes" type="checkbox" checked> إظهار جميع المحاور الأولية</label>
+  <label class="switch"><input id="showLabels" type="checkbox" checked> إظهار التسميات</label>
+  <label class="switch"><input id="showTrail" type="checkbox" checked> إظهار مسار الحركة</label>
+
+  <div class="metrics">
+    <div class="metric"><small>النمط الأولي</small><strong>(1)</strong></div>
+    <div class="metric"><small>النمط الناتج</small><strong id="pattern">—</strong></div>
+    <div class="metric"><small>العدد الناتج</small><strong id="product">—</strong></div>
+    <div class="metric"><small>نوع الانتقال</small><strong id="kind">—</strong></div>
+  </div>
+  <div class="formula" id="formula">eₚ + e_q</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>المشهد الثلاثي الأبعاد</h2>
+<div class="viewer">
+  <canvas id="gl"></canvas>
+  <div class="top-hud">اسحب للدوران • عجلة الفأرة للتقريب • نقرتان لإعادة الكاميرا</div>
+  <div class="hud"><b>المشهد:</b> محاور أولية شعاعية في فضاء تقييمات مصغّر</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>القراءة الرياضية</h2>
+<div class="body">
+  <div class="info">
+    <h3>النقطة الأصلية</h3>
+    <p>الأولي \(p\) هو متجه أساس \(e_p\). جميع هذه المتجهات تنتمي إلى الليف التوافقي \((1)\).</p>
+  </div>
+  <div class="info" id="explain">
+    <h3>الانتقال</h3>
+    <p>اختر أوليين ثم حرّك الشريط أو شغّل الحركة.</p>
+  </div>
+  <div class="info">
+    <h3>الصورة الهندسية</h3>
+    <p>
+      إذا كان \(q=p\)، تتحرك النقطة أبعد على الشعاع نفسه: \(e_p+e_p=2e_p\).
+      وإذا كان \(q\ne p\)، تدخل مركبة على شعاع ثانٍ: \(e_p+e_q\).
+    </p>
+  </div>
+  <div class="info">
+    <h3>صورة ديريشليه</h3>
+    <div class="formula">P(s)D₍₁₎(s)=D₍₂₎(s)+2D₍₁,₁₎(s)</div>
+  </div>
+  <div class="info">
+    <h3>دليل الألوان</h3>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--accent)"></i>المتجه \(e_p\)</span>
+      <span><i class="dot" style="background:var(--accent2)"></i>المتجه المضاف \(e_q\)</span>
+      <span><i class="dot" style="background:var(--result)"></i>المحصلة</span>
+      <span><i class="dot" style="background:var(--warn)"></i>محاور أولية أخرى</span>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+</div>
+
+<script>
+(() => {
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+if(!gl){
+  canvas.outerHTML='<div style="padding:30px;color:white">المتصفح لا يدعم WebGL.</div>';
+  return;
+}
+const primes=[2,3,5,7,11,13,17,19];
+const pSel=document.getElementById('pSel'),qSel=document.getElementById('qSel');
+primes.forEach(p=>{pSel.add(new Option(p,p));qSel.add(new Option(p,p))});
+pSel.value='3';qSel.value='5';
+
+const ui={
+ progress:document.getElementById('progress'),
+ play:document.getElementById('play'),
+ reset:document.getElementById('reset'),
+ home:document.getElementById('cameraHome'),
+ auto:document.getElementById('autoRotate'),
+ grid:document.getElementById('showGrid'),
+ axes:document.getElementById('showAllAxes'),
+ labels:document.getElementById('showLabels'),
+ trail:document.getElementById('showTrail'),
+ pattern:document.getElementById('pattern'),
+ product:document.getElementById('product'),
+ kind:document.getElementById('kind'),
+ formula:document.getElementById('formula'),
+ explain:document.getElementById('explain')
+};
+
+const vs=`
+attribute vec3 aPos;
+attribute vec3 aColor;
+uniform mat4 uMVP;
+uniform float uPointSize;
+varying vec3 vColor;
+void main(){gl_Position=uMVP*vec4(aPos,1.0);vColor=aColor;gl_PointSize=uPointSize;}
+`;
+const fs=`
+precision mediump float;
+varying vec3 vColor;
+uniform float uAlpha;
+void main(){
+  vec2 d=gl_PointCoord-vec2(.5);
+  if(length(d)>.5) discard;
+  gl_FragColor=vec4(vColor,uAlpha);
+}
+`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}
+const prog=gl.createProgram();
+gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
+gl.useProgram(prog);
+const loc={
+ pos:gl.getAttribLocation(prog,'aPos'),
+ color:gl.getAttribLocation(prog,'aColor'),
+ mvp:gl.getUniformLocation(prog,'uMVP'),
+ point:gl.getUniformLocation(prog,'uPointSize'),
+ alpha:gl.getUniformLocation(prog,'uAlpha')
+};
+const buf=gl.createBuffer();
+
+function mat4Mul(a,b){
+ const o=new Float32Array(16);
+ for(let r=0;r<4;r++)for(let c=0;c<4;c++)
+  o[c*4+r]=a[0*4+r]*b[c*4+0]+a[1*4+r]*b[c*4+1]+a[2*4+r]*b[c*4+2]+a[3*4+r]*b[c*4+3];
+ return o;
+}
+function perspective(fovy,aspect,near,far){
+ const f=1/Math.tan(fovy/2),nf=1/(near-far);
+ return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0]);
+}
+function normalize(v){const l=Math.hypot(...v)||1;return v.map(x=>x/l)}
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function lookAt(eye,target,up){
+ const z=normalize([eye[0]-target[0],eye[1]-target[1],eye[2]-target[2]]);
+ const x=normalize(cross(up,z));const y=cross(z,x);
+ return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,
+  -x[0]*eye[0]-x[1]*eye[1]-x[2]*eye[2],
+  -y[0]*eye[0]-y[1]*eye[1]-y[2]*eye[2],
+  -z[0]*eye[0]-z[1]*eye[1]-z[2]*eye[2],1]);
+}
+let yaw=-0.75,pitch=0.45,dist=8.5,auto=false,drag=false,lastX=0,lastY=0,anim=null;
+function resetCamera(){yaw=-0.75;pitch=0.45;dist=8.5}
+function axisVec(i){
+ const golden=Math.PI*(3-Math.sqrt(5));
+ const y=1-(i/(primes.length-1))*2;
+ const r=Math.sqrt(Math.max(0,1-y*y));
+ const a=i*golden;
+ return [r*Math.cos(a),y,r*Math.sin(a)];
+}
+const colors={
+ p:[0.35,0.84,1],q:[0.72,0.57,1],res:[0.36,0.88,0.63],other:[1,0.79,0.42],
+ grid:[0.18,0.30,0.42],white:[0.9,0.96,1]
+};
+function pushLine(arr,a,b,c){arr.push(...a,...c,...b,...c)}
+function drawArray(vertices,mode,pointSize=1,alpha=1){
+ gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+ gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.DYNAMIC_DRAW);
+ gl.enableVertexAttribArray(loc.pos);gl.enableVertexAttribArray(loc.color);
+ gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,24,0);
+ gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,24,12);
+ gl.uniform1f(loc.point,pointSize);gl.uniform1f(loc.alpha,alpha);
+ gl.drawArrays(mode,0,vertices.length/6);
+}
+function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function mix(a,b,t){return a.map((v,i)=>v+(b[i]-v)*t)}
+function scale(v,s){return v.map(x=>x*s)}
+function add(a,b){return a.map((x,i)=>x+b[i])}
+
+function updateText(){
+ const p=+pSel.value,q=+qSel.value,same=p===q;
+ ui.pattern.textContent=same?'(2)':'(1,1)';
+ ui.product.textContent=p*q;
+ ui.kind.textContent=same?'رفع على الشعاع نفسه':'إضافة مركبة على شعاع ثانٍ';
+ ui.formula.innerHTML=same
+  ? `e<sub>${p}</sub> + e<sub>${p}</sub> = 2e<sub>${p}</sub> → (2)`
+  : `e<sub>${p}</sub> + e<sub>${q}</sub> → (1,1)`;
+ ui.explain.innerHTML=same
+  ? `<h3>رفع الشعاع</h3><p>لأن \(q=p=${p}\)، تبقى الحركة على المحور الأولي نفسه، ويتحول التقييم من 1 إلى 2. الناتج ${p*p} ينتمي إلى الليف <b>(2)</b>.</p>`
+  : `<h3>ولادة محور ثانٍ</h3><p>لأن ${p} و${q} مختلفان، تظهر مركبتان مستقلتان. الناتج ${p*q} ينتمي إلى الليف <b>(1,1)</b>.</p>`;
+}
+
+function render(){
+ updateText();
+ const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();
+ if(canvas.width!==Math.floor(r.width*dpr)||canvas.height!==Math.floor(r.height*dpr)){
+   canvas.width=Math.floor(r.width*dpr);canvas.height=Math.floor(r.height*dpr);
+ }
+ gl.viewport(0,0,canvas.width,canvas.height);
+ gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+ gl.clearColor(0.02,0.05,0.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+
+ if(auto) yaw+=0.003;
+ const eye=[dist*Math.cos(pitch)*Math.cos(yaw),dist*Math.sin(pitch),dist*Math.cos(pitch)*Math.sin(yaw)];
+ const mvp=mat4Mul(perspective(Math.PI/4,canvas.width/canvas.height,.1,100),lookAt(eye,[0,0,0],[0,1,0]));
+ gl.uniformMatrix4fv(loc.mvp,false,mvp);
+
+ const p=+pSel.value,q=+qSel.value,ip=primes.indexOf(p),iq=primes.indexOf(q);
+ const vp=axisVec(ip),vq=axisVec(iq),L=3.2;
+ const t=+ui.progress.value/100;
+
+ if(ui.grid.checked){
+   const g=[];
+   for(let i=-4;i<=4;i++){
+     pushLine(g,[i,-2.5,-4],[i,-2.5,4],colors.grid);
+     pushLine(g,[-4,-2.5,i],[4,-2.5,i],colors.grid);
+   }
+   drawArray(g,gl.LINES,1,.42);
+ }
+ const axes=[];
+ primes.forEach((pr,i)=>{
+   if(!ui.axes.checked && i!==ip && i!==iq) return;
+   const v=axisVec(i),end=scale(v,L);
+   const c=i===ip?colors.p:i===iq?colors.q:colors.other;
+   pushLine(axes,[0,0,0],end,c);
+ });
+ drawArray(axes,gl.LINES,1,ui.axes.checked?.7:1);
+
+ const pp=scale(vp,1.9);
+ const qStart=scale(vq,1.9);
+ const result=q===p?scale(vp,3.6):add(scale(vp,1.9),scale(vq,1.9));
+ const phase1=ease(Math.min(t/.36,1));
+ const phase2=ease(Math.max(0,Math.min(1,(t-.28)/.55)));
+ const pNow=mix([0,0,0],pp,phase1);
+ const qNow=mix(qStart,result,phase2);
+
+ const vecs=[];
+ pushLine(vecs,[0,0,0],pNow,colors.p);
+ if(t>.28) pushLine(vecs,qStart,qNow,colors.q);
+ if(t>.72) pushLine(vecs,[0,0,0],result,colors.res);
+ drawArray(vecs,gl.LINES,1,1);
+
+ if(ui.trail.checked&&t>.28){
+   const trail=[];
+   const steps=30;
+   for(let i=0;i<steps;i++){
+     const a=i/steps,b=(i+1)/steps;
+     pushLine(trail,mix(qStart,result,a),mix(qStart,result,b),colors.q);
+   }
+   drawArray(trail,gl.LINES,1,.25);
+ }
+ const pts=[];
+ pts.push(...pNow,...colors.p);
+ if(t>.28) pts.push(...qNow,...colors.q);
+ if(t>.72) pts.push(...result,...colors.res);
+ drawArray(pts,gl.POINTS,18,1);
+
+ requestAnimationFrame(render);
+}
+[pSel,qSel,ui.progress,ui.grid,ui.axes,ui.labels,ui.trail].forEach(el=>el.addEventListener('input',updateText));
+ui.play.addEventListener('click',()=>{
+ if(anim)cancelAnimationFrame(anim);
+ const from=+ui.progress.value,start=performance.now(),dur=Math.max(400,2400*(1-from/100));
+ const step=now=>{const u=Math.min(1,(now-start)/dur);ui.progress.value=Math.round(from+(100-from)*u);if(u<1)anim=requestAnimationFrame(step)};
+ anim=requestAnimationFrame(step);
+});
+ui.reset.addEventListener('click',()=>{if(anim)cancelAnimationFrame(anim);ui.progress.value=0});
+ui.home.addEventListener('click',resetCamera);
+ui.auto.addEventListener('click',()=>{auto=!auto;ui.auto.textContent=auto?'إيقاف الدوران':'دوران تلقائي'});
+canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-lastX)*.008;pitch=Math.max(-1.2,Math.min(1.2,pitch+(e.clientY-lastY)*.008));lastX=e.clientX;lastY=e.clientY});
+canvas.addEventListener('pointerup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(4,Math.min(16,dist+e.deltaY*.01))},{passive:false});
+canvas.addEventListener('dblclick',resetCamera);
+updateText();render();
+})();
+</script>
+</body>
+</html>

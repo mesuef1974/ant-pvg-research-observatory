@@ -6,7 +6,7 @@ const TITLES = {
   dashboard: 'لوحة القيادة', search: 'البحث الموحد', results: 'نتائج الموسوعة',
   model: 'المعرفة المعيارية', integrity: 'تكامل الحوكمة', claims: 'سجل الادعاءات',
   gates: 'بوابات الأدبيات', refs: 'المراجع', graph: 'شبكة المعرفة',
-  reader: 'قارئ الموسوعة',
+  pvg: 'مدونة بحث PVG', reader: 'قارئ الموسوعة',
 };
 const NOTE_KINDS = {
   method: 'طريقة', context: 'سياق', caveat: 'محذور', heuristic: 'حدس',
@@ -725,10 +725,78 @@ async function reader() {
   if (chs.length) loadCh(); else $('page').textContent = 'لم تُستورد الموسوعة بعد.';
 }
 
+// ------------------------------------------------------------------ مدونة PVG
+
+/** طبقة بحثك أنت: داخلية غير منشورة. تُعرض منفصلةً بعلامتها الخاصة لأن
+ *  خلطها بالموسوعة أو بالأدبيات هو بعينه ما يمنعه المرصد. */
+async function pvg() {
+  const [docs, results, visuals] = await Promise.all([
+    api('/api/pvg/documents'), api('/api/pvg/results'), api('/api/pvg/visuals'),
+  ]);
+  const proven = results.filter(r => r.is_proven).length;
+
+  const resultRow = r => `<div class="row">
+    <h4>${esc(r.result_key)}</h4>
+    <div>${esc(r.statement || '')}</div>
+    <div class="meta">
+      <span class="tag pvg">PVG_RESEARCH</span>
+      <span class="badge">${esc(r.status || 'بلا حالة')}</span>
+      ${r.is_proven
+        ? '<span class="badge ok">مبرهنة — يجوز البناء عليها بـ PROVED_HERE</span>'
+        : '<span class="badge no">ليست برهانًا — لا يُبنى عليها ادعاءُ برهان</span>'}
+      <span class="badge">${esc(r.source_file)}</span>
+    </div></div>`;
+
+  app.innerHTML = `
+    <div class="panel warn-panel">
+      <h3>طبقة بحث PVG</h3>
+      <p>بحثك أنت، وسلطته <b>INTERNAL_UNPUBLISHED</b>. مبرهنةٌ هنا تعني مبرهنة
+      عندنا لا معروفة في الأدبيات، فلا ترفع ادعاءً إلى <code>KNOWN</code> مهما
+      كانت قوتها — استعمل <code>PROVED_HERE</code>، أو أضف مرجعًا منشورًا.
+      وما حالته <code>FINITE-VERIFIED</code> أو <code>INTERPRETATION</code> أو
+      <code>HYPOTHESIS</code> فليس برهانًا، والمرصد يرفض آليًا أن يُبنى عليه
+      ادعاءُ برهان: لا يحل الفحص محل البرهان.</p>
+    </div>
+    <div class="panel"><div class="cards">
+      <div class="card"><strong>${docs.length}</strong><small>مستندًا</small></div>
+      <div class="card"><strong>${results.length}</strong><small>نتيجة معرَّفة</small></div>
+      <div class="card"><strong>${proven}</strong><small>مبرهنة</small></div>
+      <div class="card"><strong>${visuals.length}</strong><small>مرئية تفاعلية</small></div>
+    </div></div>
+    <div class="panel"><h3>المرئيات التفاعلية</h3>
+      <p class="muted">تعمل دون اتصال، وكلٌّ منها مربوطة في شبكة المعرفة
+      بالنتيجة التي ترسمها.</p>
+      <div class="table">${visuals.map(v => `<div class="row inline">
+        <a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.name)}</a>
+        <span class="muted">${Math.round(v.bytes / 1024)} ك.ب</span>
+      </div>`).join('')}</div></div>
+    <div class="panel"><div class="searchbar">
+      <select id="pvgf"><option value="">كل النتائج</option>
+        <option value="1">المبرهنة فقط</option>
+        <option value="0">ما ليس برهانًا</option></select>
+      <button class="action" id="pvggo">ترشيح</button>
+    </div>
+    <div id="pvglist" class="table">${results.map(resultRow).join('')}</div></div>
+    <div class="panel"><h3>المستندات</h3><div class="table">
+      ${docs.map(d => `<div class="row inline">
+        <span>${esc(d.title)}</span>
+        <span class="muted">${d.char_count.toLocaleString('ar')} حرفًا ·
+          <code>${esc(d.sha256.slice(0, 12))}</code></span>
+      </div>`).join('')}</div></div>`;
+
+  $('pvggo').onclick = () => {
+    const f = $('pvgf').value;
+    const rows = results.filter(r => f === '' || String(Number(r.is_proven)) === f);
+    $('pvglist').innerHTML = `<p class="muted">${rows.length} من ${results.length}</p>`
+      + rows.map(resultRow).join('');
+    typeset($('pvglist'));
+  };
+}
+
 // -------------------------------------------------------------------- التوجيه
 
 const VIEWS = { dashboard, search: searchView, results, model, integrity,
-                claims, gates, refs, graph, reader };
+                claims, gates, refs, graph, pvg, reader };
 
 async function render() {
   viewTitle.textContent = TITLES[current];

@@ -1,0 +1,102 @@
+[
+  {
+    "file": "00_README_AND_ARCHIVE_MAP.md",
+    "bytes": 8352,
+    "sha256": "bc08916dfe301d7cea7cdc8d2c826bd38e0d4d0a1b7be7dd3da4b1ae119120cf"
+  },
+  {
+    "file": "01_FOUNDATIONS_AND_TRANSLATION.md",
+    "bytes": 6105,
+    "sha256": "20ad978129f7355d6a666fe3190e100414691b0b809c1639769ef99e224f5a91"
+  },
+  {
+    "file": "02_AXES_FACES_CONES_AND_GLUING.md",
+    "bytes": 4068,
+    "sha256": "24f5b9cb9cf50679c41ec2db4a2fa770bbe905ff319f400c4db2efbfa5644a33"
+  },
+  {
+    "file": "03_RAYS_SHAPES_PARTITIONS_AND_FIBERS.md",
+    "bytes": 5840,
+    "sha256": "c813fe106e8ab7fe35dea01f79de04fa0d1abf7f2cbc5d3282714a35d3e75b81"
+  },
+  {
+    "file": "04_FIXED_MASS_LEVELS_PASCAL_AND_LAYER_DECOMPOSITION.md",
+    "bytes": 4068,
+    "sha256": "265cba79cf3246541c750ab6923a0196fee14021773eea4015cf8c9ce2743aae"
+  },
+  {
+    "file": "05_DIVISOR_BOX_FACE_MATRIX_AND_SHAPE_SPACE.md",
+    "bytes": 4454,
+    "sha256": "b8e844208ba6536f7a00cf6f6665a47081ebd0cd3fd7e09f75c6e282aff73c01"
+  },
+  {
+    "file": "06_DISCRETE_CALCULUS_VECTOR_FIELDS_AND_CURVATURE.md",
+    "bytes": 4358,
+    "sha256": "49c0923e7987f09c355a25079d9f9eaf52d59e00973311a218b07acfa4e9c48d"
+  },
+  {
+    "file": "07_PVFC_FIBER_DIRICHLET_CALCULUS.md",
+    "bytes": 4267,
+    "sha256": "1fcd9b0bee026c8bd2c739ee2e5a09e9bbb68f6e6663c6802152e47a08e09d08"
+  },
+  {
+    "file": "08_PVFC_OPERATOR_ALGEBRA_AND_BIRTH_JET_MODULE.md",
+    "bytes": 4579,
+    "sha256": "cdc49e83ffd67256f453ed6cd695454495c820c1cb3cae885cdc7d4e99e834e9"
+  },
+  {
+    "file": "09_PVFC_BOUNDARIES_AND_COUNTING_TOWERS.md",
+    "bytes": 4609,
+    "sha256": "326c317c2a008beee83643438a9df08e7fe8a6b3fe5c577ad9d8b95d38145b95"
+  },
+  {
+    "file": "10_PVFC_SPECTRAL_AND_DISCRIMINATION_EXPERIMENTS.md",
+    "bytes": 5143,
+    "sha256": "8c6608513f7df6586431a151d4aa2aeaa1d59fedbf0bc3f8872bb14ae7c43b1c"
+  },
+  {
+    "file": "11_ADDITION_FIBERS_EXACT_THEORY.md",
+    "bytes": 5453,
+    "sha256": "c41561fcad14ddb8fcb5536d6f028cea0d1f7581fe7a87050cf043d55163dc52"
+  },
+  {
+    "file": "12_AXIS_ADDITION_GOLDBACH_ANALYTIC_PROGRAM.md",
+    "bytes": 4966,
+    "sha256": "9a04c0de488557671bed9bfa9f84cc3e2f0092d2610bf61241c55e9e21769788"
+  },
+  {
+    "file": "13_PVG_ANT_SIEVE_RESIDUE_ZETA_WEIL_INTERFACES.md",
+    "bytes": 5365,
+    "sha256": "50850f0341f04a8be6bb2962f6194a6409b7d1afc69e6c3577d51da7b896737a"
+  },
+  {
+    "file": "14_INVERSE_GEOMETRY_ATLASES_AND_ARITHMETIC_TERRAIN.md",
+    "bytes": 5439,
+    "sha256": "b9b30c488b40872210b26d6eed3f9fe97c9a31d5325397a137fc215f9ab7625a"
+  },
+  {
+    "file": "15_SOFTWARE_REPOSITORIES_AND_ARTIFACTS.md",
+    "bytes": 4187,
+    "sha256": "d1d8afe8b02f3b258bf29b286ba49ccc19bafd3cae4eec4d684b981c404557a1"
+  },
+  {
+    "file": "16_RESULTS_CORRECTIONS_AND_REJECTIONS_REGISTRY.md",
+    "bytes": 5588,
+    "sha256": "d50fa82c1ea17bce717850a4dce1f51353b23029ff89985183b4534c7842abc8"
+  },
+  {
+    "file": "17_OPEN_PROBLEMS_AND_NEXT_RESEARCH_PROGRAM.md",
+    "bytes": 4875,
+    "sha256": "a26c6d7874fd2b29ff50ffcb0394d99c6ab810f2cb1380fcb2a854c4dc88e599"
+  },
+  {
+    "file": "18_SOURCE_LEDGER.md",
+    "bytes": 3147,
+    "sha256": "ebbb98a74b318e657f3242f8a9174781f954b274bcb90248aac1db3d73a47157"
+  },
+  {
+    "file": "19_PVFC_EXPLICIT_FORMULAS_N1_TO_N6.md",
+    "bytes": 3768,
+    "sha256": "1f4a2237cc110d756d00a0b7f137082ef0b3d4c3d25c1f6a8c5a01d3463829cd"
+  }
+]

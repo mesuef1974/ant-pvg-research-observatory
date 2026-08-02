@@ -1,6 +1,15 @@
 {
   "format_version": 1,
-  "claims": [],
+  "claims": [
+    {
+      "claim_key": "CLAIM-20260802-184636-c2a363",
+      "statement": "ادعاء",
+      "source_layer": "MODEL_SYNTHESIS",
+      "status": "MODEL-SYNTHESIS",
+      "evidence_note": "يستند إلى PVFC-99",
+      "novelty_note": null
+    }
+  ],
   "gates": [
     {
       "gate_key": "GATE-PVFC-SD-001",
@@ -194,5 +203,94 @@
       "coverage_note": "يغطي بنية البرج ومعاملات الفكّ وعلاقات التكرار، ولا يُخصّص عند x_p = p^{-s} ولا يمسّ Selberg–Delange."
     }
   ],
-  "links": []
+  "links": [
+    {
+      "from_type": "pvg_document",
+      "from_key": "90_SESSION_MEMORY_2026-08-01_v2",
+      "relation": "EXAMINES",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": "القسم 23 يوازن بين ما تبيّن وجوده في الأدبيات وما يختلف في مسار PVG، وهو سؤال البوابة نفسه. حكم البوابة PARTIAL ولا يزال معلّقًا على قراءة arXiv:2505.18504."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_1_3d_interactive.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-01",
+      "note": "النسخة ثلاثية الأبعاد من الليف نفسه: (1) إلى (2) أو (1,1)."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_1_interactive.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-01",
+      "note": "الليف الأساسي (1) وأول تفرّع له، مع خيار إظهار معادلة ديريشليه."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_levels_1_to_3_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-05",
+      "note": "تولّد الألياف بعمليتَي الولادة والرفع، وهما مادة وحدة birth–jet."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_levels_1_to_3_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-06",
+      "note": "ومستوياتها الثلاثة تقابل الحد الأول والثاني والثالث. (تصحيح: نُسبت هذه الصفحة سابقًا إلى PVFC-02 بلا سند من نصّها.)"
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_flow_dynamics.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-SHAPE-01",
+      "note": "تعرض انتشار الكتلة وحركة مركزها نحو الاتزان على الطبقات."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_information_surface_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": "ومن ارتفاعاته أيضًا انحناء التفاعل K□."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_information_surface_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FACE-01",
+      "note": "أحد ارتفاعات السطح هو العمق min(a,b) نصًّا."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_three_faces_2_3_5.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-01",
+      "note": "تعرض الوجوه الثلاثة 2–3 و2–5 و3–5 مجتمعةً."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_three_faces_2_3_5.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-GLUE-01",
+      "note": "وتُظهر المحاور المشتركة بين الوجوه، وهي موضوع شرط التوافق."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_vector_fields_face_2_3.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": "الصفحة ترسم المشتقة المختلطة f(6n)−f(2n)−f(3n)+f(n) ونمطها اللوغاريتمي، وهو عين المقدار الذي تنصّ النتيجة على انعدامه."
+    }
+  ]
 }

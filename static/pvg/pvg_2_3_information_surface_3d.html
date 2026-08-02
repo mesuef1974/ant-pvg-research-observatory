@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>السطح المعلوماتي لوجه 2–3 في PVG</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a2f;
+      --panel2:#17213b;
+      --text:#eef3ff;
+      --muted:#aebbd7;
+      --accent:#6aa8ff;
+      --grid:#7f91b6;
+      --border:#263556;
+      --hot:#f2d16b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Tahoma,Arial,sans-serif;
+      background:radial-gradient(circle at top,#17213b 0,#0b1020 55%);
+      color:var(--text);
+      min-height:100vh;
+    }
+    header{
+      padding:18px 22px 8px;
+      max-width:1500px;
+      margin:auto;
+    }
+    h1{font-size:1.35rem;margin:0 0 8px}
+    .subtitle{color:var(--muted);font-size:.95rem;line-height:1.6}
+    main{
+      max-width:1500px;
+      margin:auto;
+      padding:12px 18px 24px;
+      display:grid;
+      grid-template-columns:320px minmax(0,1fr);
+      gap:16px;
+    }
+    .panel{
+      background:rgba(18,26,47,.94);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+    .controls{display:flex;flex-direction:column;gap:16px}
+    label{display:block;font-size:.94rem;margin-bottom:7px}
+    input[type=range],select{width:100%}
+    select{
+      background:var(--panel2);
+      color:var(--text);
+      border:1px solid var(--border);
+      padding:10px;
+      border-radius:10px;
+    }
+    input[type=range]{accent-color:var(--accent)}
+    .row{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.85rem}
+    button{
+      border:1px solid var(--border);
+      background:var(--accent);
+      color:#071020;
+      font-weight:700;
+      padding:11px 12px;
+      border-radius:11px;
+      cursor:pointer;
+    }
+    button.secondary{background:var(--panel2);color:var(--text)}
+    .metrics{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .metric{
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      min-height:76px;
+    }
+    .metric .k{color:var(--muted);font-size:.78rem}
+    .metric .v{font-size:1.05rem;margin-top:6px;word-break:break-word}
+    .stage{
+      position:relative;
+      overflow:hidden;
+      min-height:720px;
+      padding:0;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:720px;
+      cursor:grab;
+      touch-action:none;
+      background:
+        radial-gradient(circle at 50% 35%,rgba(70,100,160,.18),transparent 45%),
+        linear-gradient(#0e1528,#09101e);
+    }
+    canvas:active{cursor:grabbing}
+    .hint{
+      position:absolute;
+      right:14px;
+      bottom:14px;
+      background:rgba(10,16,31,.78);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:9px 11px;
+      color:var(--muted);
+      font-size:.82rem;
+      line-height:1.7;
+      pointer-events:none;
+    }
+    .legend{
+      position:absolute;
+      left:14px;
+      top:14px;
+      width:190px;
+      background:rgba(10,16,31,.78);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+      font-size:.82rem;
+    }
+    .gradient{
+      height:10px;
+      border-radius:999px;
+      margin:8px 0 5px;
+      background:linear-gradient(90deg,#3e6ed6,#61b8ff,#f2d16b);
+    }
+    .note{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.7;
+      border-top:1px solid var(--border);
+      padding-top:12px;
+    }
+    @media(max-width:900px){
+      main{grid-template-columns:1fr}
+      .stage{min-height:590px}
+      canvas{height:590px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>السطح المعلوماتي ثلاثي الأبعاد لوجه 2–3 في هندسة التقييمات الأولية</h1>
+  <div class="subtitle">
+    الإحداثيان الأفقيان هما \(a=\nu_2(n)\) و\(b=\nu_3(n)\)، أما الارتفاع فيتغير حسب المعلومة المختارة.
+    الملف يعمل محليًا دون اتصال بالإنترنت.
+  </div>
+</header>
+
+<main>
+  <aside class="panel controls">
+    <div>
+      <label for="metric">الكمية التي تمثل الارتفاع</label>
+      <select id="metric">
+        <option value="entropy">المعلومة E = log C(a+b,a)</option>
+        <option value="paths">عدد المسارات C(a+b,a) — مقياس لوغاريتمي</option>
+        <option value="depth">العمق min(a,b)</option>
+        <option value="curvature">انحناء التفاعل K□</option>
+        <option value="flat">المستوى المسطح</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="K">أقصى طبقة: <span id="Kval">20</span></label>
+      <input id="K" type="range" min="4" max="42" value="20">
+      <div class="row"><span>4</span><span>42</span></div>
+    </div>
+
+    <div>
+      <label for="height">تضخيم الارتفاع: <span id="Hval">1.4×</span></label>
+      <input id="height" type="range" min="0" max="40" value="14">
+    </div>
+
+    <div>
+      <label for="pointSize">حجم النقاط: <span id="Pval">3.2</span></label>
+      <input id="pointSize" type="range" min="1" max="8" step=".2" value="3.2">
+    </div>
+
+    <div>
+      <label><input id="mesh" type="checkbox" checked> إظهار شبكة السطح</label>
+      <label><input id="points" type="checkbox" checked> إظهار النقاط</label>
+      <label><input id="axes" type="checkbox" checked> إظهار المحاور</label>
+      <label><input id="autorotate" type="checkbox"> دوران تلقائي</label>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <button id="reset" class="secondary">إعادة المنظور</button>
+      <button id="animate">نمو الطبقات</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="k">النقطة</div><div class="v" id="mPoint">(10،10)</div></div>
+      <div class="metric"><div class="k">العدد</div><div class="v" id="mNumber">2¹⁰ × 3¹⁰</div></div>
+      <div class="metric"><div class="k">المسارات</div><div class="v" id="mPaths">184,756</div></div>
+      <div class="metric"><div class="k">المعلومة</div><div class="v" id="mEntropy">12.127</div></div>
+      <div class="metric"><div class="k">العمق</div><div class="v" id="mDepth">10</div></div>
+      <div class="metric"><div class="k">الاختلال</div><div class="v" id="mImbalance">0</div></div>
+    </div>
+
+    <div class="note" id="description">
+      عند استعمال ارتفاع المعلومة يبقى المحوران عند الصفر، بينما يرتفع وسط الوجه. القمة تتبع تقريبًا شعاع \(a=b\)، أي قوى العدد 6.
+    </div>
+  </aside>
+
+  <section class="panel stage">
+    <canvas id="c"></canvas>
+    <div class="legend">
+      <div id="legendTitle">ارتفاع المعلومة</div>
+      <div class="gradient"></div>
+      <div class="row"><span>منخفض</span><span>مرتفع</span></div>
+    </div>
+    <div class="hint">
+      اسحب للدوران · عجلة الفأرة للتكبير<br>
+      انقر نقطة لعرض بياناتها · نقرتان لإعادة المنظور
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const $ = id => document.getElementById(id);
+
+  const state = {
+    K:20, metric:'entropy', height:1.4, pointSize:3.2,
+    mesh:true, points:true, axes:true,
+    yaw:-0.82, pitch:0.72, zoom:1,
+    selected:{a:10,b:10}, dragging:false,
+    lastX:0,lastY:0, auto:false, growTimer:null
+  };
+
+  function resize(){
+    const r=canvas.getBoundingClientRect();
+    const dpr=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.round(r.width*dpr);
+    canvas.height=Math.round(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+
+  function logGamma(z){
+    const c=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-logGamma(1-z);
+    z-=1; let x=.99999999999980993;
+    for(let i=0;i<c.length;i++)x+=c[i]/(z+i+1);
+    const t=z+c.length-.5;
+    return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x);
+  }
+  function logC(n,k){return logGamma(n+1)-logGamma(k+1)-logGamma(n-k+1)}
+  function comb(n,k){
+    k=Math.min(k,n-k); let r=1;
+    for(let i=1;i<=k;i++)r=r*(n-k+i)/i;
+    return Math.round(r);
+  }
+  function zRaw(a,b){
+    const k=a+b;
+    if(state.metric==='flat')return 0;
+    if(state.metric==='depth')return Math.min(a,b);
+    if(state.metric==='curvature')return Math.log((k+2)/(k+1));
+    return logC(k,a);
+  }
+  function allPoints(){
+    const p=[];
+    for(let a=0;a<=state.K;a++)
+      for(let b=0;b<=state.K-a;b++)
+        p.push({a,b,z:zRaw(a,b)});
+    return p;
+  }
+  function rotateProject(a,b,z,maxZ){
+    const K=state.K;
+    let x=a-K/3, y=b-K/3;
+    let zz=(maxZ?z/maxZ:0)*K*.72*state.height;
+
+    const cy=Math.cos(state.yaw), sy=Math.sin(state.yaw);
+    const cp=Math.cos(state.pitch), sp=Math.sin(state.pitch);
+
+    const x1=x*cy-y*sy;
+    const y1=x*sy+y*cy;
+    const y2=y1*cp-zz*sp;
+    const z2=y1*sp+zz*cp;
+
+    const w=canvas.clientWidth,h=canvas.clientHeight;
+    const scale=Math.min(w,h)/(state.K*2.05)*state.zoom;
+    const perspective=1/(1+Math.max(-.75,z2/(state.K*3.7)));
+    return {
+      x:w/2+x1*scale*perspective,
+      y:h*.62-y2*scale*perspective,
+      depth:z2,
+      perspective
+    };
+  }
+  function color(t,alpha=1){
+    t=Math.max(0,Math.min(1,t));
+    let r,g,b;
+    if(t<.55){
+      const u=t/.55;
+      r=62+(97-62)*u; g=110+(184-110)*u; b=214+(255-214)*u;
+    }else{
+      const u=(t-.55)/.45;
+      r=97+(242-97)*u; g=184+(209-184)*u; b=255+(107-255)*u;
+    }
+    return `rgba(${r|0},${g|0},${b|0},${alpha})`;
+  }
+
+  let projected=[];
+  function draw(){
+    const w=canvas.clientWidth,h=canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    const pts=allPoints();
+    const maxZ=Math.max(1,...pts.map(p=>p.z));
+    projected=pts.map(p=>({...p,...rotateProject(p.a,p.b,p.z,maxZ),t:p.z/maxZ}));
+    projected.sort((p,q)=>p.depth-q.depth);
+
+    if(state.mesh){
+      ctx.lineWidth=.8;
+      for(let a=0;a<=state.K;a++){
+        const arr=projected.filter(p=>p.a===a).sort((p,q)=>p.b-q.b);
+        if(arr.length>1){
+          ctx.beginPath(); ctx.moveTo(arr[0].x,arr[0].y);
+          for(let i=1;i<arr.length;i++)ctx.lineTo(arr[i].x,arr[i].y);
+          ctx.strokeStyle='rgba(126,145,182,.36)'; ctx.stroke();
+        }
+      }
+      for(let b=0;b<=state.K;b++){
+        const arr=projected.filter(p=>p.b===b).sort((p,q)=>p.a-q.a);
+        if(arr.length>1){
+          ctx.beginPath(); ctx.moveTo(arr[0].x,arr[0].y);
+          for(let i=1;i<arr.length;i++)ctx.lineTo(arr[i].x,arr[i].y);
+          ctx.strokeStyle='rgba(126,145,182,.36)'; ctx.stroke();
+        }
+      }
+    }
+
+    if(state.axes){
+      const O=rotateProject(0,0,0,maxZ), A=rotateProject(state.K,0,0,maxZ), B=rotateProject(0,state.K,0,maxZ);
+      ctx.lineWidth=2;
+      ctx.strokeStyle='rgba(238,243,255,.8)';
+      ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(A.x,A.y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+      ctx.fillStyle='#eef3ff';ctx.font='16px Tahoma';
+      ctx.fillText('ν₂',A.x+8,A.y);
+      ctx.fillText('ν₃',B.x-24,B.y);
+    }
+
+    if(state.points){
+      for(const p of projected){
+        const sel=p.a===state.selected.a&&p.b===state.selected.b;
+        const r=(state.pointSize*(.72+.45*p.perspective))+(sel?3:0);
+        ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+        ctx.fillStyle=sel?'#ffffff':color(p.t,.88);
+        ctx.fill();
+        if(sel){
+          ctx.beginPath();ctx.arc(p.x,p.y,r+5,0,Math.PI*2);
+          ctx.strokeStyle='#f2d16b';ctx.lineWidth=2.5;ctx.stroke();
+        }
+      }
+    }
+    updateMetrics();
+  }
+
+  function superscript(n){
+    const m={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+    return String(n).split('').map(x=>m[x]||x).join('');
+  }
+  function updateMetrics(){
+    let {a,b}=state.selected;
+    if(a+b>state.K){a=Math.floor(state.K/2);b=state.K-a;state.selected={a,b}}
+    const k=a+b;
+    $('mPoint').textContent=`(${a}، ${b})`;
+    $('mNumber').textContent=`2${superscript(a)} × 3${superscript(b)}`;
+    $('mPaths').textContent=comb(k,a).toLocaleString('ar');
+    $('mEntropy').textContent=logC(k,a).toFixed(3);
+    $('mDepth').textContent=Math.min(a,b);
+    $('mImbalance').textContent=a-b;
+  }
+
+  const descriptions={
+    entropy:'عند استعمال ارتفاع المعلومة يبقى المحوران عند الصفر، بينما يرتفع وسط الوجه. القمة تتبع تقريبًا شعاع a=b، أي قوى العدد 6.',
+    paths:'عدد المسارات يزداد بسرعة هائلة قرب مركز كل طبقة. استُعمل اللوغاريتم في الارتفاع حتى يبقى السطح قابلًا للرؤية.',
+    depth:'تظهر أصداف العمق كسلالم متوازية. كل انتقال إلى الداخل يعني وجود زوج إضافي من 2 و3، أي عامل إضافي من 6.',
+    curvature:'يعتمد انحناء التفاعل المحلي على الطبقة k=a+b فقط، لذلك يظهر كشرائط متساوية الارتفاع، ويضعف كلما ابتعدنا عن الأصل.',
+    flat:'هذا هو وجه القسمة الأساسي بلا وزن معلوماتي. الشبكة نفسها مسطحة؛ الارتفاع يأتي من الحقل الموضوع فوقها.'
+  };
+  const titles={
+    entropy:'ارتفاع المعلومة',
+    paths:'عدد المسارات — لوغاريتمي',
+    depth:'عمق النقطة',
+    curvature:'انحناء التفاعل',
+    flat:'الشبكة المسطحة'
+  };
+
+  $('metric').addEventListener('change',e=>{
+    state.metric=e.target.value;
+    $('description').textContent=descriptions[state.metric];
+    $('legendTitle').textContent=titles[state.metric];
+    draw();
+  });
+  $('K').addEventListener('input',e=>{state.K=+e.target.value;$('Kval').textContent=state.K;draw()});
+  $('height').addEventListener('input',e=>{state.height=+e.target.value/10;$('Hval').textContent=state.height.toFixed(1)+'×';draw()});
+  $('pointSize').addEventListener('input',e=>{state.pointSize=+e.target.value;$('Pval').textContent=state.pointSize.toFixed(1);draw()});
+  $('mesh').addEventListener('change',e=>{state.mesh=e.target.checked;draw()});
+  $('points').addEventListener('change',e=>{state.points=e.target.checked;draw()});
+  $('axes').addEventListener('change',e=>{state.axes=e.target.checked;draw()});
+  $('autorotate').addEventListener('change',e=>state.auto=e.target.checked);
+
+  function resetView(){state.yaw=-.82;state.pitch=.72;state.zoom=1;draw()}
+  $('reset').addEventListener('click',resetView);
+  canvas.addEventListener('dblclick',resetView);
+
+  canvas.addEventListener('pointerdown',e=>{
+    state.dragging=true;state.lastX=e.clientX;state.lastY=e.clientY;canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!state.dragging)return;
+    const dx=e.clientX-state.lastX,dy=e.clientY-state.lastY;
+    state.lastX=e.clientX;state.lastY=e.clientY;
+    state.yaw+=dx*.009;state.pitch=Math.max(-1.35,Math.min(1.35,state.pitch+dy*.009));draw();
+  });
+  canvas.addEventListener('pointerup',e=>{state.dragging=false;canvas.releasePointerCapture(e.pointerId)});
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    state.zoom=Math.max(.45,Math.min(3,state.zoom*Math.exp(-e.deltaY*.001)));
+    draw();
+  },{passive:false});
+
+  canvas.addEventListener('click',e=>{
+    if(Math.abs(e.clientX-state.lastX)>3||Math.abs(e.clientY-state.lastY)>3)return;
+    const r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+    let best=null,d=1e9;
+    for(const p of projected){
+      const q=(p.x-x)**2+(p.y-y)**2;
+      if(q<d){d=q;best=p}
+    }
+    if(best&&d<500){state.selected={a:best.a,b:best.b};draw()}
+  });
+
+  $('animate').addEventListener('click',()=>{
+    if(state.growTimer){clearInterval(state.growTimer);state.growTimer=null;$('animate').textContent='نمو الطبقات';return}
+    state.K=4;$('K').value=4;$('Kval').textContent=4;draw();
+    $('animate').textContent='إيقاف';
+    state.growTimer=setInterval(()=>{
+      state.K++;
+      if(state.K>42){clearInterval(state.growTimer);state.growTimer=null;$('animate').textContent='نمو الطبقات';return}
+      $('K').value=state.K;$('Kval').textContent=state.K;draw();
+    },220);
+  });
+
+  function loop(){
+    if(state.auto&&!state.dragging){state.yaw+=.003;draw()}
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize',resize);
+  resize();loop();
+})();
+</script>
+</body>
+</html>

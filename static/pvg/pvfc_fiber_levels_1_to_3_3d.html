@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PVFC — من (1) إلى المستوى الثالث</title>
+<style>
+:root{
+  --bg:#06101b;--panel:#0c1928;--panel2:#10243a;--text:#eef7ff;
+  --muted:#9fb2c5;--line:#28465f;--accent:#59d5ff;--accent2:#b993ff;
+  --good:#5fe2a4;--warn:#ffc96f;--danger:#ff8190
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:var(--text);
+  background:radial-gradient(circle at 15% 0%,rgba(89,213,255,.08),transparent 30%),var(--bg)
+}
+.app{max-width:1550px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+h1{margin:0;font-size:clamp(25px,3.6vw,43px)}
+header p{margin:7px 0 0;color:var(--muted)}
+.badge{border:1px solid var(--line);border-radius:999px;padding:9px 13px;color:#dff8ff;white-space:nowrap}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr) 350px;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.panel h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:17px}
+.body{padding:15px}
+.control{margin-bottom:13px}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+select,button,input[type=range]{width:100%}
+select,button{
+  background:#091725;color:var(--text);border:1px solid #31516d;border-radius:11px;
+  padding:10px 11px;font-size:15px
+}
+button{cursor:pointer}
+button.primary{background:linear-gradient(135deg,#147b9d,#674bc0);border:0;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}
+.tabs button.active{outline:2px solid var(--accent);background:#14324f}
+.switch{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin:10px 0}
+.switch input{accent-color:var(--accent)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.metric{background:#091725;border:1px solid #233e57;border-radius:12px;padding:10px}
+.metric small{display:block;color:var(--muted);margin-bottom:4px}
+.metric strong{font-size:17px}
+.formula{
+  direction:ltr;text-align:center;background:#071421;border:1px solid #24415b;border-radius:13px;
+  padding:12px;margin-top:10px;font:18px Cambria,"Times New Roman",serif;line-height:1.65
+}
+.viewer{position:relative;height:800px;background:#050d15}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.hud,.top-hud{
+  position:absolute;background:rgba(5,14,24,.84);border:1px solid #29445f;
+  border-radius:13px;padding:9px 11px;font-size:12px;color:var(--muted)
+}
+.hud{left:13px;bottom:13px}.top-hud{right:13px;top:13px}
+.info{background:#091725;border:1px solid #233e57;border-radius:13px;padding:12px;margin-bottom:11px}
+.info h3{font-size:15px;margin:0 0 7px}
+.info p{margin:0;color:var(--muted);line-height:1.78;font-size:14px}
+.path-list{display:grid;gap:8px}
+.path-item{
+  border:1px solid #27445e;border-radius:11px;padding:10px;background:#081624;
+  cursor:pointer;color:var(--muted)
+}
+.path-item.active{border-color:var(--accent);color:var(--text);background:#0d2337}
+.level-map{display:grid;grid-template-columns:1fr;gap:8px}
+.level-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.node-chip{border:1px solid #2a4964;border-radius:999px;padding:7px 11px;background:#081724}
+.arrow{color:var(--muted);text-align:center}
+@media(max-width:1140px){
+  .layout{grid-template-columns:1fr}
+  .viewer{height:680px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <h1>PVFC ثلاثي الأبعاد — من \((1)\) إلى المستوى الثالث</h1>
+    <p>استكشف كيف تولّد عمليتا الولادة والرفع جميع الألياف الأولى.</p>
+  </div>
+  <div class="badge">مسارات تفاعلية • WebGL محلي</div>
+</header>
+
+<div class="layout">
+<section class="panel">
+<h2>لوحة المسار</h2>
+<div class="body">
+  <div class="tabs">
+    <button id="tab1" class="active">المستوى 1</button>
+    <button id="tab2">المستوى 2</button>
+    <button id="tab3">المستوى 3</button>
+  </div>
+
+  <div class="control">
+    <label for="pathSel">اختر مسار التوليد</label>
+    <select id="pathSel">
+      <option value="1-2">\( (1)\to(2) \)</option>
+      <option value="1-11">\( (1)\to(1,1) \)</option>
+      <option value="2-3">\( (2)\to(3) \)</option>
+      <option value="2-21">\( (2)\to(2,1) \)</option>
+      <option value="11-21">\( (1,1)\to(2,1) \)</option>
+      <option value="11-111">\( (1,1)\to(1,1,1) \)</option>
+    </select>
+  </div>
+
+  <div class="control">
+    <label for="progress">مرحلة الحركة</label>
+    <input id="progress" type="range" min="0" max="100" value="0">
+  </div>
+
+  <div class="row">
+    <button id="play" class="primary">تشغيل</button>
+    <button id="reset">إعادة</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button id="cameraHome">الكاميرا الأصلية</button>
+    <button id="autoRotate">دوران تلقائي</button>
+  </div>
+
+  <label class="switch"><input id="showGrid" type="checkbox" checked> الشبكة الأرضية</label>
+  <label class="switch"><input id="showAxes" type="checkbox" checked> المحاور الأولية</label>
+  <label class="switch"><input id="showTree" type="checkbox" checked> شجرة الألياف</label>
+  <label class="switch"><input id="showTrail" type="checkbox" checked> مسار الحركة</label>
+
+  <div class="metrics">
+    <div class="metric"><small>البداية</small><strong id="startPattern">(1)</strong></div>
+    <div class="metric"><small>النهاية</small><strong id="endPattern">(2)</strong></div>
+    <div class="metric"><small>العملية</small><strong id="operation">رفع</strong></div>
+    <div class="metric"><small>المستوى</small><strong id="level">2</strong></div>
+  </div>
+
+  <div class="formula" id="formula">eₚ + eₚ = 2eₚ</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>المشهد الثلاثي الأبعاد</h2>
+<div class="viewer">
+  <canvas id="gl"></canvas>
+  <div class="top-hud">اسحب للدوران • عجلة الفأرة للتقريب • نقرتان لإعادة الكاميرا</div>
+  <div class="hud">الألوان: سماوي = حالة البداية، بنفسجي = الفعل، أخضر = الليف الناتج</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>التفسير الرياضي</h2>
+<div class="body">
+  <div class="info">
+    <h3>خريطة المستويات</h3>
+    <div class="level-map">
+      <div class="level-row"><span class="node-chip">(1)</span></div>
+      <div class="arrow">↓</div>
+      <div class="level-row"><span class="node-chip">(2)</span><span class="node-chip">(1,1)</span></div>
+      <div class="arrow">↓</div>
+      <div class="level-row"><span class="node-chip">(3)</span><span class="node-chip">(2,1)</span><span class="node-chip">(1,1,1)</span></div>
+    </div>
+  </div>
+
+  <div class="info" id="explain">
+    <h3>الانتقال الحالي</h3>
+    <p>يرفع الجزء الوحيد من 1 إلى 2.</p>
+  </div>
+
+  <div class="info">
+    <h3>جميع المسارات</h3>
+    <div class="path-list" id="pathList"></div>
+  </div>
+
+  <div class="info">
+    <h3>معادلات ديريشليه الأساسية</h3>
+    <div class="formula">P·D₍₁₎ = D₍₂₎ + 2D₍₁,₁₎</div>
+    <div class="formula">P·D₍₂₎ = D₍₃₎ + D₍₂,₁₎</div>
+    <div class="formula">P·D₍₁,₁₎ = D₍₂,₁₎ + 3D₍₁,₁,₁₎</div>
+  </div>
+</div>
+</section>
+</div>
+</div>
+
+<script>
+(() => {
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+if(!gl){canvas.outerHTML='<div style="padding:30px;color:white">WebGL غير متاح في هذا المتصفح.</div>';return;}
+
+const ui={
+ path:document.getElementById('pathSel'),
+ progress:document.getElementById('progress'),
+ play:document.getElementById('play'),
+ reset:document.getElementById('reset'),
+ home:document.getElementById('cameraHome'),
+ auto:document.getElementById('autoRotate'),
+ grid:document.getElementById('showGrid'),
+ axes:document.getElementById('showAxes'),
+ tree:document.getElementById('showTree'),
+ trail:document.getElementById('showTrail'),
+ start:document.getElementById('startPattern'),
+ end:document.getElementById('endPattern'),
+ op:document.getElementById('operation'),
+ level:document.getElementById('level'),
+ formula:document.getElementById('formula'),
+ explain:document.getElementById('explain'),
+ pathList:document.getElementById('pathList'),
+ tabs:[document.getElementById('tab1'),document.getElementById('tab2'),document.getElementById('tab3')]
+};
+
+const paths={
+ "1-2":{start:"(1)",end:"(2)",op:"رفع",level:2,formula:"eₚ + eₚ = 2eₚ",desc:"نرفع التقييم على المحور نفسه من 1 إلى 2.",a:[0,0,0],b:[-2.4,0.7,0.5]},
+ "1-11":{start:"(1)",end:"(1,1)",op:"ولادة",level:2,formula:"eₚ + e_q → (1,1)",desc:"نضيف محورًا أوليًا ثانيًا مستقلًا.",a:[0,0,0],b:[2.4,0.7,-0.5]},
+ "2-3":{start:"(2)",end:"(3)",op:"رفع",level:3,formula:"2eₚ + eₚ = 3eₚ",desc:"نرفع الجزء 2 إلى 3 على الشعاع نفسه.",a:[-2.4,0.7,0.5],b:[-3.5,2.4,0.8]},
+ "2-21":{start:"(2)",end:"(2,1)",op:"ولادة",level:3,formula:"2eₚ + e_q → (2,1)",desc:"نبقي الأس 2 ونضيف محورًا جديدًا بأس 1.",a:[-2.4,0.7,0.5],b:[0,2.5,0]},
+ "11-21":{start:"(1,1)",end:"(2,1)",op:"رفع",level:3,formula:"eₚ+e_q+eₚ → (2,1)",desc:"نرفع أحد الجزأين 1 إلى 2.",a:[2.4,0.7,-0.5],b:[0,2.5,0]},
+ "11-111":{start:"(1,1)",end:"(1,1,1)",op:"ولادة",level:3,formula:"eₚ+e_q+e_r → (1,1,1)",desc:"نضيف محورًا أوليًا ثالثًا مستقلًا.",a:[2.4,0.7,-0.5],b:[3.5,2.4,-0.8]}
+};
+
+const pathOrder=Object.keys(paths);
+pathOrder.forEach(key=>{
+  const d=paths[key],el=document.createElement('div');
+  el.className='path-item';el.dataset.key=key;
+  el.textContent=`${d.start}  ⟶  ${d.end} — ${d.op}`;
+  el.addEventListener('click',()=>{ui.path.value=key;ui.progress.value=0;syncUI()});
+  ui.pathList.appendChild(el);
+});
+
+const vs=`attribute vec3 aPos;attribute vec3 aColor;uniform mat4 uMVP;uniform float uPointSize;varying vec3 vColor;void main(){gl_Position=uMVP*vec4(aPos,1.0);vColor=aColor;gl_PointSize=uPointSize;}`;
+const fs=`precision mediump float;varying vec3 vColor;uniform float uAlpha;void main(){vec2 d=gl_PointCoord-vec2(.5);if(length(d)>.5)discard;gl_FragColor=vec4(vColor,uAlpha);}`;
+function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}
+const prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+const loc={pos:gl.getAttribLocation(prog,'aPos'),color:gl.getAttribLocation(prog,'aColor'),mvp:gl.getUniformLocation(prog,'uMVP'),point:gl.getUniformLocation(prog,'uPointSize'),alpha:gl.getUniformLocation(prog,'uAlpha')};
+const buf=gl.createBuffer();
+
+function mul(a,b){const o=new Float32Array(16);for(let r=0;r<4;r++)for(let c=0;c<4;c++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
+function perspective(fovy,aspect,near,far){const f=1/Math.tan(fovy/2),nf=1/(near-far);return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0])}
+function norm(v){const l=Math.hypot(...v)||1;return v.map(x=>x/l)}
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function lookAt(e,t,u){const z=norm([e[0]-t[0],e[1]-t[1],e[2]-t[2]]),x=norm(cross(u,z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-x[0]*e[0]-x[1]*e[1]-x[2]*e[2],-y[0]*e[0]-y[1]*e[1]-y[2]*e[2],-z[0]*e[0]-z[1]*e[1]-z[2]*e[2],1])}
+function line(arr,a,b,c){arr.push(...a,...c,...b,...c)}
+function draw(v,mode,size=1,alpha=1){gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(v),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(loc.pos);gl.enableVertexAttribArray(loc.color);gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,24,12);gl.uniform1f(loc.point,size);gl.uniform1f(loc.alpha,alpha);gl.drawArrays(mode,0,v.length/6)}
+const C={start:[.35,.84,1],action:[.72,.57,1],result:[.36,.88,.63],tree:[1,.79,.44],grid:[.18,.30,.42],muted:[.42,.58,.72]};
+let yaw=-.75,pitch=.42,dist=10.5,auto=false,drag=false,lastX=0,lastY=0,anim=null;
+function home(){yaw=-.75;pitch=.42;dist=10.5}
+function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function mix(a,b,t){return a.map((x,i)=>x+(b[i]-x)*t)}
+function syncUI(){
+ const d=paths[ui.path.value];
+ ui.start.textContent=d.start;ui.end.textContent=d.end;ui.op.textContent=d.op;ui.level.textContent=d.level;ui.formula.textContent=d.formula;
+ ui.explain.innerHTML=`<h3>الانتقال الحالي</h3><p>${d.desc}</p>`;
+ document.querySelectorAll('.path-item').forEach(el=>el.classList.toggle('active',el.dataset.key===ui.path.value));
+ ui.tabs.forEach((b,i)=>b.classList.toggle('active',i===d.level-1));
+}
+function render(){
+ syncUI();
+ const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();
+ if(canvas.width!==Math.floor(r.width*dpr)||canvas.height!==Math.floor(r.height*dpr)){canvas.width=Math.floor(r.width*dpr);canvas.height=Math.floor(r.height*dpr)}
+ gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(.02,.05,.085,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ if(auto)yaw+=.003;
+ const eye=[dist*Math.cos(pitch)*Math.cos(yaw),dist*Math.sin(pitch),dist*Math.cos(pitch)*Math.sin(yaw)];
+ gl.uniformMatrix4fv(loc.mvp,false,mul(perspective(Math.PI/4,canvas.width/canvas.height,.1,100),lookAt(eye,[0,1,0],[0,1,0])));
+ if(ui.grid.checked){const g=[];for(let i=-5;i<=5;i++){line(g,[i,-2.2,-5],[i,-2.2,5],C.grid);line(g,[-5,-2.2,i],[5,-2.2,i],C.grid)}draw(g,gl.LINES,1,.4)}
+ if(ui.axes.checked){const a=[];const dirs=[[1,0,0],[0,1,0],[0,0,1],[-.7,.7,0],[.5,.5,.7],[-.5,.5,.7]];dirs.forEach(v=>line(a,[0,0,0],v.map(x=>x*3.2),C.muted));draw(a,gl.LINES,1,.45)}
+ if(ui.tree.checked){const tr=[];Object.values(paths).forEach(p=>line(tr,p.a,p.b,C.tree));draw(tr,gl.LINES,1,.38)}
+ const d=paths[ui.path.value],t=ease(+ui.progress.value/100),m=mix(d.a,d.b,t);
+ const trail=[];if(ui.trail.checked){for(let i=0;i<24;i++)line(trail,mix(d.a,d.b,i/24),mix(d.a,d.b,(i+1)/24),C.action);draw(trail,gl.LINES,1,.22)}
+ const active=[];line(active,d.a,m,C.action);draw(active,gl.LINES,1,1);
+ const pts=[];pts.push(...d.a,...C.start,...m,...C.action);if(t>.96)pts.push(...d.b,...C.result);draw(pts,gl.POINTS,20,1);
+ requestAnimationFrame(render);
+}
+ui.path.addEventListener('change',()=>{ui.progress.value=0;syncUI()});
+ui.play.addEventListener('click',()=>{if(anim)cancelAnimationFrame(anim);const from=+ui.progress.value,start=performance.now(),dur=Math.max(400,2200*(1-from/100));const step=now=>{const u=Math.min(1,(now-start)/dur);ui.progress.value=Math.round(from+(100-from)*u);if(u<1)anim=requestAnimationFrame(step)};anim=requestAnimationFrame(step)});
+ui.reset.addEventListener('click',()=>{if(anim)cancelAnimationFrame(anim);ui.progress.value=0});
+ui.home.addEventListener('click',home);
+ui.auto.addEventListener('click',()=>{auto=!auto;ui.auto.textContent=auto?'إيقاف الدوران':'دوران تلقائي'});
+ui.tabs[0].addEventListener('click',()=>{ui.path.value='1-2';ui.progress.value=0});
+ui.tabs[1].addEventListener('click',()=>{ui.path.value='1-11';ui.progress.value=0});
+ui.tabs[2].addEventListener('click',()=>{ui.path.value='2-3';ui.progress.value=0});
+canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-lastX)*.008;pitch=Math.max(-1.2,Math.min(1.2,pitch+(e.clientY-lastY)*.008));lastX=e.clientX;lastY=e.clientY});
+canvas.addEventListener('pointerup',()=>drag=false);
+canvas.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(5,Math.min(18,dist+e.deltaY*.012))},{passive:false});
+canvas.addEventListener('dblclick',home);
+syncUI();render();
+})();
+</script>
+</body>
+</html>

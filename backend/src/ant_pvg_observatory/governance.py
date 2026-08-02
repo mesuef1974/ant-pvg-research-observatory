@@ -24,15 +24,20 @@ from .models import (
     GateVerdict,
     LiteratureGate,
     ModelSynthesisNote,
+    PvgResult,
     ReadingStatus,
     SourceLayer,
 )
 
 _RESULT_KEY = re.compile(r"ANT-[A-Z]+-\d+-\d+")
 _NOTE_KEY = re.compile(r"MS-[A-Z]+-\d+")
+_PVG_KEY = re.compile(r"\b(?:PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)\b")
 
 #: حالات الادعاء التي تعني أن المعلومة موثقة، فتستوجب إسنادًا.
 ANCHORED_STATUSES = frozenset({ClaimStatus.KNOWN, ClaimStatus.KNOWN_EQUIVALENT})
+
+#: حالات تزعم أن العبارة مبرهنة، سواء في الأدبيات أو هنا.
+PROOF_ASSERTING_STATUSES = ANCHORED_STATUSES | {ClaimStatus.PROVED_HERE}
 
 
 def _fail(detail: str) -> None:
@@ -96,7 +101,33 @@ def enforce_citation_policy(
                 "استبدلها بنتيجة معتمدة من الموسوعة أو بمرجع خارجي موثق."
             )
 
+    pvg_keys = sorted(set(_PVG_KEY.findall(blob)))
+    for key in pvg_keys:
+        row = session.scalars(
+            select(PvgResult).where(PvgResult.result_key == key)
+        ).one_or_none()
+        if row is None:
+            _fail(
+                f"المعرّف {key} غير موجود في سجل نتائج PVG. "
+                "شغّل استيراد المدونة أو صحّح المعرّف."
+            )
+        # الحالة غير المبرهنة تُذكر بحرية؛ المرفوض أن يُبنى عليها ادعاءُ برهان.
+        if not row.is_proven and claim_status in PROOF_ASSERTING_STATUSES:
+            _fail(
+                f"النتيجة {key} حالتها «{row.status}» وليست برهانًا — "
+                "والأرشيف نفسه يقول لا يحل الفحص محل البرهان. "
+                "أنزل حالة الادعاء إلى FINITE_VERIFIED أو OPEN."
+            )
+
     if claim_status in ANCHORED_STATUSES and not result_keys:
+        # KNOWN تعني «معروف في الأدبيات». وطبقة PVG غير منشورة، فمهما بلغت
+        # قوة نتيجتها لا تجعل العبارة معروفةً عند أحد سوانا.
+        if pvg_keys:
+            _fail(
+                f"الإسناد الوحيد هنا نتيجةُ PVG ({'، '.join(pvg_keys)})، وهي "
+                "طبقة داخلية غير منشورة فلا تُثبت أن العبارة معروفة في "
+                "الأدبيات. استعمل PROVED_HERE، أو أضف مرجعًا منشورًا."
+            )
         _fail(
             "لا يجوز رفع ادعاء إلى حالة موثقة دون إسناد إلى نتيجة معتمدة في "
             "الموسوعة أو إلى مرجع خارجي موثق."
