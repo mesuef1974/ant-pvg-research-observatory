@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,13 +9,15 @@ from .config import settings
 from .db import ensure_schema, get_session
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
-from .models import Document, ExtractionStatus
+from .models import Document, ExtractionStatus, SourceLayer
 from .schemas import (
     DocumentPageView,
     DocumentView,
     LocalDocumentImport,
     PageIndexSummary,
+    PageSearchResponseView,
 )
+from .search import search_pages
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 
@@ -104,3 +106,28 @@ def get_document_pages(
     session: SessionDependency,
 ) -> list[DocumentPageView]:
     return list_document_pages(session, document_id)
+
+
+@app.get(
+    "/api/search/pages",
+    response_model=PageSearchResponseView,
+    tags=["search"],
+)
+def search_document_pages(
+    session: SessionDependency,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    document_id: Annotated[int | None, Query(gt=0)] = None,
+    source_layer: SourceLayer | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> PageSearchResponseView:
+    return PageSearchResponseView.model_validate(
+        search_pages(
+            session,
+            query=q,
+            document_id=document_id,
+            source_layer=source_layer,
+            limit=limit,
+            offset=offset,
+        )
+    )
