@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .db import Base, engine, get_session
+from .db import ensure_schema, get_session
 from .library import import_local_pdf
 from .models import Document
 from .schemas import DocumentView, LocalDocumentImport
@@ -13,7 +13,7 @@ from .schemas import DocumentView, LocalDocumentImport
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    ensure_schema()
     settings.library_root.mkdir(parents=True, exist_ok=True)
     yield
 
