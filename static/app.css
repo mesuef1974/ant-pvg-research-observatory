@@ -43,3 +43,8 @@
 .env-remark h5,.env-example h5{color:var(--b)}
 .env-conjecture,.env-openproblem{border-inline-start-color:var(--warn)}
 .env-conjecture h5,.env-openproblem h5{color:var(--warn)}@media(max-width:850px){body{grid-template-columns:1fr}aside{position:relative;height:auto;border-left:0;border-bottom:1px solid var(--line)}nav{grid-template-columns:repeat(2,1fr)}.searchbar,.formgrid{grid-template-columns:1fr}}
+
+/* شبكة المعرفة: الطرف المعلَّق يجب أن يُرى فورًا */
+.row.edge{border-inline-start:3px solid var(--a)}
+.row.edge.dangling{border-inline-start-color:#c05a6a;background:#1d1218}
+.row.edge h4{font-size:14px}

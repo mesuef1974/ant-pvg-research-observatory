@@ -236,6 +236,20 @@ def import_encyclopedia(
     for record in evidence_records:
         session.add(EvidenceRecord(**record))
 
+    from ..graph import check_links
+
+    check_links(
+        session,
+        lambda code, severity, subject, detail: findings.append(
+            {
+                "code": code,
+                "severity": severity,
+                "subject": subject,
+                "detail": detail,
+            }
+        ),
+    )
+
     for finding in findings:
         session.add(
             IntegrityFinding(

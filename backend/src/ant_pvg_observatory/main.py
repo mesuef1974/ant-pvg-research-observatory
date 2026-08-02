@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from . import graph
 from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
@@ -45,6 +46,7 @@ from .schemas import (
     ClaimUpdate,
     ClaimView,
     DashboardView,
+    DerivedLinksView,
     DocumentPageView,
     DocumentView,
     EncyclopediaImportRequest,
@@ -60,6 +62,7 @@ from .schemas import (
     KnowledgeLinkView,
     LocalDocumentImport,
     ModelSynthesisNoteView,
+    NeighbourhoodView,
     PageIndexSummary,
     PageSearchResponseView,
     ReferenceCreate,
@@ -791,6 +794,39 @@ def list_evidence_records(
     if document_kind is not None:
         statement = statement.where(EvidenceRecord.document_kind == document_kind)
     return list(session.scalars(statement))
+
+
+@app.get(
+    "/api/links/neighbourhood",
+    response_model=NeighbourhoodView,
+    tags=["governance"],
+)
+def link_neighbourhood(
+    session: SessionDependency,
+    key: Annotated[str, Query(min_length=1, max_length=200)],
+    node_type: str | None = None,
+) -> NeighbourhoodView:
+    """جوار عقدة بأطراف محلولة: كل طرف يحمل وجوده وحالته وقابليته للاستشهاد."""
+    return NeighbourhoodView.model_validate(
+        graph.neighbourhood(session, key, node_type)
+    )
+
+
+@app.post(
+    "/api/links/derive-from-claims",
+    response_model=DerivedLinksView,
+    tags=["governance"],
+)
+def derive_links(session: SessionDependency) -> DerivedLinksView:
+    """يشتق روابط DEPENDS-ON من معرّفات ANT في نصوص الادعاءات.
+
+    عمل صريح لا تلقائي: ذكرُ معرّف في نص ليس إعلانَ اعتماد.
+    """
+    created = graph.derive_links_from_claims(session)
+    return DerivedLinksView(
+        created=len(created),
+        links=[KnowledgeLinkView.model_validate(link) for link in created],
+    )
 
 
 if STATIC_ROOT.is_dir():
