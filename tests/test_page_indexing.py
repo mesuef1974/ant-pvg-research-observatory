@@ -3,7 +3,11 @@ from pathlib import Path
 import pytest
 from ant_pvg_observatory.config import settings
 from ant_pvg_observatory.db import Base
-from ant_pvg_observatory.indexing import index_document_pages
+from ant_pvg_observatory.indexing import (
+    _normalize_page_text,
+    _restore_visual_rtl_line,
+    index_document_pages,
+)
 from ant_pvg_observatory.library import import_local_pdf
 from ant_pvg_observatory.models import (
     Document,
@@ -24,6 +28,15 @@ def _write_blank_pdf(path: Path, pages: int) -> None:
         writer.add_blank_page(width=612, height=792)
     with path.open("wb") as stream:
         writer.write(stream)
+
+
+def test_restores_visual_arabic_order() -> None:
+    assert _restore_visual_rtl_line("اتيز ةلاد") == "دالة زيتا"
+    assert _restore_visual_rtl_line("Λ(n) دلوغنام نوف") == "فون مانغولد Λ(n)"
+
+
+def test_normalizes_arabic_presentation_forms() -> None:
+    assert _normalize_page_text("ﺎﺘﻳﺯ ﺔﻟﺍﺩ") == "دالة زيتا"
 
 
 def test_page_indexing_is_idempotent(tmp_path: Path, monkeypatch) -> None:
