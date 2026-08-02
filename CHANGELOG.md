@@ -13,13 +13,19 @@ All notable changes are recorded here. The project is pre-release and follows se
 - Explicit source-layer assignment for every imported document.
 - Path-containment and PDF-type validation.
 - Compatibility upgrade for v0.1 SQLite document tables.
-- Alembic migration `0002_remove_legacy_source_model`.
+- Alembic migrations `0002_remove_legacy_source_model` and
+  `0003_canonicalize_document_metadata`.
 - Tests for PDF import, duplicate detection, and migration from the legacy MVP schema.
 
 ### Changed
 
 - Removed the abandoned `sources` table and `documents.source_id` relationship.
+- Removed the obsolete `documents.file_name` column.
 - `Document.source_layer` is now the sole authoritative source classification.
+- New imports set `created_at` explicitly and the database supplies
+  `CURRENT_TIMESTAMP` as a fallback.
+- Legacy documents with unresolved `local_path` or `sha256` remain readable through
+  the API instead of causing response-validation failure.
 
 ### Governance
 
