@@ -3,11 +3,10 @@ from __future__ import annotations
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
+from ant_pvg_observatory import models  # noqa: F401
 from ant_pvg_observatory.config import settings
 from ant_pvg_observatory.db import Base
-from ant_pvg_observatory import models  # noqa: F401
+from sqlalchemy import engine_from_config, pool
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
