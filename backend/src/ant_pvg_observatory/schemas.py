@@ -15,8 +15,8 @@ class DocumentView(BaseModel):
     id: int
     title: str
     source_layer: SourceLayer
-    local_path: str
-    sha256: str
+    local_path: str | None
+    sha256: str | None
     media_type: str
     page_count: int
     file_size_bytes: int
