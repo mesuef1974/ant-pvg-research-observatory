@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import StrEnum
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Enum,
     ForeignKey,
@@ -174,3 +175,124 @@ class LiteratureGate(Base):
     status: Mapped[str] = mapped_column(String(40), default="OPEN", index=True)
     verdict: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class EncyclopediaChapter(Base):
+    """فصل من الموسوعة. ليس ملفًا: الفصل السابع مقسَّم على خمسة ملفات مصدر."""
+
+    __tablename__ = "encyclopedia_chapters"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    number: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(1000))
+    volume: Mapped[str | None] = mapped_column(String(200), index=True)
+    tex_paths: Mapped[str] = mapped_column(Text)
+    char_count: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[str] = mapped_column(String(100), index=True)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    units: Mapped[list[EncyclopediaUnit]] = relationship(
+        back_populates="chapter",
+        cascade="all, delete-orphan",
+        order_by="EncyclopediaUnit.ordinal",
+    )
+
+
+class EncyclopediaUnit(Base):
+    """وحدة نصية قابلة للاسترجاع: قسم من فصل، بكتله المهيكلة ونصه المطبَّع."""
+
+    __tablename__ = "encyclopedia_units"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter_id: Mapped[int] = mapped_column(
+        ForeignKey("encyclopedia_chapters.id", ondelete="CASCADE"), index=True
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, index=True)
+    heading: Mapped[str | None] = mapped_column(String(1000))
+    text: Mapped[str] = mapped_column(Text)
+    search_text: Mapped[str] = mapped_column(Text)
+    blocks_json: Mapped[str] = mapped_column(Text)
+    text_sha256: Mapped[str] = mapped_column(String(64), index=True)
+
+    chapter: Mapped[EncyclopediaChapter] = relationship(back_populates="units")
+
+
+class EncyclopediaResult(Base):
+    """نتيجة معرَّفة ANT-* بحالتها في المخطوط وفي سجلات النتائج.
+
+    ``citable`` قرار محسوب من السجل وسياسة الاعتماد، وعليه يتوقف قبول أي
+    ادعاء يستند إلى هذه النتيجة.
+    """
+
+    __tablename__ = "encyclopedia_results"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    result_key: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    kind: Mapped[str] = mapped_column(String(40), index=True)
+    title: Mapped[str | None] = mapped_column(String(1000))
+    chapter_number: Mapped[int | None] = mapped_column(Integer, index=True)
+    tex_status: Mapped[str | None] = mapped_column(String(60))
+    registry_status: Mapped[str | None] = mapped_column(String(200))
+    registry_files: Mapped[str | None] = mapped_column(Text)
+    source_note: Mapped[str | None] = mapped_column(Text)
+    citable: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    label: Mapped[str | None] = mapped_column(String(300))
+    statement: Mapped[str | None] = mapped_column(Text)
+    tex_path: Mapped[str | None] = mapped_column(String(2000))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class BibliographyEntry(Base):
+    """مدخل ببليوغرافي. ``aliases`` مفاتيح biber المرادفة في حقل ids."""
+
+    __tablename__ = "bibliography_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    entry_key: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    entry_type: Mapped[str] = mapped_column(String(40), index=True)
+    title: Mapped[str | None] = mapped_column(Text)
+    author: Mapped[str | None] = mapped_column(Text)
+    year: Mapped[str | None] = mapped_column(String(20), index=True)
+    journal: Mapped[str | None] = mapped_column(Text)
+    doi: Mapped[str | None] = mapped_column(String(300))
+    url: Mapped[str | None] = mapped_column(String(2000))
+    aliases: Mapped[str | None] = mapped_column(Text)
+    bib_file: Mapped[str] = mapped_column(String(300), index=True)
+    cited: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+
+
+class ModelSynthesisNote(Base):
+    """ملاحظة من طبقة المعرفة المعيارية.
+
+    سلطتها ``UNVERIFIED_UNTIL_SOURCED`` بحكم البنية، ولا يجوز الاستشهاد بها
+    بحال. ``is_gap`` يعني أن الموضوع معياري ولا تغطيه الموسوعة.
+    """
+
+    __tablename__ = "model_synthesis_notes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    note_key: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(1000))
+    kind: Mapped[str] = mapped_column(String(40), index=True)
+    domain: Mapped[str | None] = mapped_column(String(300), index=True)
+    anchors: Mapped[str | None] = mapped_column(Text)
+    literature_hint: Mapped[str | None] = mapped_column(Text)
+    is_gap: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    body: Mapped[str] = mapped_column(Text)
+    search_text: Mapped[str] = mapped_column(Text)
+    blocks_json: Mapped[str] = mapped_column(Text)
+    source_file: Mapped[str] = mapped_column(String(300), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class IntegrityFinding(Base):
+    """ملاحظة تكامل ناتجة عن فحص آلي للموسوعة أو لطبقات المرصد."""
+
+    __tablename__ = "integrity_findings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(60), index=True)
+    severity: Mapped[str] = mapped_column(String(20), index=True)
+    subject: Mapped[str | None] = mapped_column(String(300), index=True)
+    detail: Mapped[str] = mapped_column(Text)
+    checked_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
