@@ -117,6 +117,7 @@ class EncyclopediaImportSummaryView(BaseModel):
     model_note_count: int
     coverage_gap_count: int
     finding_count: int
+    evidence_record_count: int
 
     # model_note_count يصطدم بمجال pydantic المحجوز model_؛ الحقل مقصود بهذا الاسم.
     model_config = {"from_attributes": True, "protected_namespaces": ()}
@@ -368,3 +369,62 @@ class KnowledgeLinkView(BaseModel):
     note: str | None
 
     model_config = {"from_attributes": True}
+
+
+class EvidenceRecordView(BaseModel):
+    chapter_number: int | None
+    document_kind: str
+    source_file: str
+    ordinal: int
+    statement: str | None
+    source_note: str | None
+    verdict: str | None
+    doi: str | None
+    cutoff_date: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class GraphNodeView(BaseModel):
+    node_type: str
+    key: str
+    exists: bool
+    label: str | None = None
+    status: str | None = None
+    citable: bool | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class GraphEdgeView(BaseModel):
+    link_id: int
+    relation: str
+    direction: str
+    note: str | None
+    node_type: str
+    key: str
+    exists: bool
+    label: str | None
+    status: str | None
+    citable: bool | None
+
+
+class NeighbourhoodView(BaseModel):
+    node: GraphNodeView
+    outgoing: list[GraphEdgeView]
+    incoming: list[GraphEdgeView]
+
+    model_config = {"from_attributes": True}
+
+
+class DerivedLinksView(BaseModel):
+    created: int
+    links: list[KnowledgeLinkView]
+
+
+class GateRecordView(BaseModel):
+    """السجل الدائم للبوابة: عبارات البحث وتاريخ القطع والحصيلة وبنود المتابعة."""
+
+    gate_key: str
+    path: str
+    markdown: str

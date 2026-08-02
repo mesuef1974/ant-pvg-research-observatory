@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from . import graph
 from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
@@ -24,6 +25,7 @@ from .models import (
     EncyclopediaChapter,
     EncyclopediaResult,
     EncyclopediaUnit,
+    EvidenceRecord,
     ExtractionStatus,
     GateReference,
     GateVerdict,
@@ -44,11 +46,14 @@ from .schemas import (
     ClaimUpdate,
     ClaimView,
     DashboardView,
+    DerivedLinksView,
     DocumentPageView,
     DocumentView,
     EncyclopediaImportRequest,
     EncyclopediaImportSummaryView,
+    EvidenceRecordView,
     GateCreate,
+    GateRecordView,
     GateReferenceLink,
     GateReferenceView,
     GateUpdate,
@@ -58,6 +63,7 @@ from .schemas import (
     KnowledgeLinkView,
     LocalDocumentImport,
     ModelSynthesisNoteView,
+    NeighbourhoodView,
     PageIndexSummary,
     PageSearchResponseView,
     ReferenceCreate,
@@ -499,6 +505,7 @@ def dashboard(session: SessionDependency) -> DashboardView:
             "claims": count(Claim),
             "gates": count(LiteratureGate),
             "findings": count(IntegrityFinding),
+            "evidence": count(EvidenceRecord),
         },
         severity={row[0]: row[1] for row in severity_rows},
         revision=revision,
@@ -767,6 +774,86 @@ def export_research(session: SessionDependency) -> dict:
     يكتب في القاعدة، فلا يُعرَّض على واجهة تُفتح بالنقر.
     """
     return export_research_layer(session)
+
+
+@app.get(
+    "/api/encyclopedia/evidence",
+    response_model=list[EvidenceRecordView],
+    tags=["encyclopedia"],
+)
+def list_evidence_records(
+    session: SessionDependency,
+    chapter_number: Annotated[int | None, Query(gt=0)] = None,
+    document_kind: str | None = None,
+) -> list[EvidenceRecord]:
+    """صفوف سجلات الأدلة وخرائط البراهين، بحالة تحقق كل مصدر."""
+    statement = select(EvidenceRecord).order_by(
+        EvidenceRecord.source_file, EvidenceRecord.ordinal
+    )
+    if chapter_number is not None:
+        statement = statement.where(EvidenceRecord.chapter_number == chapter_number)
+    if document_kind is not None:
+        statement = statement.where(EvidenceRecord.document_kind == document_kind)
+    return list(session.scalars(statement))
+
+
+@app.get(
+    "/api/links/neighbourhood",
+    response_model=NeighbourhoodView,
+    tags=["governance"],
+)
+def link_neighbourhood(
+    session: SessionDependency,
+    key: Annotated[str, Query(min_length=1, max_length=200)],
+    node_type: str | None = None,
+) -> NeighbourhoodView:
+    """جوار عقدة بأطراف محلولة: كل طرف يحمل وجوده وحالته وقابليته للاستشهاد."""
+    return NeighbourhoodView.model_validate(
+        graph.neighbourhood(session, key, node_type)
+    )
+
+
+@app.post(
+    "/api/links/derive-from-claims",
+    response_model=DerivedLinksView,
+    tags=["governance"],
+)
+def derive_links(session: SessionDependency) -> DerivedLinksView:
+    """يشتق روابط DEPENDS-ON من معرّفات ANT في نصوص الادعاءات.
+
+    عمل صريح لا تلقائي: ذكرُ معرّف في نص ليس إعلانَ اعتماد.
+    """
+    created = graph.derive_links_from_claims(session)
+    return DerivedLinksView(
+        created=len(created),
+        links=[KnowledgeLinkView.model_validate(link) for link in created],
+    )
+
+
+@app.get(
+    "/api/gates/{gate_key}/record",
+    response_model=GateRecordView,
+    tags=["governance"],
+)
+def gate_record(gate_key: str, session: SessionDependency) -> GateRecordView:
+    """السجل الدائم للبوابة من ``docs/gates/``.
+
+    الحكم في القاعدة خلاصة؛ أما عبارات البحث وتاريخ القطع وبنود المتابعة
+    والحجر الصحي فتعيش في ملف خاضع لـGit. وبلا هذا المسار يبقى ذلك العمل
+    غير مرئي من المنصة أصلًا.
+    """
+    _gate_or_404(session, gate_key)
+    path = graph.gate_record_path(STATIC_ROOT.parent, gate_key)
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"لا سجل دائم لهذه البوابة في {graph.GATE_RECORD_DIR}/",
+        )
+    return GateRecordView(
+        gate_key=gate_key,
+        path=f"{graph.GATE_RECORD_DIR}/{gate_key}.md",
+        markdown=path.read_text(encoding="utf-8"),
+    )
 
 
 if STATIC_ROOT.is_dir():
