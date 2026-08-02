@@ -383,3 +383,48 @@ class EvidenceRecordView(BaseModel):
     cutoff_date: str | None
 
     model_config = {"from_attributes": True}
+
+
+class GraphNodeView(BaseModel):
+    node_type: str
+    key: str
+    exists: bool
+    label: str | None = None
+    status: str | None = None
+    citable: bool | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class GraphEdgeView(BaseModel):
+    link_id: int
+    relation: str
+    direction: str
+    note: str | None
+    node_type: str
+    key: str
+    exists: bool
+    label: str | None
+    status: str | None
+    citable: bool | None
+
+
+class NeighbourhoodView(BaseModel):
+    node: GraphNodeView
+    outgoing: list[GraphEdgeView]
+    incoming: list[GraphEdgeView]
+
+    model_config = {"from_attributes": True}
+
+
+class DerivedLinksView(BaseModel):
+    created: int
+    links: list[KnowledgeLinkView]
+
+
+class GateRecordView(BaseModel):
+    """السجل الدائم للبوابة: عبارات البحث وتاريخ القطع والحصيلة وبنود المتابعة."""
+
+    gate_key: str
+    path: str
+    markdown: str

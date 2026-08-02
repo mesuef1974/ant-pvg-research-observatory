@@ -5,7 +5,8 @@ const viewTitle = document.querySelector('#viewTitle');
 const TITLES = {
   dashboard: 'لوحة القيادة', search: 'البحث الموحد', results: 'نتائج الموسوعة',
   model: 'المعرفة المعيارية', integrity: 'تكامل الحوكمة', claims: 'سجل الادعاءات',
-  gates: 'بوابات الأدبيات', refs: 'المراجع', reader: 'قارئ الموسوعة',
+  gates: 'بوابات الأدبيات', refs: 'المراجع', graph: 'شبكة المعرفة',
+  reader: 'قارئ الموسوعة',
 };
 const NOTE_KINDS = {
   method: 'طريقة', context: 'سياق', caveat: 'محذور', heuristic: 'حدس',
@@ -17,6 +18,185 @@ const COUNT_LABELS = {
   model_notes: 'ملاحظات معيارية', coverage_gaps: 'فجوات تغطية',
   claims: 'ادعاءات', gates: 'بوابات', findings: 'ملاحظات تكامل',
 };
+/** يصيّر Markdown السجلات: عناوين وجداول وقوائم واقتباسات وشيفرة.
+ *  مُصغَّر عمدًا — سجلات البوابات تكتبها أنت بصيغة معروفة، ولا داعي لمكتبة
+ *  كاملة تُضاف إلى أصول تعمل دون اتصال. */
+function renderMarkdown(md) {
+  const inline = t => esc(t)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      (m, txt, href) => /^https?:\/\//.test(href)
+        ? `<a href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>` : txt);
+
+  const out = [];
+  const lines = md.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (/^```/.test(line)) {
+      const buf = [];
+      for (i++; i < lines.length && !/^```/.test(lines[i]); i++) buf.push(lines[i]);
+      i++;
+      out.push(`<pre class="tex-pre">${esc(buf.join('\n'))}</pre>`);
+      continue;
+    }
+    const heading = line.match(/^(#{1,4})\s+(.*)$/);
+    if (heading) {
+      const level = Math.min(heading[1].length + 2, 6);
+      out.push(`<h${level} class="sec-head">${inline(heading[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+    if (/^\s*\|/.test(line) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
+      const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => inline(c.trim()));
+      const head = cells(line);
+      i += 2;
+      const body = [];
+      for (; i < lines.length && /^\s*\|/.test(lines[i]); i++) body.push(cells(lines[i]));
+      out.push(`<div class="tablewrap"><table>
+        <thead><tr>${head.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${body.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>`);
+      continue;
+    }
+    if (/^\s*>/.test(line)) {
+      const buf = [];
+      for (; i < lines.length && /^\s*>/.test(lines[i]); i++) buf.push(lines[i].replace(/^\s*>\s?/, ''));
+      out.push(`<blockquote>${inline(buf.join(' '))}</blockquote>`);
+      continue;
+    }
+    const listMatch = /^\s*([-*]|\d+\.)\s+/;
+    if (listMatch.test(line)) {
+      const ordered = /^\s*\d+\./.test(line);
+      const items = [];
+      for (; i < lines.length && listMatch.test(lines[i]); i++) {
+        items.push(`<li>${inline(lines[i].replace(listMatch, ''))}</li>`);
+      }
+      out.push(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+      continue;
+    }
+    if (/^\s*---+\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
+    if (!line.trim()) { i++; continue; }
+
+    const para = [];
+    for (; i < lines.length && lines[i].trim()
+           && !/^(#{1,4}\s|\s*\||\s*>|```|\s*---+\s*$)/.test(lines[i])
+           && !listMatch.test(lines[i]); i++) para.push(lines[i]);
+    out.push(`<p>${inline(para.join(' '))}</p>`);
+  }
+  return out.join('');
+}
+
+const NODE_TYPES = {
+  result: 'نتيجة', claim: 'ادعاء', gate: 'بوابة',
+  reference: 'مرجع', model_note: 'ملاحظة معيارية',
+};
+const LINK_RELATIONS = [
+  'DEPENDS-ON', 'CITES', 'SUPPORTED-BY', 'GENERALIZES',
+  'SPECIALIZES', 'CONTRADICTS', 'RELATES-TO',
+];
+
+function nodeBadges(x) {
+  return [
+    `<span class="badge">${esc(NODE_TYPES[x.node_type] || x.node_type)}</span>`,
+    x.exists ? '' : '<span class="badge no">طرف معلَّق</span>',
+    x.status ? `<span class="badge">${esc(x.status)}</span>` : '',
+    x.citable === false ? '<span class="badge no">لا يُستشهد به</span>'
+      : x.citable === true ? '<span class="badge ok">قابل للاستشهاد</span>' : '',
+  ].join('');
+}
+
+function edgeRow(e) {
+  const arrow = e.direction === 'outgoing' ? '←' : '→';
+  return `<div class="row edge${e.exists ? '' : ' dangling'}">
+    <h4>${arrow} ${esc(e.relation)} — ${esc(e.key)}</h4>
+    ${e.label ? `<p>${esc(e.label)}</p>` : ''}
+    ${e.note ? `<p class="muted">${esc(e.note)}</p>` : ''}
+    <div class="meta">${nodeBadges(e)}</div></div>`;
+}
+
+async function graph() {
+  const links = await api('/api/links');
+  app.innerHTML = `
+    <div class="panel"><h3>استكشاف الجوار</h3><div class="searchbar">
+      <input id="gk" placeholder="مفتاح العقدة، مثل CLAIM-0001 أو ANT-THM-06-01">
+      <select id="gt"><option value="">استنتج النوع</option>
+        ${Object.entries(NODE_TYPES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+      <button class="action" id="ggo">اعرض</button>
+    </div><p class="muted">كل طرف يُحلّ إلى كائنه، فيظهر إن كان معلَّقًا أو غير قابل
+    للاستشهاد.</p></div>
+    <div id="hood" class="panel"><p class="muted">اختر عقدة.</p></div>
+
+    <div class="panel"><h3>إضافة رابط</h3><div class="formgrid">
+      <select id="lft">${Object.entries(NODE_TYPES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+      ${field('lfk', 'مفتاح المصدر')}
+      <select id="lr">${LINK_RELATIONS.map(r => `<option>${r}</option>`).join('')}</select>
+      <select id="ltt">${Object.entries(NODE_TYPES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+      ${field('ltk', 'مفتاح الهدف')}
+      ${field('ln', 'ملاحظة')}
+      <button id="ladd" class="action wide">أضف</button>
+    </div><p id="lerr" class="err"></p></div>
+
+    <div class="panel"><h3>اشتقاق من نصوص الادعاءات</h3>
+      <p class="muted">يستخرج روابط <code>DEPENDS-ON</code> من معرّفات
+      <code>ANT-*</code> المذكورة في الادعاءات. عمل صريح لا تلقائي: ذكرُ معرّف في
+      نص ليس إعلانَ اعتماد.</p>
+      <button id="lderive" class="action">اشتق الروابط</button></div>
+
+    <div class="panel"><h3>كل الروابط (${links.length})</h3><div class="table">
+      ${links.map(l => `<div class="row"><h4>${esc(l.from_key)} —${esc(l.relation)}→ ${esc(l.to_key)}</h4>
+        ${l.note ? `<p class="muted">${esc(l.note)}</p>` : ''}
+        <div class="meta"><span class="badge">${esc(NODE_TYPES[l.from_type] || l.from_type)}</span>
+        <span class="badge">${esc(NODE_TYPES[l.to_type] || l.to_type)}</span></div></div>`).join('')
+        || '<p class="muted">لا روابط بعد.</p>'}
+    </div></div>`;
+
+  const show = async () => {
+    const key = $('gk').value.trim();
+    if (!key) return;
+    const t = $('gt').value ? `&node_type=${$('gt').value}` : '';
+    try {
+      const d = await api(`/api/links/neighbourhood?key=${encodeURIComponent(key)}${t}`);
+      $('hood').innerHTML = `
+        <h3>${esc(d.node.key)}</h3>
+        ${d.node.label ? `<p>${esc(d.node.label)}</p>` : ''}
+        <div class="meta">${nodeBadges(d.node)}</div>
+        <h4 class="sec-head">صادر (${d.outgoing.length})</h4>
+        <div class="table">${d.outgoing.map(edgeRow).join('') || '<p class="muted">لا شيء.</p>'}</div>
+        <h4 class="sec-head">وارد (${d.incoming.length})</h4>
+        <div class="table">${d.incoming.map(edgeRow).join('') || '<p class="muted">لا شيء.</p>'}</div>`;
+      typeset($('hood'));
+    } catch (e) { $('hood').innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  };
+  $('ggo').onclick = show;
+  $('gk').onkeydown = e => { if (e.key === 'Enter') show(); };
+
+  $('ladd').onclick = async () => {
+    $('lerr').textContent = '';
+    try {
+      await api('/api/links', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from_type: $('lft').value, from_key: $('lfk').value.trim(),
+          relation: $('lr').value,
+          to_type: $('ltt').value, to_key: $('ltk').value.trim(),
+          note: $('ln').value || null,
+        }),
+      });
+      render();
+    } catch (e) { $('lerr').textContent = e.message; }
+  };
+  $('lderive').onclick = async () => {
+    try {
+      const r = await api('/api/links/derive-from-claims', { method: 'POST' });
+      alert(r.created ? `اشتُق ${r.created} رابطًا.` : 'لا روابط جديدة.');
+      render();
+    } catch (e) { alert(e.message); }
+  };
+}
+
 const READING = ['DISCOVERED', 'ABSTRACT-READ', 'FULLY-READ', 'VERIFIED'];
 const RELATIONS = ['COVERS', 'PARTIAL', 'ADJACENT', 'CONTRADICTS', 'NOT-RELEVANT'];
 // حالات القراءة التي تكفي لإسناد حكم بوابة؛ يطابقها الخادم في governance.py
@@ -358,6 +538,7 @@ async function gates() {
         <button class="action small glink" data-gate="${esc(x.gate_key)}">ربط مرجع</button>
       </div>
       <div class="inline-form">
+        <button class="action small grecord" data-gate="${esc(x.gate_key)}">السجل الدائم</button>
         <select class="gstat" data-gate="${esc(x.gate_key)}">
           ${GATE_STATUSES.map(v => `<option${v === x.status ? ' selected' : ''}>${v}</option>`).join('')}
         </select>
@@ -367,6 +548,7 @@ async function gates() {
         <button class="action small gsave" data-gate="${esc(x.gate_key)}">حفظ</button>
       </div>
       <p class="err" id="gerr-${i}"></p>
+      <div class="record" id="grec-${esc(x.gate_key)}"></div>
     </div>`).join('')}`;
 
   $('ga').onclick = async () => {
@@ -400,6 +582,25 @@ async function gates() {
       if (!r.ok) throw new Error('تعذّر فك الربط');
       render();
     } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll('.grecord').forEach(b => b.onclick = async () => {
+    const key = b.dataset.gate;
+    const box = document.getElementById(`grec-${key}`);
+    if (box.dataset.open === '1') {
+      box.innerHTML = ''; box.dataset.open = '0';
+      b.textContent = 'السجل الدائم';
+      return;
+    }
+    try {
+      const r = await api(`/api/gates/${encodeURIComponent(key)}/record`);
+      box.innerHTML = `<p class="path">${esc(r.path)}</p>${renderMarkdown(r.markdown)}`;
+      box.dataset.open = '1';
+      b.textContent = 'إخفاء السجل';
+      typeset(box);
+    } catch (e) {
+      box.innerHTML = `<p class="err">${esc(e.message)}</p>`;
+      box.dataset.open = '1';
+    }
   });
   document.querySelectorAll('.gsave').forEach((b, i) => b.onclick = async () => {
     const key = b.dataset.gate;
@@ -527,7 +728,7 @@ async function reader() {
 // -------------------------------------------------------------------- التوجيه
 
 const VIEWS = { dashboard, search: searchView, results, model, integrity,
-                claims, gates, refs, reader };
+                claims, gates, refs, graph, reader };
 
 async function render() {
   viewTitle.textContent = TITLES[current];

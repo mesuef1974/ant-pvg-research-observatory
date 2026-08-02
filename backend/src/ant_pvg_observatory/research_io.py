@@ -8,15 +8,15 @@
 هذه الوحدة تجعل تلك الطبقة **نصًّا خاضعًا لـGit**: تصدير إلى JSON مرتَّب
 ترتيبًا ثابتًا فتكون الفروق قابلة للقراءة، واستيراد يعيدها.
 
-التصدير حتمي: الترتيب مثبَّت، والطوابع الزمنية للإنشاء والتحديث مستبعدة لأنها
-تتغير بلا تغيّر في المحتوى فتُنتج فروقًا كاذبة.
+التصدير حتمي تمامًا: الترتيب مثبَّت، ولا طابع زمني في الملف إطلاقًا — لا طوابع
+الإنشاء والتحديث ولا تاريخ التصدير نفسه. تاريخ التصدير يسجّله إيداع Git، ووضعه
+في الملف كان سيُنتج فرقًا يوميًا بلا تغيّر في المحتوى.
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import select
@@ -53,7 +53,19 @@ class ResearchLayerCounts:
 class ImportReport:
     created: ResearchLayerCounts
     updated: ResearchLayerCounts
+    #: موجود سلفًا بالقيم نفسها. يُفصل عن ``updated`` لأن «حُدِّث» تعني تغيّرًا.
+    unchanged: ResearchLayerCounts
     skipped_links: int
+
+
+def _apply(target, fields: dict) -> bool:
+    """يضبط الحقول ويُرجع ما إذا تغيّر شيء فعلًا."""
+    changed = False
+    for field, value in fields.items():
+        if getattr(target, field) != value:
+            setattr(target, field, value)
+            changed = True
+    return changed
 
 
 def _claim_row(claim: Claim) -> dict:
@@ -137,7 +149,6 @@ def export_research_layer(session: Session) -> dict:
 
     return {
         "format_version": FORMAT_VERSION,
-        "exported_at": datetime.now(UTC).strftime("%Y-%m-%d"),
         "claims": [_claim_row(c) for c in claims],
         "gates": [_gate_row(g) for g in gates],
         "references": [_reference_row(r) for r in references],
@@ -174,10 +185,10 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
             f"صيغة ملف غير مدعومة: {version}؛ المتوقَّع {FORMAT_VERSION}."
         )
 
-    created = dict.fromkeys(
-        ("claims", "gates", "references", "gate_references", "links"), 0
-    )
-    updated = dict(created)
+    keys = ("claims", "gates", "references", "gate_references", "links")
+    created = dict.fromkeys(keys, 0)
+    updated = dict.fromkeys(keys, 0)
+    unchanged = dict.fromkeys(keys, 0)
 
     for row in payload.get("claims", []):
         claim = session.scalars(
@@ -194,9 +205,11 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
             session.add(Claim(claim_key=row["claim_key"], **fields))
             created["claims"] += 1
         else:
-            for field, value in fields.items():
-                setattr(claim, field, value)
-            updated["claims"] += 1
+            target = claim
+            if _apply(target, fields):
+                updated["claims"] += 1
+            else:
+                unchanged["claims"] += 1
 
     for row in payload.get("gates", []):
         gate = session.scalars(
@@ -212,9 +225,11 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
             session.add(LiteratureGate(gate_key=row["gate_key"], **fields))
             created["gates"] += 1
         else:
-            for field, value in fields.items():
-                setattr(gate, field, value)
-            updated["gates"] += 1
+            target = gate
+            if _apply(target, fields):
+                updated["gates"] += 1
+            else:
+                unchanged["gates"] += 1
 
     for row in payload.get("references", []):
         reference = session.scalars(
@@ -239,9 +254,11 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
             )
             created["references"] += 1
         else:
-            for field, value in fields.items():
-                setattr(reference, field, value)
-            updated["references"] += 1
+            target = reference
+            if _apply(target, fields):
+                updated["references"] += 1
+            else:
+                unchanged["references"] += 1
 
     session.flush()
 
@@ -262,14 +279,18 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
             skipped += 1
             continue
         link = session.get(GateReference, (gate_id, reference_id))
+        fields = {
+            "relation": GateRelation(row["relation"]),
+            "coverage_note": row.get("coverage_note"),
+        }
         if link is None:
-            link = GateReference(gate_id=gate_id, reference_id=reference_id)
+            link = GateReference(gate_id=gate_id, reference_id=reference_id, **fields)
             session.add(link)
             created["gate_references"] += 1
-        else:
+        elif _apply(link, fields):
             updated["gate_references"] += 1
-        link.relation = GateRelation(row["relation"])
-        link.coverage_note = row.get("coverage_note")
+        else:
+            unchanged["gate_references"] += 1
 
     for row in payload.get("links", []):
         existing = session.scalars(
@@ -284,14 +305,16 @@ def import_research_layer(session: Session, payload: dict) -> ImportReport:
         if existing is None:
             session.add(KnowledgeLink(**row))
             created["links"] += 1
-        else:
-            existing.note = row.get("note")
+        elif _apply(existing, {"note": row.get("note")}):
             updated["links"] += 1
+        else:
+            unchanged["links"] += 1
 
     session.commit()
     return ImportReport(
         created=ResearchLayerCounts(**created),
         updated=ResearchLayerCounts(**updated),
+        unchanged=ResearchLayerCounts(**unchanged),
         skipped_links=skipped,
     )
 

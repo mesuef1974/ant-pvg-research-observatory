@@ -108,24 +108,41 @@ def test_export_captures_every_hand_entered_layer(populated: Session) -> None:
     assert payload["links"][0]["to_key"] == "ANT-THM-06-01"
 
 
+def _all_keys(node) -> set[str]:
+    """كل مفاتيح القواميس في البنية. الفحص على المفاتيح لا على النص المُسلسَل:
+
+    البحث النصي يُسقط الاختبار خطأً لو ورد الاسم داخل قيمة، مثل ملاحظة تذكر
+    ``gate_id`` في نصها.
+    """
+    if isinstance(node, dict):
+        return set(node) | {k for v in node.values() for k in _all_keys(v)}
+    if isinstance(node, list):
+        return {k for item in node for k in _all_keys(item)}
+    return set()
+
+
 def test_gate_links_travel_by_key_not_by_row_id(populated: Session) -> None:
     """المعرفات الرقمية تتغير بإعادة البناء، فالربط بها يكسر الاسترجاع."""
-    payload = export_research_layer(populated)
-    serialized = json.dumps(payload, ensure_ascii=False)
+    populated.scalars(select(ObservatoryReference)).one().notes = (
+        "ملاحظة تذكر gate_id و reference_id في نصها عمدًا"
+    )
+    populated.commit()
 
-    assert "gate_id" not in serialized
-    assert "reference_id" not in serialized
+    keys = _all_keys(export_research_layer(populated))
+
+    assert "gate_id" not in keys
+    assert "reference_id" not in keys
+    assert {"gate_key", "reference_key"} <= keys
 
 
 def test_export_is_deterministic(populated: Session, tmp_path: Path) -> None:
     first = export_research_layer(populated)
     second = export_research_layer(populated)
 
-    # الطابع الزمني وحده يتغير؛ ما عداه ثابت فتكون فروق Git ذات معنى
-    first.pop("exported_at")
-    second.pop("exported_at")
-    assert json.dumps(first, ensure_ascii=False, sort_keys=True) == json.dumps(
-        second, ensure_ascii=False, sort_keys=True
+    # لا طابع زمني في الملف إطلاقًا، فالتطابق تامّ بلا استثناء أي حقل
+    assert "exported_at" not in first
+    assert json.dumps(first, ensure_ascii=False) == json.dumps(
+        second, ensure_ascii=False
     )
 
 
@@ -158,8 +175,11 @@ def test_import_is_idempotent_and_never_duplicates(populated: Session) -> None:
     first = import_research_layer(populated, payload)
     second = import_research_layer(populated, payload)
 
-    assert first.created.claims == 0 and first.updated.claims == 1
-    assert second.updated.claims == 1
+    # لا شيء تغيّر فعلًا، فيُحسب «بلا تغيير» لا «حُدِّث»
+    assert first.created.claims == 0
+    assert first.updated.claims == 0
+    assert first.unchanged.claims == 1
+    assert second.unchanged.claims == 1
     for model in (Claim, LiteratureGate, ObservatoryReference, GateReference, KnowledgeLink):
         assert populated.scalar(select(func.count()).select_from(model)) == 1
 
@@ -169,8 +189,12 @@ def test_import_updates_changed_fields(populated: Session) -> None:
     payload["references"][0]["reading_status"] = "VERIFIED"
     payload["gates"][0]["verdict"] = "NOT-FOUND-YET"
 
-    import_research_layer(populated, payload)
+    report = import_research_layer(populated, payload)
 
+    assert report.updated.references == 1 and report.unchanged.references == 0
+    assert report.updated.gates == 1
+    # الادعاء لم يُمَس، فيُحسب بلا تغيير
+    assert report.unchanged.claims == 1
     assert (
         populated.scalars(select(ObservatoryReference)).one().reading_status
         is ReadingStatus.VERIFIED
