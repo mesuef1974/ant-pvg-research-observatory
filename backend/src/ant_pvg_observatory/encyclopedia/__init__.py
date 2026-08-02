@@ -1,4 +1,4 @@
-"""استيعاب الموسوعة: التحليل وفحوص التكامل."""
-from . import integrity, parsing
+"""استيعاب الموسوعة: التحليل وفحوص التكامل والتخزين."""
+from . import ingestion, integrity, parsing
 
-__all__ = ["integrity", "parsing"]
+__all__ = ["ingestion", "integrity", "parsing"]

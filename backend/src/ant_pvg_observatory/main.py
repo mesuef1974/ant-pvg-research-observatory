@@ -7,18 +7,38 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .db import ensure_schema, get_session
+from .encyclopedia import ingestion
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
-from .models import Document, ExtractionStatus, SourceFile, SourceLayer
+from .models import (
+    BibliographyEntry,
+    Document,
+    EncyclopediaChapter,
+    EncyclopediaResult,
+    EncyclopediaUnit,
+    ExtractionStatus,
+    IntegrityFinding,
+    ModelSynthesisNote,
+    SourceFile,
+    SourceLayer,
+)
 from .schemas import (
+    BibliographyEntryView,
+    ChapterView,
     DocumentPageView,
     DocumentView,
+    EncyclopediaImportRequest,
+    EncyclopediaImportSummaryView,
+    IntegrityFindingView,
     LocalDocumentImport,
+    ModelSynthesisNoteView,
     PageIndexSummary,
     PageSearchResponseView,
+    ResultView,
     SourceCorpusImportRequest,
     SourceCorpusImportSummaryView,
     SourceFileView,
+    UnitView,
 )
 from .search import search_pages
 from .source_corpus import import_encyclopedia_source, list_source_files
@@ -161,3 +181,126 @@ def import_source_corpus(
 )
 def get_source_files(session: SessionDependency) -> list[SourceFile]:
     return list_source_files(session)
+
+
+@app.post(
+    "/api/encyclopedia/import",
+    response_model=EncyclopediaImportSummaryView,
+    tags=["encyclopedia"],
+)
+def import_encyclopedia(
+    payload: EncyclopediaImportRequest,
+    session: SessionDependency,
+) -> EncyclopediaImportSummaryView:
+    """يستوعب الموسوعة من مصدر LaTeX ويسجّل مراجعة Git وفحوص التكامل."""
+    return EncyclopediaImportSummaryView.model_validate(
+        ingestion.import_encyclopedia(
+            session,
+            repository_root=payload.repository_root,
+        )
+    )
+
+
+@app.get(
+    "/api/encyclopedia/chapters",
+    response_model=list[ChapterView],
+    tags=["encyclopedia"],
+)
+def list_chapters(session: SessionDependency) -> list[EncyclopediaChapter]:
+    return list(
+        session.scalars(
+            select(EncyclopediaChapter).order_by(EncyclopediaChapter.number)
+        )
+    )
+
+
+@app.get(
+    "/api/encyclopedia/units",
+    response_model=list[UnitView],
+    tags=["encyclopedia"],
+)
+def list_units(
+    session: SessionDependency,
+    chapter_id: Annotated[int, Query(gt=0)],
+) -> list[EncyclopediaUnit]:
+    return list(
+        session.scalars(
+            select(EncyclopediaUnit)
+            .where(EncyclopediaUnit.chapter_id == chapter_id)
+            .order_by(EncyclopediaUnit.ordinal)
+        )
+    )
+
+
+@app.get(
+    "/api/encyclopedia/results",
+    response_model=list[ResultView],
+    tags=["encyclopedia"],
+)
+def list_results(
+    session: SessionDependency,
+    chapter_number: Annotated[int | None, Query(gt=0)] = None,
+    citable: bool | None = None,
+) -> list[EncyclopediaResult]:
+    statement = select(EncyclopediaResult).order_by(
+        EncyclopediaResult.chapter_number, EncyclopediaResult.result_key
+    )
+    if chapter_number is not None:
+        statement = statement.where(
+            EncyclopediaResult.chapter_number == chapter_number
+        )
+    if citable is not None:
+        statement = statement.where(EncyclopediaResult.citable == citable)
+    return list(session.scalars(statement))
+
+
+@app.get(
+    "/api/encyclopedia/bibliography",
+    response_model=list[BibliographyEntryView],
+    tags=["encyclopedia"],
+)
+def list_bibliography(session: SessionDependency) -> list[BibliographyEntry]:
+    return list(
+        session.scalars(select(BibliographyEntry).order_by(BibliographyEntry.entry_key))
+    )
+
+
+@app.get(
+    "/api/model-synthesis/notes",
+    response_model=list[ModelSynthesisNoteView],
+    tags=["model-synthesis"],
+)
+def list_model_notes(
+    session: SessionDependency,
+    kind: str | None = None,
+    is_gap: bool | None = None,
+) -> list[ModelSynthesisNote]:
+    """طبقة المعرفة المعيارية. لا يُستشهد بها: ``citable`` ثابتة على False."""
+    statement = select(ModelSynthesisNote).order_by(
+        ModelSynthesisNote.source_file, ModelSynthesisNote.note_key
+    )
+    if kind is not None:
+        statement = statement.where(ModelSynthesisNote.kind == kind)
+    if is_gap is not None:
+        statement = statement.where(ModelSynthesisNote.is_gap == is_gap)
+    return list(session.scalars(statement))
+
+
+@app.get(
+    "/api/integrity/findings",
+    response_model=list[IntegrityFindingView],
+    tags=["governance"],
+)
+def list_integrity_findings(
+    session: SessionDependency,
+    severity: str | None = None,
+    code: str | None = None,
+) -> list[IntegrityFinding]:
+    statement = select(IntegrityFinding).order_by(
+        IntegrityFinding.severity, IntegrityFinding.code
+    )
+    if severity is not None:
+        statement = statement.where(IntegrityFinding.severity == severity)
+    if code is not None:
+        statement = statement.where(IntegrityFinding.code == code)
+    return list(session.scalars(statement))

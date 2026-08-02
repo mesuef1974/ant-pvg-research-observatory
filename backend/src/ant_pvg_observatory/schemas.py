@@ -93,3 +93,103 @@ class SourceFileView(BaseModel):
     source_layer: SourceLayer
 
     model_config = {"from_attributes": True}
+
+
+class EncyclopediaImportRequest(BaseModel):
+    repository_root: Path
+
+
+class EncyclopediaImportSummaryView(BaseModel):
+    repository: str
+    revision: str
+    chapter_count: int
+    unit_count: int
+    result_count: int
+    citable_count: int
+    bibliography_count: int
+    model_note_count: int
+    coverage_gap_count: int
+    finding_count: int
+
+    # model_note_count يصطدم بمجال pydantic المحجوز model_؛ الحقل مقصود بهذا الاسم.
+    model_config = {"from_attributes": True, "protected_namespaces": ()}
+
+
+class ChapterView(BaseModel):
+    id: int
+    number: int
+    title: str
+    volume: str | None
+    char_count: int
+    revision: str
+
+    model_config = {"from_attributes": True}
+
+
+class UnitView(BaseModel):
+    id: int
+    chapter_id: int
+    ordinal: int
+    heading: str | None
+    text: str
+    blocks_json: str
+
+    model_config = {"from_attributes": True}
+
+
+class ResultView(BaseModel):
+    result_key: str
+    kind: str
+    title: str | None
+    chapter_number: int | None
+    tex_status: str | None
+    registry_status: str | None
+    registry_files: str | None
+    source_note: str | None
+    citable: bool
+    statement: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class BibliographyEntryView(BaseModel):
+    entry_key: str
+    entry_type: str
+    title: str | None
+    author: str | None
+    year: str | None
+    journal: str | None
+    doi: str | None
+    url: str | None
+    aliases: str | None
+    bib_file: str
+    cited: bool
+
+    model_config = {"from_attributes": True}
+
+
+class ModelSynthesisNoteView(BaseModel):
+    """ملاحظة معيارية. ``citable`` ثابتة على False: لا يُستشهد بهذه الطبقة."""
+
+    note_key: str
+    title: str
+    kind: str
+    domain: str | None
+    anchors: str | None
+    literature_hint: str | None
+    is_gap: bool
+    body: str
+    blocks_json: str
+    source_file: str
+    citable: bool = False
+
+    model_config = {"from_attributes": True}
+
+
+class IntegrityFindingView(BaseModel):
+    code: str
+    severity: str
+    subject: str | None
+    detail: str
+
+    model_config = {"from_attributes": True}
