@@ -1,0 +1,198 @@
+{
+  "format_version": 1,
+  "claims": [],
+  "gates": [
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "title": "مؤثرات انتقال الألياف وأبراج Selberg–Delange",
+      "research_question": "هل يوجد في الأدبيات تمثيل موحد لانتقالات الألياف على جميع معاملات Selberg–Delange، بحيث يُعطى برج المعاملات التقاربية بمؤثرات رفع/خفض على بنية دوال متناظرة مخصَّصة عند x_p = p^{-s}؟",
+      "status": "REVIEW-IN-PROGRESS",
+      "verdict": "PARTIAL"
+    }
+  ],
+  "references": [
+    {
+      "reference_key": "BretecheTenenbaum2020Remarks",
+      "title": "Remarks on the Selberg–Delange method",
+      "authors": "Régis de la Bretèche, Gérald Tenenbaum",
+      "year": "2020",
+      "venue": "Acta Arithmetica — محكَّم",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "أحدث معالجة للفروض التي تُنتج تقديرات حادة. لا بنية مؤثرات.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Elliott2008RingStructures",
+      "title": "Ring structures on groups of arithmetic functions",
+      "authors": "Jesse Elliott",
+      "year": "2008",
+      "venue": "Journal of Number Theory — محكَّم",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "بنية حلقية على الدوال الضربية عبر متجهات Witt: الجمع التفاف ديريشلي والضرب نقطي على تامّة الضربية. مسار بديل محتمل لا يمرّ بالدوال المتناظرة أصلًا.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Filmus2016SliceOrthogonalBasis",
+      "title": "An Orthogonal Basis for Functions over a Slice of the Boolean Hypercube",
+      "authors": "Yuval Filmus",
+      "year": "2016",
+      "venue": "Electronic Journal of Combinatorics 23(1) #P23 — محكَّم",
+      "doi": null,
+      "url": "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v23i1p23",
+      "reading_status": "DISCOVERED",
+      "notes": "الموضع الطبيعي لـCLAIM-0002: أساس متعامد للشريحة مبني على تمثيل Young المتعامد، ومتجهات ذاتية لبيانَي Johnson وKneser.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "GranvilleKoukoulopoulos2017BeyondLSD",
+      "title": "Beyond the LSD method for the partial sums of multiplicative functions",
+      "authors": "Andrew Granville, Dimitris Koukoulopoulos",
+      "year": "2017",
+      "venue": "The Ramanujan Journal — محكَّم",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "حدود طريقة Landau–Selberg–Delange حين يضعف حد الخطأ على الأوليات.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Gross1998SatakeIsomorphism",
+      "title": "On the Satake isomorphism",
+      "authors": "Benedict H. Gross",
+      "year": "1998",
+      "venue": "Galois Representations in Arithmetic Algebraic Geometry — عرض تفسيري مرجعي",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "الجذر النظري: تماثل جبر Hecke الكروي بحلقة تمثيلات الزمرة الثنوية، وتحويله إلى عوامل L محلية.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Jing1991VertexOperators",
+      "title": "Vertex operators and Hall-Littlewood symmetric functions",
+      "authors": "Naihuan Jing",
+      "year": "1991",
+      "venue": "Advances in Mathematics — محكَّم",
+      "doi": null,
+      "url": "https://doi.org/10.1016/0001-8708(91)90072-F",
+      "reading_status": "DISCOVERED",
+      "notes": "المؤثر القياسي الذي يُلحق جزءًا بالتقسيم. يجعل «مؤثر انتقال بين ألياف» مفهومًا معروفًا منذ 1991، فالجِدّة المحتملة في التخصيص العددي لا في وجود المؤثر.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Macdonald1995SymmetricFunctions",
+      "title": "Symmetric Functions and Hall Polynomials",
+      "authors": "I. G. Macdonald",
+      "year": "1995",
+      "venue": "Oxford University Press — كتاب معياري",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "الفصل الخامس: تماثل Satake وربط الأساس المتناظر بالعوامل المحلية. الجذر الأقدم للإطار كله، ويلزم فحصه قراءةً مباشرة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "QUARANTINE-2604-14596-PrimeZeroDuality",
+      "title": "Prime–Zero Duality: Fractal Geometry, Renormalization-Group Flow, and an Information-Ontological Framework for Number Theory",
+      "authors": "غير محقق",
+      "year": "2026",
+      "venue": "arXiv:2604.14596 — نسخة أولية",
+      "doi": null,
+      "url": "https://arxiv.org/abs/2604.14596",
+      "reading_status": "DISCOVERED",
+      "notes": "محجور: لا يُستشهد به ولا يُبنى عليه. إطار «معلوماتي-أنطولوجي»، واستقرار عددي مزعوم بتغيّر 17% على مدى L≤2000 يُقدَّم دليلًا، ولا مرجع دورية. أُدرج هنا لتوثيق تضارب التسمية لا للاعتماد.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Weising2024ArtinSymmetricFunctions",
+      "title": "Artin Symmetric Functions",
+      "authors": "Milo Bechtloff Weising",
+      "year": "2024",
+      "venue": "arXiv:2409.09643v3 — نسخة أولية، لا مرجع دورية",
+      "doi": "10.48550/arXiv.2409.09643",
+      "url": "https://arxiv.org/abs/2409.09643",
+      "reading_status": "DISCOVERED",
+      "notes": "أقرب إطار وجدته إلى CLAIM-0001: حلقة دوال متناظرة مفهرسة بالمثاليات الأولية، وفكّ في أساس Hall–Littlewood، وتحويلات Mellin إلى جداءات دوال L لأرتين. نسخة أولية — لا تُعامل معاملة المحكَّم.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Weising2025HigherOrderBell",
+      "title": "Higher Order Bell Symmetric Functions",
+      "authors": "Milo Bechtloff Weising",
+      "year": "2025",
+      "venue": "arXiv:2505.18504 — نسخة أولية، لا مرجع دورية",
+      "doi": "10.48550/arXiv.2505.18504",
+      "url": "https://arxiv.org/abs/2505.18504",
+      "reading_status": "DISCOVERED",
+      "notes": "أخطر ورقة على ادعاء الجِدّة في CLAIM-0003: أبراج أسّية plethystic متكرّرة، وعلاقات تكرار صريحة لمعاملات الفكّ في الأساس الأحادي، وسلوك تقاربي توبيري. أولوية القراءة الأولى.",
+      "bibliography_key": null
+    }
+  ],
+  "gate_references": [
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "BretecheTenenbaum2020Remarks",
+      "relation": "ADJACENT",
+      "coverage_note": "يعالج التقديرات التقاربية لا بنية برج المعاملات."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Elliott2008RingStructures",
+      "relation": "ADJACENT",
+      "coverage_note": "بنية جبرية موحدة على الدوال الحسابية، بلا أبراج معاملات."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Filmus2016SliceOrthogonalBasis",
+      "relation": "COVERS",
+      "coverage_note": "يغطي طرف التحليل التوافقي على الشرائح تغطيةً مباشرة بأساس محكَّم."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "GranvilleKoukoulopoulos2017BeyondLSD",
+      "relation": "ADJACENT",
+      "coverage_note": "يحدّ نطاق الطريقة، ولا يقدّم تمثيلًا موحدًا."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Gross1998SatakeIsomorphism",
+      "relation": "PARTIAL",
+      "coverage_note": "الأصل الذي تنبع منه علاقة الأساس المتناظر بالعوامل المحلية."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Jing1991VertexOperators",
+      "relation": "PARTIAL",
+      "coverage_note": "يغطي طرف المؤثرات، ولا يمسّ التخصيص عند x_p = p^{-s}."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Macdonald1995SymmetricFunctions",
+      "relation": "PARTIAL",
+      "coverage_note": "الأصل النظري للتخصيص عند الأوليات."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "QUARANTINE-2604-14596-PrimeZeroDuality",
+      "relation": "NOT-RELEVANT",
+      "coverage_note": "تضارب تسمية مع مصطلحات مسار PVG. حجر صحي."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Weising2024ArtinSymmetricFunctions",
+      "relation": "PARTIAL",
+      "coverage_note": "يغطي طرف الدوال المتناظرة المخصَّصة عند الأوليات، ولا يمسّ معاملات Selberg–Delange."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Weising2025HigherOrderBell",
+      "relation": "PARTIAL",
+      "coverage_note": "يغطي بنية البرج ومعاملات الفكّ وعلاقات التكرار، ولا يُخصّص عند x_p = p^{-s} ولا يمسّ Selberg–Delange."
+    }
+  ],
+  "links": []
+}

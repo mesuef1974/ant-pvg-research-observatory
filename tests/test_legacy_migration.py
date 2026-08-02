@@ -3,11 +3,22 @@ from __future__ import annotations
 import os
 import sqlite3
 import subprocess
+import sys
 from pathlib import Path
 
 
-LATEST_REVISION = "0005_structured_source_corpus"
+def _head_revision() -> str:
+    """يشتق آخر هجرة من ملفات Alembic بدل تثبيتها نصًّا.
 
+    التثبيت النصي يجعل كل هجرة جديدة تُسقط هذا الاختبار لسبب لا علاقة له
+    بما يفحصه، فيُدرَّب القارئ على تجاهل الفشل.
+    """
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    root = Path(__file__).resolve().parents[1]
+    script = ScriptDirectory.from_config(Config(str(root / "alembic.ini")))
+    return script.get_current_head()
 
 def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
     database_path = tmp_path / "legacy.db"
@@ -52,7 +63,7 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
     environment = os.environ.copy()
     environment["ANT_PVG_DATABASE_URL"] = f"sqlite:///{database_path.as_posix()}"
     subprocess.run(
-        ["alembic", "upgrade", "head"],
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
         check=True,
         cwd=Path(__file__).resolve().parents[1],
         env=environment,
@@ -86,4 +97,4 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
     assert "source_layer" in columns
     assert defaults["created_at"] == "CURRENT_TIMESTAMP"
     assert row == (1, "Legacy volume", 292, "2026-08-01T23:32:54+00:00")
-    assert revision == (LATEST_REVISION,)
+    assert revision == (_head_revision(),)

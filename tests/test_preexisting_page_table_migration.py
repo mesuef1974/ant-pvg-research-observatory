@@ -3,17 +3,15 @@ from __future__ import annotations
 import os
 import sqlite3
 import subprocess
+import sys
 from pathlib import Path
-
-
-LATEST_REVISION = "0005_structured_source_corpus"
 
 
 def _run_alembic(database_path: Path, revision: str) -> None:
     environment = os.environ.copy()
     environment["ANT_PVG_DATABASE_URL"] = f"sqlite:///{database_path.as_posix()}"
     subprocess.run(
-        ["alembic", "upgrade", revision],
+        [sys.executable, "-m", "alembic", "upgrade", revision],
         check=True,
         cwd=Path(__file__).resolve().parents[1],
         env=environment,
@@ -21,6 +19,19 @@ def _run_alembic(database_path: Path, revision: str) -> None:
         text=True,
     )
 
+
+def _head_revision() -> str:
+    """يشتق آخر هجرة من ملفات Alembic بدل تثبيتها نصًّا.
+
+    التثبيت النصي يجعل كل هجرة جديدة تُسقط هذا الاختبار لسبب لا علاقة له
+    بما يفحصه، فيُدرَّب القارئ على تجاهل الفشل.
+    """
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    root = Path(__file__).resolve().parents[1]
+    script = ScriptDirectory.from_config(Config(str(root / "alembic.ini")))
+    return script.get_current_head()
 
 def test_migration_adopts_preexisting_document_pages_table(tmp_path: Path) -> None:
     database_path = tmp_path / "preexisting-pages.db"
@@ -65,7 +76,7 @@ def test_migration_adopts_preexisting_document_pages_table(tmp_path: Path) -> No
             )
         }
 
-    assert revision == (LATEST_REVISION,)
+    assert revision == (_head_revision(),)
     assert "ix_document_pages_document_id" in indexes
     assert "ix_document_pages_text_sha256" in indexes
     assert "ix_document_pages_extraction_status" in indexes

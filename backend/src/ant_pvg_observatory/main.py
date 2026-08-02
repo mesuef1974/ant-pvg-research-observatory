@@ -36,6 +36,7 @@ from .models import (
     SourceFile,
     SourceLayer,
 )
+from .research_io import export_research_layer
 from .schemas import (
     BibliographyEntryView,
     ChapterView,
@@ -756,6 +757,16 @@ def create_link(
     session.commit()
     session.refresh(link)
     return link
+
+
+@app.get("/api/research-layer/export", tags=["governance"])
+def export_research(session: SessionDependency) -> dict:
+    """الطبقة البحثية كاملةً بترتيب ثابت.
+
+    قراءة فقط. الاسترجاع يجري عبر ``scripts/research_layer.py import`` لأنه
+    يكتب في القاعدة، فلا يُعرَّض على واجهة تُفتح بالنقر.
+    """
+    return export_research_layer(session)
 
 
 if STATIC_ROOT.is_dir():
