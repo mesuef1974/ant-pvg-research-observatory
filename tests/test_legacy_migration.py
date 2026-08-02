@@ -75,9 +75,10 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
         ).fetchone()
 
     assert "sources" not in tables
+    assert "document_pages" in tables
     assert "source_id" not in columns
     assert "file_name" not in columns
     assert "source_layer" in columns
     assert defaults["created_at"] == "CURRENT_TIMESTAMP"
     assert row == (1, "Legacy volume", 292, "2026-08-01T23:32:54+00:00")
-    assert revision == ("0003_canonicalize_document_metadata",)
+    assert revision == ("0004_document_pages",)
