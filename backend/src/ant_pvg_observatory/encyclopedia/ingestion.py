@@ -26,9 +26,11 @@ from ..models import (
     EncyclopediaChapter,
     EncyclopediaResult,
     EncyclopediaUnit,
+    EvidenceRecord,
     IntegrityFinding,
     ModelSynthesisNote,
 )
+from . import evidence as evidence_module
 from . import integrity, parsing
 from .search import rebuild_fts
 
@@ -47,6 +49,7 @@ class EncyclopediaImportSummary:
     model_note_count: int
     coverage_gap_count: int
     finding_count: int
+    evidence_record_count: int
 
 
 def _sha256(text: str) -> str:
@@ -69,6 +72,7 @@ def git_revision(root: Path) -> str:
 
 def _clear(session: Session) -> None:
     for model in (
+        EvidenceRecord,
         IntegrityFinding,
         ModelSynthesisNote,
         BibliographyEntry,
@@ -92,6 +96,7 @@ def import_encyclopedia(
     bibliography = parsing.parse_bib(root)
     cited = parsing.cite_keys(root)
     notes = parsing.parse_model_notes()
+    evidence_records = evidence_module.parse_evidence_documents(root)
     revision = git_revision(root)
 
     findings = integrity.run_checks(
@@ -105,6 +110,18 @@ def import_encyclopedia(
         for result in chapter["results"]
         if result["result_id"]
     }
+    evidence_module.check_evidence_records(
+        evidence_records,
+        {chapter["number"] for chapter in chapters},
+        lambda code, severity, subject, detail: findings.append(
+            {
+                "code": code,
+                "severity": severity,
+                "subject": subject,
+                "detail": detail,
+            }
+        ),
+    )
     integrity.check_model_notes(
         notes,
         {key: {"citable": int(value)} for key, value in citable_by_key.items()},
@@ -216,6 +233,9 @@ def import_encyclopedia(
             )
         )
 
+    for record in evidence_records:
+        session.add(EvidenceRecord(**record))
+
     for finding in findings:
         session.add(
             IntegrityFinding(
@@ -241,4 +261,5 @@ def import_encyclopedia(
             1 for note in notes if note["gap"] in ("yes", "partial")
         ),
         finding_count=len(findings),
+        evidence_record_count=len(evidence_records),
     )
