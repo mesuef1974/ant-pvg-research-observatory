@@ -1,0 +1,6 @@
+ANT-PVG Local Research Observatory
+
+لا اعتماديات خارجية إلزامية. المشروع يعمل على مكتبة بايثون القياسية وحدها.
+يلزم Python 3.12 أو أحدث (تُستعمل Path.is_relative_to و unlink(missing_ok=True)).
+
+مسار مستودع الموسوعة يُضبط عبر متغير البيئة ANT_ENCYCLOPEDIA_ROOT.

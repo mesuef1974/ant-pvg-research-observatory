@@ -1,0 +1,19 @@
+# قاعدة البيانات التشغيلية وملفات WAL العابرة — تُبنى بالاستيراد ولا تُرفع
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# ملفات المصادر المحلية الثقيلة
+imports/*.pdf
+imports/*.djvu
+
+# تقارير التصدير — يُحفظ المجلد فارغًا
+exports/*
+!exports/.gitkeep
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.vscode/
