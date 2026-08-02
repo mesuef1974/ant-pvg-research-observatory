@@ -95,6 +95,43 @@ def test_search_pages_supports_arabic_filters_and_pagination() -> None:
         assert [result.page_number for result in filtered.results] == [2, 3]
 
 
+def test_search_pages_matches_arabic_without_pdf_word_spacing() -> None:
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        document = _add_document(
+            session,
+            title="compact-arabic",
+            source_layer=SourceLayer.ENCYCLOPEDIA,
+            pages=[
+                "الموسوعةالشاملةفينظريةالأعدادالتحليلية",
+                "تظهرُدالةُزيتافيالفصلالسادس",
+                "تعرفدالةفونمانغولدبالرمزΛ",
+            ],
+        )
+
+        zeta = search_pages(session, query="دالة زيتا", document_id=document.id)
+        assert zeta.total == 1
+        assert zeta.results[0].page_number == 2
+
+        mangoldt = search_pages(
+            session,
+            query="فون مانغولد",
+            document_id=document.id,
+        )
+        assert mangoldt.total == 1
+        assert mangoldt.results[0].page_number == 3
+
+        normalized_alef = search_pages(
+            session,
+            query="الاعداد التحليلية",
+            document_id=document.id,
+        )
+        assert normalized_alef.total == 1
+        assert normalized_alef.results[0].page_number == 1
+
+
 def test_search_pages_is_case_insensitive_for_latin_text() -> None:
     engine = create_engine("sqlite+pysqlite:///:memory:")
     Base.metadata.create_all(engine)
