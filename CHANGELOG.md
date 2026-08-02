@@ -2,6 +2,25 @@
 
 All notable changes are recorded here. The project is pre-release and follows semantic-versioning intent.
 
+## [0.3.0-dev] — 2026-08-02
+
+### Added
+
+- Root architecture document defining source, storage, retrieval, and migration boundaries.
+- `document_pages` table with one-based page numbering and per-document uniqueness.
+- Page-level PDF text extraction with Unicode normalization.
+- Page text hashes, character counts, word counts, statuses, and error recording.
+- Idempotent full-document re-indexing.
+- Page indexing and page listing API endpoints.
+- Regression tests for re-indexing and legacy documents without registered paths.
+
+### Governance
+
+- `EMPTY` means no extractable text, not a visually blank page.
+- Extraction failures are stored explicitly rather than silently discarded.
+- Registered paths remain constrained to the local library root.
+- Page indexing preserves document identity and source-layer classification.
+
 ## [0.2.0-dev] — 2026-08-02
 
 ### Added
