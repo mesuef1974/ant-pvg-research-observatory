@@ -18,8 +18,17 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
+alembic upgrade head
 uvicorn ant_pvg_observatory.main:app --reload --app-dir backend/src
 ```
+
+يجب تشغيل:
+
+```powershell
+alembic upgrade head
+```
+
+بعد كل `git pull` يتضمن تغييرات في مخطط قاعدة البيانات، وقبل تشغيل الخادم. الترحيل الأول يحافظ على قاعدة SQLite القديمة ويضيف أعمدة مكتبة الوثائق الناقصة بدل مطالبتك بحذفها.
 
 ثم افتح:
 
