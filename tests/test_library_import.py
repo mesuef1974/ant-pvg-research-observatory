@@ -1,14 +1,13 @@
 from pathlib import Path
 
-from pypdf import PdfWriter
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-
 from ant_pvg_observatory.config import settings
 from ant_pvg_observatory.db import Base
 from ant_pvg_observatory.library import import_local_pdf
 from ant_pvg_observatory.models import SourceLayer
 from ant_pvg_observatory.schemas import LocalDocumentImport
+from pypdf import PdfWriter
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 
 def _write_pdf(path: Path, pages: int = 2) -> None:
