@@ -2,6 +2,25 @@
 
 All notable changes are recorded here. The project is pre-release and follows semantic-versioning intent.
 
+## [0.2.0-dev] — 2026-08-02
+
+### Added
+
+- Governed local PDF import from paths inside `library/`.
+- Multi-document registry API.
+- SHA-256 deduplication.
+- PDF page-count and file-size metadata.
+- Explicit source-layer assignment for every imported document.
+- Path-containment and PDF-type validation.
+- Compatibility upgrade for v0.1 SQLite document tables.
+- Tests for PDF import and duplicate detection.
+
+### Governance
+
+- Imported files remain local and are referenced by relative path only.
+- A document cannot escape the configured library root.
+- Reimporting identical bytes does not create a second record.
+
 ## [0.1.0-dev] — 2026-08-02
 
 ### Added
