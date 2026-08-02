@@ -7,9 +7,15 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .db import ensure_schema, get_session
+from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
-from .models import Document
-from .schemas import DocumentView, LocalDocumentImport
+from .models import Document, ExtractionStatus
+from .schemas import (
+    DocumentPageView,
+    DocumentView,
+    LocalDocumentImport,
+    PageIndexSummary,
+)
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 
@@ -21,7 +27,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="0.2.0-dev", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="0.3.0-dev", lifespan=lifespan)
 
 
 @app.get("/api/health", tags=["system"])
@@ -66,3 +72,35 @@ def import_document(
     session: SessionDependency,
 ) -> Document:
     return import_local_pdf(session, payload)
+
+
+@app.post(
+    "/api/documents/{document_id}/index-pages",
+    response_model=PageIndexSummary,
+    tags=["indexing"],
+)
+def index_pages(document_id: int, session: SessionDependency) -> PageIndexSummary:
+    pages = index_document_pages(session, document_id)
+    return PageIndexSummary(
+        document_id=document_id,
+        page_count=len(pages),
+        extracted_count=sum(
+            page.extraction_status is ExtractionStatus.EXTRACTED for page in pages
+        ),
+        empty_count=sum(page.extraction_status is ExtractionStatus.EMPTY for page in pages),
+        failed_count=sum(
+            page.extraction_status is ExtractionStatus.FAILED for page in pages
+        ),
+    )
+
+
+@app.get(
+    "/api/documents/{document_id}/pages",
+    response_model=list[DocumentPageView],
+    tags=["indexing"],
+)
+def get_document_pages(
+    document_id: int,
+    session: SessionDependency,
+) -> list[DocumentPageView]:
+    return list_document_pages(session, document_id)
