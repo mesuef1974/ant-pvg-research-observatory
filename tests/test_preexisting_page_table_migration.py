@@ -6,6 +6,9 @@ import subprocess
 from pathlib import Path
 
 
+LATEST_REVISION = "0005_structured_source_corpus"
+
+
 def _run_alembic(database_path: Path, revision: str) -> None:
     environment = os.environ.copy()
     environment["ANT_PVG_DATABASE_URL"] = f"sqlite:///{database_path.as_posix()}"
@@ -55,8 +58,16 @@ def test_migration_adopts_preexisting_document_pages_table(tmp_path: Path) -> No
             row[1]
             for row in connection.execute("PRAGMA index_list(document_pages)")
         }
+        tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
 
-    assert revision == ("0004_document_pages",)
+    assert revision == (LATEST_REVISION,)
     assert "ix_document_pages_document_id" in indexes
     assert "ix_document_pages_text_sha256" in indexes
     assert "ix_document_pages_extraction_status" in indexes
+    assert "source_files" in tables
+    assert "source_sections" in tables
