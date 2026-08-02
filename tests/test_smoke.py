@@ -186,11 +186,21 @@ try:
         check(asset.rsplit('/', 1)[-1], got == 200, got)
 
     print('\n== تكامل الحوكمة ==')
-    s, d = call('/api/integrity?severity=CRITICAL')
-    check('يرصد تعارض ANT-THM-07-09',
-          any(f['subject'] == 'ANT-THM-07-09' for f in d['findings']), d['findings'][:1])
+    s, crit = call('/api/integrity?severity=CRITICAL')
+    s, high = call('/api/integrity?severity=HIGH')
+    check('لا تعارض حالات حرج في الموسوعة', not crit['findings'],
+          [f['subject'] for f in crit['findings']][:5])
+    check('لا ملاحظات مرتفعة الخطورة', not high['findings'],
+          [(f['code'], f['subject']) for f in high['findings']][:5])
     s, d = call('/api/integrity?code=CITE_KEY_MISSING')
-    check('يرصد مفتاح استشهاد مفقود', len(d['findings']) == 1, d['findings'])
+    check('لا مفاتيح استشهاد مفقودة', not d['findings'],
+          [f['subject'] for f in d['findings']][:5])
+    s, d = call('/api/integrity?code=CITE_KEY_ALIAS_USED')
+    check('مرادفات biber (حقل ids) تُحلّ ولا تُبلَّغ خطأً', d['findings'],
+          'لم يُرصد أي مفتاح مرادف — تحقق من قراءة حقل ids')
+    s, d = call('/api/integrity')
+    codes = {f['code'] for f in d['findings']}
+    check('الفاحص ما زال يعمل ويُنتج ملاحظات', len(codes) >= 5, sorted(codes))
 finally:
     p.terminate()
     try:

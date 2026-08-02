@@ -32,7 +32,7 @@ def now():
 
 # تُرفع عند كل تغيير في المحلل أو في بنية ما يُخزَّن، فيُعاد الاستيراد تلقائيًا
 # على القواعد القديمة بدل عرض بيانات ناقصة بلا خطأ.
-INGEST_VERSION = 3
+INGEST_VERSION = 4
 
 # ------------------------------------------------------------ تطبيع نص عربي
 
@@ -467,8 +467,19 @@ def parse_bib(root):
                 'author': field('author'), 'year': field('year'),
                 'journal': field('journal') or field('booktitle') or field('publisher'),
                 'doi': field('doi'), 'url': field('url'), 'bib_file': f.name,
+                # حقل ids في biber يعلن مفاتيح مرادفة للمدخل نفسه، ويستشهد بها
+                # المخطوط استشهادًا صحيحًا. تجاهله يُنتج بلاغًا كاذبًا عن مفتاح مفقود.
+                'aliases': [a.strip() for a in field('ids').split(',') if a.strip()],
             }
     return entries
+
+
+def bib_keys(entries):
+    """كل المفاتيح التي يقبلها biber: المفاتيح الأصلية ومرادفاتها."""
+    keys = set(entries)
+    for e in entries.values():
+        keys |= set(e.get('aliases') or [])
+    return keys
 
 def cite_keys(root):
     keys = set()
@@ -594,12 +605,20 @@ def run_checks(chapters, registries, policy, bib, cited, claims):
             add('TEX_STATUS_MISSING', 'LOW', rid,
                 'النتيجة تحمل معرّفًا في المخطوط بلا وسم حالة صريح.')
 
-    for k in sorted(cited - set(bib)):
+    known = bib_keys(bib)
+    for k in sorted(cited - known):
         add('CITE_KEY_MISSING', 'HIGH', k,
-            'مفتاح استشهاد مستعمل في المخطوط ولا يقابله مدخل في أي ملف .bib.')
+            'مفتاح استشهاد مستعمل في المخطوط ولا يقابله مدخل ولا مرادف في أي ملف .bib.')
+    alias_of = {a: k for k, e in bib.items() for a in (e.get('aliases') or [])}
     for k in sorted(set(bib) - cited):
+        if any(a in cited for a in (bib[k].get('aliases') or [])):
+            continue
         add('BIB_UNCITED', 'INFO', k,
             'مدخل ببليوغرافي غير مستشهد به صراحة (يظهر عبر \\nocite{*} فقط).')
+    for a in sorted(cited & set(alias_of)):
+        add('CITE_KEY_ALIAS_USED', 'LOW', a,
+            f'المخطوط يستشهد بمفتاح مرادف يحلّه biber إلى {alias_of[a]}؛ '
+            'صحيح لكن توحيد المفتاح أوضح.')
 
     for c in claims:
         for rid in set(re.findall(r'ANT-[A-Z]+-\d+-\d+',
