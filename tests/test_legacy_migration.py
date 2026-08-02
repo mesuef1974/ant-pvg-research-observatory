@@ -22,13 +22,27 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
                 title TEXT NOT NULL,
                 file_name TEXT,
                 page_count INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at TEXT NOT NULL,
                 FOREIGN KEY(source_id) REFERENCES sources(id)
             );
             INSERT INTO sources(id, source_type, title)
             VALUES (1, 'ENCYCLOPEDIA', 'Legacy encyclopedia');
-            INSERT INTO documents(id, source_id, title, file_name, page_count)
-            VALUES (1, 1, 'Legacy volume', 'volume-01.pdf', 292);
+            INSERT INTO documents(
+                id,
+                source_id,
+                title,
+                file_name,
+                page_count,
+                created_at
+            )
+            VALUES (
+                1,
+                1,
+                'Legacy volume',
+                'volume-01.pdf',
+                292,
+                '2026-08-01T23:32:54+00:00'
+            );
             """
         )
 
@@ -50,11 +64,11 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
                 "SELECT name FROM sqlite_master WHERE type = 'table'"
             )
         }
-        columns = {
-            row[1] for row in connection.execute("PRAGMA table_info(documents)")
-        }
+        table_info = list(connection.execute("PRAGMA table_info(documents)"))
+        columns = {row[1] for row in table_info}
+        defaults = {row[1]: row[4] for row in table_info}
         row = connection.execute(
-            "SELECT id, title, page_count FROM documents WHERE id = 1"
+            "SELECT id, title, page_count, created_at FROM documents WHERE id = 1"
         ).fetchone()
         revision = connection.execute(
             "SELECT version_num FROM alembic_version"
@@ -62,6 +76,8 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
 
     assert "sources" not in tables
     assert "source_id" not in columns
+    assert "file_name" not in columns
     assert "source_layer" in columns
-    assert row == (1, "Legacy volume", 292)
-    assert revision == ("0002_remove_legacy_source_model",)
+    assert defaults["created_at"] == "CURRENT_TIMESTAMP"
+    assert row == (1, "Legacy volume", 292, "2026-08-01T23:32:54+00:00")
+    assert revision == ("0003_canonicalize_document_metadata",)
