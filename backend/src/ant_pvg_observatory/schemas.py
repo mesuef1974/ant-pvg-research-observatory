@@ -67,3 +67,29 @@ class PageSearchResponseView(BaseModel):
     results: list[PageSearchResultView]
 
     model_config = {"from_attributes": True}
+
+
+class SourceCorpusImportRequest(BaseModel):
+    repository_root: Path
+
+
+class SourceCorpusImportSummaryView(BaseModel):
+    repository: str
+    revision: str
+    file_count: int
+    section_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class SourceFileView(BaseModel):
+    id: int
+    repository: str
+    revision: str
+    path: str
+    order_index: int
+    sha256: str
+    line_count: int
+    source_layer: SourceLayer
+
+    model_config = {"from_attributes": True}
