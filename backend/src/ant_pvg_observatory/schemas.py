@@ -193,3 +193,25 @@ class IntegrityFindingView(BaseModel):
     detail: str
 
     model_config = {"from_attributes": True}
+
+
+class UnifiedSearchResultView(BaseModel):
+    layer: SourceLayer
+    kind: str
+    key: str
+    title: str
+    snippet: str
+    chapter_number: int | None = None
+    citable: bool = False
+    is_gap: bool = False
+    rank: float = 0.0
+
+    model_config = {"from_attributes": True}
+
+
+class UnifiedSearchResponseView(BaseModel):
+    query: str
+    total: int
+    results: list[UnifiedSearchResultView]
+
+    model_config = {"from_attributes": True}

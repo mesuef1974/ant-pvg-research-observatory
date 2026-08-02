@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
+from .encyclopedia.search import search_corpus
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
 from .models import (
@@ -38,6 +39,7 @@ from .schemas import (
     SourceCorpusImportRequest,
     SourceCorpusImportSummaryView,
     SourceFileView,
+    UnifiedSearchResponseView,
     UnitView,
 )
 from .search import search_pages
@@ -304,3 +306,20 @@ def list_integrity_findings(
     if code is not None:
         statement = statement.where(IntegrityFinding.code == code)
     return list(session.scalars(statement))
+
+
+@app.get(
+    "/api/search/corpus",
+    response_model=UnifiedSearchResponseView,
+    tags=["search"],
+)
+def search_unified(
+    session: SessionDependency,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    source_layer: SourceLayer | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 40,
+) -> UnifiedSearchResponseView:
+    """بحث عبر الطبقات الثلاث. كل نتيجة تحمل طبقتها وقابليتها للاستشهاد."""
+    return UnifiedSearchResponseView.model_validate(
+        search_corpus(session, query=q, source_layer=source_layer, limit=limit)
+    )

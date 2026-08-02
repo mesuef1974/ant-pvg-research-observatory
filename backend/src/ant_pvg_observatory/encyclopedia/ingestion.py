@@ -30,6 +30,7 @@ from ..models import (
     ModelSynthesisNote,
 )
 from . import integrity, parsing
+from .search import rebuild_fts
 
 REPOSITORY = "mesuef1974/analytic-number-theory-encyclopedia-ar"
 
@@ -226,6 +227,7 @@ def import_encyclopedia(
         )
 
     session.commit()
+    rebuild_fts(session)
     return EncyclopediaImportSummary(
         repository=REPOSITORY,
         revision=revision,

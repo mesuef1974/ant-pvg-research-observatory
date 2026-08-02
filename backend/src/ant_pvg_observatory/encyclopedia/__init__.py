@@ -1,4 +1,4 @@
-"""استيعاب الموسوعة: التحليل وفحوص التكامل والتخزين."""
-from . import ingestion, integrity, parsing
+"""استيعاب الموسوعة: التحليل وفحوص التكامل والتخزين والبحث."""
+from . import ingestion, integrity, parsing, search
 
-__all__ = ["ingestion", "integrity", "parsing"]
+__all__ = ["ingestion", "integrity", "parsing", "search"]
