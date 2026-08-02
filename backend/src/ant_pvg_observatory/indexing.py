@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import unicodedata
 from pathlib import Path
 
@@ -12,13 +13,51 @@ from sqlalchemy.orm import Session
 from .library import _resolve_library_path
 from .models import Document, DocumentPage, ExtractionStatus
 
+_ARABIC_PRESENTATION_FORM_RANGES = (
+    (0xFB50, 0xFDFF),
+    (0xFE70, 0xFEFF),
+)
+_MIRRORED_PUNCTUATION = str.maketrans("()[]{}<>«»", ")][}{><»«")
+
+
+def _contains_arabic_presentation_forms(text: str) -> bool:
+    return any(
+        start <= ord(character) <= end
+        for character in text
+        for start, end in _ARABIC_PRESENTATION_FORM_RANGES
+    )
+
+
+def _restore_visual_rtl_line(line: str) -> str:
+    """Convert a visually ordered Arabic PDF line into logical reading order.
+
+    Some Arabic PDFs expose glyph presentation forms in left-to-right visual order.
+    NFKC converts those glyphs to canonical Arabic letters, but the character and
+    token order still needs reversing. Non-Arabic tokens retain their internal order.
+    """
+    tokens = re.findall(r"\S+", line)
+    restored: list[str] = []
+    for token in reversed(tokens):
+        if any("\u0600" <= character <= "\u06ff" for character in token):
+            token = token[::-1].translate(_MIRRORED_PUNCTUATION)
+        restored.append(token)
+    return " ".join(restored)
+
 
 def _normalize_page_text(text: str | None) -> str:
     if not text:
         return ""
-    normalized = unicodedata.normalize("NFC", text)
-    normalized = normalized.replace("\r\n", "\n").replace("\r", "\n")
-    return "\n".join(line.rstrip() for line in normalized.split("\n")).strip()
+
+    raw_lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    normalized_lines: list[str] = []
+    for raw_line in raw_lines:
+        had_presentation_forms = _contains_arabic_presentation_forms(raw_line)
+        line = unicodedata.normalize("NFKC", raw_line).rstrip()
+        if had_presentation_forms and line.strip():
+            line = _restore_visual_rtl_line(line)
+        normalized_lines.append(line)
+
+    return "\n".join(normalized_lines).strip()
 
 
 def _text_sha256(text: str) -> str:
