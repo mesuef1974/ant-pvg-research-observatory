@@ -48,9 +48,13 @@ def main() -> None:
         else:
             report = read_import(session, args.path)
             print(f"استُورد من {args.path}")
-            for label, counts in (("أُنشئ", report.created), ("حُدِّث", report.updated)):
+            for label, counts in (
+                ("أُنشئ", report.created),
+                ("تغيّر", report.updated),
+                ("بلا تغيير", report.unchanged),
+            ):
                 print(
-                    f"  {label}: ادعاءات {counts.claims} | بوابات {counts.gates} | "
+                    f"  {label:9}: ادعاءات {counts.claims} | بوابات {counts.gates} | "
                     f"مراجع {counts.references} | روابط بوابات {counts.gate_references} | "
                     f"روابط معرفة {counts.links}"
                 )
