@@ -1,17 +1,21 @@
 from pathlib import Path
 
 import pytest
-from fastapi import HTTPException
-from pypdf import PdfWriter
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session
-
 from ant_pvg_observatory.config import settings
 from ant_pvg_observatory.db import Base
 from ant_pvg_observatory.indexing import index_document_pages
 from ant_pvg_observatory.library import import_local_pdf
-from ant_pvg_observatory.models import Document, DocumentPage, ExtractionStatus, SourceLayer
+from ant_pvg_observatory.models import (
+    Document,
+    DocumentPage,
+    ExtractionStatus,
+    SourceLayer,
+)
 from ant_pvg_observatory.schemas import LocalDocumentImport
+from fastapi import HTTPException
+from pypdf import PdfWriter
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.orm import Session
 
 
 def _write_blank_pdf(path: Path, pages: int) -> None:
