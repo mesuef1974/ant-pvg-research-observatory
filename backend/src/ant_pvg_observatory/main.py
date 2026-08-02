@@ -1,9 +1,14 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from .config import settings
-from .db import Base, engine
+from .db import Base, engine, get_session
+from .library import import_local_pdf
+from .models import Document
+from .schemas import DocumentView, LocalDocumentImport
 
 
 @asynccontextmanager
@@ -13,7 +18,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="0.1.0-dev", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="0.2.0-dev", lifespan=lifespan)
 
 
 @app.get("/api/health", tags=["system"])
@@ -40,3 +45,21 @@ def source_layers() -> list[dict[str, str]]:
             "rule": "Requires traceable bibliographic evidence and reading status.",
         },
     ]
+
+
+@app.get("/api/documents", response_model=list[DocumentView], tags=["library"])
+def list_documents(session: Session = Depends(get_session)) -> list[Document]:
+    return list(session.scalars(select(Document).order_by(Document.id.desc())))
+
+
+@app.post(
+    "/api/documents/import-local",
+    response_model=DocumentView,
+    status_code=201,
+    tags=["library"],
+)
+def import_document(
+    payload: LocalDocumentImport,
+    session: Session = Depends(get_session),
+) -> Document:
+    return import_local_pdf(session, payload)
