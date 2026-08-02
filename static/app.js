@@ -1,13 +1,433 @@
-const app=document.querySelector('#app'), title=document.querySelector('#viewTitle');let current='dashboard';
-const api=async(url,opt)=>{const r=await fetch(url,opt);const j=await r.json();if(!r.ok)throw Error(j.error||r.status);return j};
-const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const layerClass=x=>x==='ENCYCLOPEDIA'?'enc':x==='LITERATURE'?'lit':'model';
-function row(x,body=''){return `<div class="row"><h4>${esc(x.title||x.claim_id||x.gate_id||'نتيجة')}</h4>${body}<div class="meta">${x.source_layer?`<span class="tag ${layerClass(x.source_layer)}">${esc(x.source_layer)}</span>`:''}${x.status?`<span class="badge">${esc(x.status)}</span>`:''}${x.novelty_status?`<span class="badge">${esc(x.novelty_status)}</span>`:''}</div></div>`}
-async function render(){title.textContent={dashboard:'لوحة القيادة',search:'البحث الموحد',claims:'سجل الادعاءات',gates:'بوابات الأدبيات',refs:'المراجع',reader:'قارئ الموسوعة'}[current];document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===current));if(current==='dashboard')return dashboard();if(current==='search')return searchView();if(current==='claims')return claims();if(current==='gates')return gates();if(current==='refs')return refs();if(current==='reader')return reader()}
-async function dashboard(){const d=await api('/api/dashboard');app.innerHTML=`<div class="cards">${Object.entries(d.counts).map(([k,v])=>`<div class="card"><strong>${v}</strong><small>${k}</small></div>`).join('')}</div><div class="panel"><h3>طبقات المصادر</h3><div class="table">${d.sources.map(s=>row(s,`<p>${esc(s.authority)}</p>`)).join('')}</div></div><div class="panel"><h3>الادعاءات الأخيرة</h3><div class="table">${d.recent_claims.map(x=>row(x,`<p>${esc(x.statement)}</p>`)).join('')}</div></div><div class="panel"><h3>البوابات المفتوحة</h3><div class="table">${d.gates.map(x=>row(x,`<p>${esc(x.question)}</p>`)).join('')}</div></div>`}
-function searchView(){app.innerHTML=`<div class="panel"><div class="searchbar"><input id="q" placeholder="ابحث في الموسوعة والادعاءات والأدبيات"><select id="layer"><option>ALL</option><option>ENCYCLOPEDIA</option><option>MODEL_SYNTHESIS</option><option>LITERATURE</option></select><button class="action" id="go">بحث</button></div></div><div id="results" class="panel"><h3>النتائج</h3></div>`;document.querySelector('#go').onclick=async()=>{const d=await api(`/api/search?q=${encodeURIComponent(q.value)}&layer=${layer.value}`);results.innerHTML=`<h3>${d.results.length} نتيجة</h3><div class="table">${d.results.map(x=>row(x,`<p>${esc(x.snippet||'')}</p>${x.page_no?`<small>صفحة ${x.page_no}</small>`:''}`)).join('')}</div>`};q.onkeydown=e=>{if(e.key==='Enter')go.click()}}
-async function claims(){const d=await api('/api/claims');app.innerHTML=`<div class="panel"><h3>إضافة ادعاء</h3><div class="formgrid"><input id="st" class="wide" placeholder="نص الادعاء"><input id="dom" placeholder="المجال"><select id="sl"><option>MODEL_SYNTHESIS</option><option>ENCYCLOPEDIA</option><option>LITERATURE</option></select><select id="cs"><option>MODEL-SYNTHESIS</option><option>KNOWN</option><option>KNOWN-IN-EQUIVALENT-FORM</option><option>CANDIDATE-GAP</option><option>PROVED-HERE</option><option>OPEN</option></select><input id="nov" placeholder="حالة الجدة" value="UNCERTIFIED"><textarea id="ev" class="wide" placeholder="الدليل والملاحظات"></textarea><button id="add" class="action wide">إضافة</button></div></div><div class="panel"><div class="table">${d.map(x=>row(x,`<p>${esc(x.statement)}</p><p>${esc(x.evidence)}</p>`)).join('')}</div></div>`;add.onclick=async()=>{await api('/api/claims',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({statement:st.value,domain:dom.value,source_layer:sl.value,status:cs.value,novelty_status:nov.value,evidence:ev.value})});render()}}
-async function gates(){const d=await api('/api/gates');app.innerHTML=`<div class="panel"><h3>فتح بوابة جديدة</h3><div class="formgrid"><input id="gt" placeholder="عنوان البوابة"><input id="gq" placeholder="السؤال البحثي"><input id="gk" class="wide" placeholder="الكلمات المفتاحية"><textarea id="gs" class="wide" placeholder="النطاق"></textarea><button id="ga" class="action wide">فتح البوابة</button></div></div><div class="panel"><div class="table">${d.map(x=>row(x,`<p>${esc(x.question)}</p><p><b>النطاق:</b> ${esc(x.scope)}</p><p><b>الحكم:</b> ${esc(x.verdict)}</p>`)).join('')}</div></div>`;ga.onclick=async()=>{await api('/api/gates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:gt.value,question:gq.value,keywords:gk.value,scope:gs.value})});render()}}
-async function refs(){const d=await api('/api/references');app.innerHTML=`<div class="panel"><h3>إضافة مرجع</h3><div class="formgrid"><input id="rt" class="wide" placeholder="العنوان"><input id="ra" placeholder="المؤلفون"><input id="ry" placeholder="السنة"><input id="rv" placeholder="الدورية/الناشر"><input id="rd" placeholder="DOI"><input id="ru" placeholder="الرابط"><select id="rr"><option>DISCOVERED</option><option>ABSTRACT-READ</option><option>FULLY-READ</option><option>VERIFIED</option></select><textarea id="rn" class="wide" placeholder="الملاحظات"></textarea><button id="radd" class="action wide">إضافة</button></div></div><div class="panel"><div class="table">${d.map(x=>row(x,`<p>${esc(x.authors)} (${esc(x.year)}) - ${esc(x.venue)}</p><p>${esc(x.notes)}</p>`)).join('')}</div></div>`;radd.onclick=async()=>{await api('/api/references',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:rt.value,authors:ra.value,year:ry.value,venue:rv.value,doi:rd.value,url:ru.value,reading_status:rr.value,notes:rn.value})});render()}}
-function reader(){app.innerHTML=`<div class="panel"><div class="searchbar"><input id="pn" type="number" min="1" value="1"><span></span><button id="load" class="action">عرض الصفحة</button></div></div><div class="panel"><div id="page" class="reader">اختر رقم الصفحة.</div></div>`;load.onclick=async()=>{const d=await api('/api/pages?page='+pn.value);page.textContent=d.text||'لا يوجد نص مستخرج لهذه الصفحة.'};load.click()}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{current=b.dataset.view;render()});refresh.onclick=render;render();
+const ENCYCLOPEDIA_ROOT = 'D:/analytic-number-theory-encyclopedia-ar';
+const app = document.querySelector('#app');
+const viewTitle = document.querySelector('#viewTitle');
+
+const TITLES = {
+  dashboard: 'لوحة القيادة', search: 'البحث الموحد', results: 'نتائج الموسوعة',
+  model: 'المعرفة المعيارية', integrity: 'تكامل الحوكمة', claims: 'سجل الادعاءات',
+  gates: 'بوابات الأدبيات', refs: 'المراجع', reader: 'قارئ الموسوعة',
+};
+const NOTE_KINDS = {
+  method: 'طريقة', context: 'سياق', caveat: 'محذور', heuristic: 'حدس',
+  gap: 'فجوة', definition: 'تعريف', theorem: 'مبرهنة',
+};
+const COUNT_LABELS = {
+  chapters: 'فصول', units: 'وحدات نصية', results: 'نتائج معرَّفة',
+  citable: 'قابلة للاستشهاد', bib: 'مراجع ببليوغرافية',
+  model_notes: 'ملاحظات معيارية', coverage_gaps: 'فجوات تغطية',
+  claims: 'ادعاءات', gates: 'بوابات', findings: 'ملاحظات تكامل',
+};
+const SEVERITY = { CRITICAL: 'حرج', HIGH: 'مرتفع', MEDIUM: 'متوسط', LOW: 'منخفض', INFO: 'إخباري' };
+
+let current = 'dashboard';
+
+const esc = s => (s ?? '').toString().replace(/[&<>"']/g,
+  m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+async function api(url, opt) {
+  const r = await fetch(url, opt);
+  const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+  if (!r.ok) throw new Error(j.error || r.status);
+  return j;
+}
+
+const layerClass = x => x === 'ENCYCLOPEDIA' ? 'enc' : x === 'LITERATURE' ? 'lit' : 'model';
+
+// --------------------------------------------------- إظهار الرياضيات (KaTeX)
+
+const KATEX_OPTS = {
+  delimiters: [
+    { left: '\\[', right: '\\]', display: true },
+    { left: '$$', right: '$$', display: true },
+    { left: '\\(', right: '\\)', display: false },
+  ],
+  throwOnError: false, errorColor: '#ff9db1', strict: false,
+};
+
+/** يُظهِر الرياضيات داخل عنصر. يعمل بلا شبكة لأن KaTeX مُضمَّن محليًا. */
+function typeset(el) {
+  if (!el || typeof renderMathInElement !== 'function') return;
+  el.querySelectorAll('.math-display[data-tex]').forEach(node => {
+    try {
+      katex.render(node.dataset.tex, node, { ...KATEX_OPTS, displayMode: true });
+    } catch (e) { node.textContent = node.dataset.tex; }
+  });
+  try { renderMathInElement(el, KATEX_OPTS); } catch (e) { /* يبقى النص الخام */ }
+}
+
+/** يحوّل كتل الوحدة المهيكلة إلى HTML: فقرات، معادلات، قوائم، وبيئات مسمّاة. */
+function blocksHtml(blocks) {
+  return (blocks || []).map(b => {
+    switch (b.t) {
+      case 'p':
+        return `<p>${esc(b.text)}</p>`;
+      case 'math':
+        return `<div class="math-display" data-tex="${esc(b.tex)}"></div>`;
+      case 'pre':
+        return `<pre class="tex-pre">${esc(b.text)}</pre>`;
+      case 'list':
+        return `<${b.ordered ? 'ol' : 'ul'}>${
+          b.items.map(i => `<li>${blocksHtml(i)}</li>`).join('')}</${b.ordered ? 'ol' : 'ul'}>`;
+      case 'env': {
+        const meta = [
+          b.result_id ? `<span class="badge">${esc(b.result_id)}</span>` : '',
+          b.status ? `<span class="badge">${esc(b.status)}</span>` : '',
+        ].join('');
+        return `<section class="env env-${esc(b.env)}">
+          <h5>${esc(b.label)}${b.title ? ` — ${esc(b.title)}` : ''}${meta}</h5>
+          ${blocksHtml(b.blocks)}</section>`;
+      }
+      default:
+        return '';
+    }
+  }).join('');
+}
+
+function badges(x) {
+  const b = [];
+  if (x.layer || x.source_layer)
+    b.push(`<span class="tag ${layerClass(x.layer || x.source_layer)}">${esc(x.layer || x.source_layer)}</span>`);
+  if (x.status) b.push(`<span class="badge">${esc(x.status)}</span>`);
+  if (x.novelty_note) b.push(`<span class="badge">${esc(x.novelty_note)}</span>`);
+  if (x.citable !== undefined)
+    b.push(`<span class="badge ${x.citable ? 'ok' : 'no'}">${x.citable ? 'قابلة للاستشهاد' : 'غير قابلة للاستشهاد'}</span>`);
+  return `<div class="meta">${b.join('')}</div>`;
+}
+
+const row = (x, body = '') =>
+  `<div class="row"><h4>${esc(x.title || x.claim_key || x.gate_key || x.result_key || 'نتيجة')}</h4>${body}${badges(x)}</div>`;
+
+function field(id, ph, tag = 'input', extra = '') {
+  return tag === 'textarea'
+    ? `<textarea id="${id}" class="${extra}" placeholder="${ph}"></textarea>`
+    : `<input id="${id}" class="${extra}" placeholder="${ph}">`;
+}
+
+const $ = id => document.getElementById(id);
+
+// ------------------------------------------------------------------- العروض
+
+async function dashboard() {
+  const d = await api('/api/dashboard');
+  const sev = Object.entries(d.severity || {})
+    .map(([k, v]) => `<span class="badge sev-${k}">${SEVERITY[k] || k}: ${v}</span>`).join(' ');
+  app.innerHTML = `
+    <div class="cards">${Object.entries(d.counts).map(([k, v]) =>
+      `<div class="card"><strong>${v}</strong><small>${COUNT_LABELS[k] || k}</small></div>`).join('')}</div>
+    <div class="panel"><h3>مصدر الموسوعة</h3><div class="table">
+      <div class="row"><h4>مراجعة Git للمصدر</h4>
+        <p class="path">${esc(d.revision || 'لم يُستورد بعد')}</p></div>
+    </div></div>
+    <div class="panel"><h3>تكامل الحوكمة ${sev}</h3><div class="table">
+      ${d.top_findings.length
+        ? d.top_findings.map(f => `<div class="row"><h4>${esc(f.subject)}</h4>
+            <p>${esc(f.detail)}</p><div class="meta">
+            <span class="badge sev-${f.severity}">${SEVERITY[f.severity] || f.severity}</span>
+            <span class="badge">${esc(f.code)}</span></div></div>`).join('')
+        : '<p class="muted">لا ملاحظات حرجة.</p>'}
+    </div></div>
+    <div class="panel"><h3>حالات النتائج</h3><div class="table">
+      ${d.by_status.slice(0, 12).map(s =>
+        `<div class="row inline"><span>${esc(s.s)}</span><b>${s.n}</b></div>`).join('')}
+    </div></div>
+    <div class="panel"><h3>الادعاءات الأخيرة</h3><div class="table">
+      ${d.recent_claims.map(x => row(x, `<p>${esc(x.statement)}</p>`)).join('') || '<p class="muted">لا ادعاءات.</p>'}
+    </div></div>`;
+}
+
+function searchView() {
+  app.innerHTML = `
+    <div class="panel"><div class="searchbar">
+      <input id="q" placeholder="ابحث في الموسوعة والنتائج والادعاءات والأدبيات">
+      <select id="layer"><option>ALL</option><option>ENCYCLOPEDIA</option>
+        <option>MODEL_SYNTHESIS</option><option>LITERATURE</option></select>
+      <button class="action" id="go">بحث</button>
+    </div><p class="muted">البحث يطبّع الهمزات والتشكيل، فيتطابق «الأعداد» مع «الأعداد».</p></div>
+    <div id="results" class="panel"><h3>النتائج</h3></div>`;
+  const run = async () => {
+    const d = await api(`/api/search/corpus?q=${encodeURIComponent($('q').value)}${$('layer').value === 'ALL' ? '' : '&source_layer=' + $('layer').value}`);
+    $('results').innerHTML = `<h3>${d.results.length} نتيجة</h3><div class="table">${
+      d.results.map(x => row(x, `<p>${esc(x.snippet || '')}</p>${
+        x.chapter_number ? `<small>الفصل ${esc(x.chapter_number)}</small>` : ''}`)).join('') ||
+      '<p class="muted">لا نتائج.</p>'}</div>`;
+    typeset($('results'));
+  };
+  $('go').onclick = run;
+  $('q').onkeydown = e => { if (e.key === 'Enter') run(); };
+  $('q').focus();
+}
+
+async function results() {
+  const d = await api('/api/encyclopedia/results');
+  app.innerHTML = `
+    <div class="panel"><div class="searchbar">
+      <input id="rq" placeholder="ترشيح بالمعرّف أو العنوان">
+      <select id="rc"><option value="">كل حالات الاستشهاد</option>
+        <option value="1">قابلة للاستشهاد</option><option value="0">غير قابلة</option></select>
+      <button class="action" id="rgo">ترشيح</button>
+    </div></div>
+    <div class="panel"><div id="rlist" class="table"></div></div>`;
+  const draw = () => {
+    const t = $('rq').value.trim(), c = $('rc').value;
+    const f = d.filter(x =>
+      (!t || (x.result_key + ' ' + (x.title || '')).includes(t)) &&
+      (c === '' || String(x.citable ? 1 : 0) === c));
+    $('rlist').innerHTML = `<p class="muted">${f.length} من ${d.length}</p>` + f.map(x => row(
+      { title: x.result_key, citable: x.citable },
+      `<p><b>${esc(x.title || '—')}</b></p>
+       <p>${esc((x.statement || '').slice(0, 300))}</p>
+       <div class="meta"><span class="badge">الفصل ${esc(x.chapter_number)}</span>
+        <span class="badge">${esc(x.kind)}</span>
+        <span class="badge">مخطوط: ${esc(x.tex_status || '—')}</span>
+        <span class="badge">سجل: ${esc(x.registry_status || '—')}</span></div>`)).join('');
+  };
+  $('rgo').onclick = draw;
+  $('rq').onkeydown = e => { if (e.key === 'Enter') draw(); };
+  draw();
+}
+
+async function model() {
+  const d = await api('/api/model-synthesis/notes');
+  const card = n => `<div class="row note${n.is_gap ? ' gap' : ''}">
+    <h4>${esc(n.note_key)} — ${esc(n.title)}</h4>
+    <div class="note-body">${blocksHtml(JSON.parse(n.blocks_json || '[]'))}</div>
+    <div class="meta">
+      <span class="tag model">MODEL_SYNTHESIS</span>
+      <span class="badge">${esc(NOTE_KINDS[n.kind] || n.kind)}</span>
+      <span class="badge no">لا يُستشهد بها</span>
+      ${n.is_gap ? '<span class="badge sev-HIGH">فجوة تغطية</span>' : ''}
+      ${n.anchors ? `<span class="badge ok">مسنَدة إلى ${esc(n.anchors)}</span>` : ''}
+      ${n.literature_hint ? `<span class="badge">تلميح غير محقق: ${esc(n.literature_hint)}</span>` : ''}
+    </div></div>`;
+
+  app.innerHTML = `
+    <div class="panel warn-panel">
+      <h3>طبقة المعرفة المعيارية</h3>
+      <p>معرفة رياضية مولَّدة، سلطتها <b>UNVERIFIED_UNTIL_SOURCED</b>. تصلح خريطةً
+      تدلّ على الموضع وقائمةَ تحقق قبل البحث وتنبيهًا إلى مزلق. لا تصلح للاستشهاد،
+      ويمنع المرصد آليًا استناد أي ادعاء إليها. وأسماء الأوراق المذكورة تلميحات بحث
+      غير محققة يجب التثبت منها عبر DOI أو الناشر.</p>
+    </div>
+    <div class="panel"><h3>حسب المجال</h3><div class="table">
+      ${(d.by_domain || []).map(x => `<div class="row inline"><span>${esc(x.domain)}</span>
+        <b>${x.n}${x.gaps ? ` <span class="badge sev-HIGH">${x.gaps} فجوة</span>` : ''}</b>
+      </div>`).join('')}
+    </div></div>
+    <div class="panel"><div class="searchbar">
+      <select id="nk"><option value="">كل الأنواع</option>
+        ${(d.by_kind || []).map(k => `<option value="${esc(k.kind)}">${esc(NOTE_KINDS[k.kind] || k.kind)} (${k.n})</option>`).join('')}</select>
+      <select id="ng"><option value="">الكل</option>
+        <option value="1">فجوات التغطية فقط</option>
+        <option value="0">المسنَدة فقط</option></select>
+      <button class="action" id="ngo">ترشيح</button>
+    </div></div>
+    <div class="panel"><div id="nlist" class="table">${d.map(card).join('')}</div></div>`;
+
+  $('ngo').onclick = () => {
+    const k = $('nk').value, g = $('ng').value;
+    const f = d.filter(n =>
+      (!k || n.kind === k) && (g === '' || String(n.is_gap) === g));
+    $('nlist').innerHTML = `<p class="muted">${f.length} من ${d.length}</p>`
+      + f.map(card).join('');
+    typeset($('nlist'));
+  };
+}
+
+async function integrity() {
+  const d = await api('/api/integrity/findings');
+  app.innerHTML = `
+    <div class="panel"><h3>ملخص الفحوص</h3><div class="table">
+      ${(d.by_code || []).sort((a, b) => b.n - a.n).map(c =>
+        `<div class="row inline"><span><span class="badge sev-${c.severity}">${SEVERITY[c.severity] || c.severity}</span>
+          ${esc(c.code)}</span><b>${c.n}</b></div>`).join('')}
+    </div></div>
+    <div class="panel"><h3>الملاحظات (${d.length})</h3><div class="table">
+      ${d.map(f => `<div class="row"><h4>${esc(f.subject)}</h4>
+        <p>${esc(f.detail)}</p><div class="meta">
+        <span class="badge sev-${f.severity}">${SEVERITY[f.severity] || f.severity}</span>
+        <span class="badge">${esc(f.code)}</span></div></div>`).join('')}
+    </div></div>`;
+}
+
+const STATUSES = ['MODEL-SYNTHESIS', 'KNOWN', 'KNOWN-IN-EQUIVALENT-FORM',
+  'CANDIDATE-GAP', 'PROVED-HERE', 'OPEN'];
+
+async function claims() {
+  const d = await api('/api/claims');
+  app.innerHTML = `
+    <div class="panel"><h3>إضافة ادعاء</h3><div class="formgrid">
+      ${field('st', 'نص الادعاء', 'input', 'wide')}
+      ${field('dom', 'المجال')}
+      <select id="sl"><option>MODEL_SYNTHESIS</option><option>ENCYCLOPEDIA</option>
+        <option>LITERATURE</option></select>
+      <select id="cs">${STATUSES.map(s => `<option>${s}</option>`).join('')}</select>
+      ${field('nov', 'حالة الجدة')}
+      ${field('ev', 'الدليل — اذكر معرّف ANT عند الإسناد إلى الموسوعة', 'textarea', 'wide')}
+      <button id="add" class="action wide">إضافة</button>
+    </div><p class="muted">لا تُقبل حالة KNOWN دون إسناد إلى نتيجة معتمدة أو مرجع خارجي.</p>
+    <p id="cerr" class="err"></p></div>
+    <div class="panel"><div class="table">${d.map(x => row(x, `
+      <p>${esc(x.statement)}</p><p class="muted">${esc(x.evidence_note)}</p>
+      <div class="inline-form">
+        <select data-claim="${esc(x.claim_key)}" class="cstat">
+          ${STATUSES.map(s => `<option${s === x.status ? ' selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <button class="action small csave" data-claim="${esc(x.claim_key)}">حفظ الحالة</button>
+      </div>`)).join('') || '<p class="muted">لا ادعاءات.</p>'}</div></div>`;
+
+  $('add').onclick = async () => {
+    $('cerr').textContent = '';
+    try {
+      await api('/api/claims', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          statement: $('st').value, domain: $('dom').value, source_layer: $('sl').value,
+          status: $('cs').value, novelty_note: $('nov').value,
+          evidence_note: $('ev').value,
+        }),
+      });
+      render();
+    } catch (e) { $('cerr').textContent = e.message; }
+  };
+  document.querySelectorAll('.csave').forEach(b => b.onclick = async () => {
+    const id = b.dataset.claim;
+    const sel = document.querySelector(`.cstat[data-claim="${CSS.escape(id)}"]`);
+    try {
+      await api(`/api/claims/${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: sel.value }),
+      });
+      render();
+    } catch (e) { alert(e.message); }
+  });
+}
+
+const GATE_STATUSES = ['OPEN', 'REVIEW-IN-PROGRESS', 'CLOSED-COVERED', 'CLOSED-GAP'];
+
+async function gates() {
+  const d = await api('/api/gates');
+  app.innerHTML = `
+    <div class="panel"><h3>فتح بوابة جديدة</h3><div class="formgrid">
+      ${field('gt', 'عنوان البوابة')}${field('gq', 'السؤال البحثي')}
+      ${field('gk', 'الكلمات المفتاحية', 'input', 'wide')}
+      ${field('gs', 'النطاق', 'textarea', 'wide')}
+      <button id="ga" class="action wide">فتح البوابة</button>
+    </div><p id="gerr" class="err"></p></div>
+    <div class="panel"><div class="table">${d.map(x => row(x, `
+      <p>${esc(x.research_question)}</p>
+      <p><b>النطاق:</b> ${esc(x.scope)}</p><p><b>الحكم:</b> ${esc(x.verdict)}</p>
+      <div class="inline-form">
+        <select class="gstat" data-gate="${esc(x.gate_key)}">
+          ${GATE_STATUSES.map(s => `<option${s === x.status ? ' selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <input class="gverd" data-gate="${esc(x.gate_key)}" value="${esc(x.verdict)}" placeholder="الحكم">
+        <button class="action small gsave" data-gate="${esc(x.gate_key)}">حفظ</button>
+      </div>`)).join('')}</div></div>`;
+
+  $('ga').onclick = async () => {
+    $('gerr').textContent = '';
+    try {
+      await api('/api/gates', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: $('gt').value, research_question: $('gq').value,
+          keywords: $('gk').value, scope: $('gs').value }),
+      });
+      render();
+    } catch (e) { $('gerr').textContent = e.message; }
+  };
+  document.querySelectorAll('.gsave').forEach(b => b.onclick = async () => {
+    const id = b.dataset.gate, sel = q => document.querySelector(`${q}[data-gate="${CSS.escape(id)}"]`);
+    try {
+      await api(`/api/gates/${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: sel('.gstat').value, verdict: sel('.gverd').value }),
+      });
+      render();
+    } catch (e) { alert(e.message); }
+  });
+}
+
+async function refs() {
+  const bib = await api('/api/encyclopedia/bibliography');
+  const cited = bib.filter(x => x.cited).length;
+  app.innerHTML = `
+    <div class="panel"><h3>ببليوغرافيا الموسوعة (${bib.length})</h3>
+      <p class="muted">${cited} مستشهد به، و${bib.length - cited} يظهر عبر
+      <code>\\nocite{*}</code> فقط. سجل مراجع المرصد المستقل — بحالة قراءة
+      وربط بالبوابات — لم يُنقل بعد.</p>
+      <div class="table">
+      ${bib.map(x => row({ title: x.entry_key, layer: 'LITERATURE' },
+        `<p>${esc(x.author)} (${esc(x.year)}). ${esc(x.title)}. ${esc(x.journal)}</p>
+         <div class="meta"><span class="badge">${esc(x.bib_file)}</span>
+         <span class="badge ${x.cited ? 'ok' : 'no'}">${x.cited ? 'مستشهد به' : 'غير مستشهد'}</span>
+         ${x.aliases ? `<span class="badge">مرادفات: ${esc(x.aliases)}</span>` : ''}
+         ${x.doi ? `<span class="badge">${esc(x.doi)}</span>` : ''}</div>`)).join('')}
+      </div></div>`;
+}
+
+async function reader() {
+  const chs = await api('/api/encyclopedia/chapters');
+  app.innerHTML = `
+    <div class="panel"><div class="searchbar">
+      <select id="ch">${chs.map(c =>
+        `<option value="${c.id}">الفصل ${c.number ?? '—'} — ${esc(c.title)}</option>`).join('')}</select>
+      <select id="sec"></select>
+      <button id="load" class="action">عرض</button>
+    </div></div>
+    <div class="panel"><div id="page" class="reader">اختر فصلًا.</div></div>`;
+  let units = [];
+  const loadCh = async () => {
+    units = await api('/api/encyclopedia/units?chapter_id=' + $('ch').value);
+    $('sec').innerHTML = units.map((u, i) =>
+      `<option value="${i}">${esc(u.heading || 'قسم ' + u.ordinal)}</option>`).join('');
+    show();
+  };
+  const show = () => {
+    const u = units[$('sec').value | 0];
+    const page = $('page');
+    if (!u) { page.textContent = 'لا نص.'; return; }
+    let blocks = null;
+    try { blocks = JSON.parse(u.blocks_json || 'null'); } catch (e) { /* نص خام */ }
+    page.innerHTML = blocks
+      ? `<h4 class="sec-head">${esc(u.heading || '')}</h4>${blocksHtml(blocks)}`
+      : `<pre>${esc(u.text)}</pre>`;
+    page.scrollTop = 0;
+    typeset(page);
+  };
+  $('ch').onchange = loadCh;
+  $('sec').onchange = show;
+  $('load').onclick = show;
+  if (chs.length) loadCh(); else $('page').textContent = 'لم تُستورد الموسوعة بعد.';
+}
+
+// -------------------------------------------------------------------- التوجيه
+
+const VIEWS = { dashboard, search: searchView, results, model, integrity,
+                claims, gates, refs, reader };
+
+async function render() {
+  viewTitle.textContent = TITLES[current];
+  document.querySelectorAll('nav button')
+    .forEach(b => b.classList.toggle('active', b.dataset.view === current));
+  try {
+    await VIEWS[current]();
+    typeset(app);   // نصوص النتائج ومقتطفات البحث تحمل رياضيات سطرية أيضًا
+  } catch (e) {
+    app.innerHTML = `<div class="panel"><p class="err">${esc(e.message)}</p></div>`;
+  }
+}
+
+document.querySelectorAll('nav button')
+  .forEach(b => b.onclick = () => { current = b.dataset.view; render(); });
+$('refresh').onclick = render;
+$('ingest').onclick = async () => {
+  const btn = $('ingest');
+  btn.disabled = true; btn.textContent = 'جارٍ الاستيراد…';
+  try {
+    const r = await api('/api/encyclopedia/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repository_root: ENCYCLOPEDIA_ROOT }) });
+    alert(`تم: ${r.chapter_count} فصلًا، ${r.unit_count} وحدة، ${r.result_count} نتيجة، ${r.finding_count} ملاحظة.`);
+    render();
+  } catch (e) { alert(e.message); }
+  finally { btn.disabled = false; btn.textContent = 'إعادة الاستيراد'; }
+};
+render();

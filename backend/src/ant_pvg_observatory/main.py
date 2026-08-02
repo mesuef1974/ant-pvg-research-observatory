@@ -1,9 +1,12 @@
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlalchemy import select
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .config import settings
@@ -22,6 +25,7 @@ from .models import (
     EncyclopediaUnit,
     ExtractionStatus,
     IntegrityFinding,
+    LiteratureGate,
     ModelSynthesisNote,
     SourceFile,
     SourceLayer,
@@ -32,10 +36,14 @@ from .schemas import (
     ClaimCreate,
     ClaimUpdate,
     ClaimView,
+    DashboardView,
     DocumentPageView,
     DocumentView,
     EncyclopediaImportRequest,
     EncyclopediaImportSummaryView,
+    GateCreate,
+    GateUpdate,
+    GateView,
     IntegrityFindingView,
     LocalDocumentImport,
     ModelSynthesisNoteView,
@@ -61,7 +69,10 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="0.3.0-dev", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="0.4.0-dev", lifespan=lifespan)
+
+#: جذر الملفات الساكنة. الواجهة تُقدَّم من الخادم نفسه، فلا حاجة إلى ثانٍ.
+STATIC_ROOT = Path(__file__).resolve().parents[3] / "static"
 
 
 @app.get("/api/health", tags=["system"])
@@ -408,3 +419,135 @@ def update_claim(
     session.commit()
     session.refresh(claim)
     return claim
+
+
+@app.get("/api/dashboard", response_model=DashboardView, tags=["system"])
+def dashboard(session: SessionDependency) -> DashboardView:
+    """ملخّص واحد للوحة القيادة بدل عشرة طلبات منفصلة."""
+    def count(model) -> int:
+        return session.scalar(select(func.count()).select_from(model)) or 0
+
+    severity_rows = session.execute(
+        select(IntegrityFinding.severity, func.count())
+        .group_by(IntegrityFinding.severity)
+    ).all()
+    status_rows = session.execute(
+        select(
+            func.coalesce(
+                EncyclopediaResult.registry_status,
+                EncyclopediaResult.tex_status,
+                "غير محدد",
+            ).label("status"),
+            func.count(),
+        )
+        .group_by("status")
+        .order_by(func.count().desc())
+    ).all()
+    order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
+    top = sorted(
+        session.scalars(
+            select(IntegrityFinding)
+            .where(IntegrityFinding.severity.in_(["CRITICAL", "HIGH"]))
+            .limit(20)
+        ),
+        key=lambda f: order.get(f.severity, 9),
+    )[:8]
+    revision = session.scalar(select(EncyclopediaChapter.revision).limit(1))
+
+    return DashboardView(
+        counts={
+            "chapters": count(EncyclopediaChapter),
+            "units": count(EncyclopediaUnit),
+            "results": count(EncyclopediaResult),
+            "citable": session.scalar(
+                select(func.count())
+                .select_from(EncyclopediaResult)
+                .where(EncyclopediaResult.citable.is_(True))
+            )
+            or 0,
+            "bib": count(BibliographyEntry),
+            "model_notes": count(ModelSynthesisNote),
+            "coverage_gaps": session.scalar(
+                select(func.count())
+                .select_from(ModelSynthesisNote)
+                .where(ModelSynthesisNote.is_gap.is_(True))
+            )
+            or 0,
+            "claims": count(Claim),
+            "gates": count(LiteratureGate),
+            "findings": count(IntegrityFinding),
+        },
+        severity={row[0]: row[1] for row in severity_rows},
+        revision=revision,
+        by_status=[{"s": row[0], "n": row[1]} for row in status_rows],
+        top_findings=[IntegrityFindingView.model_validate(f) for f in top],
+        recent_claims=[
+            ClaimView.model_validate(c)
+            for c in session.scalars(select(Claim).order_by(Claim.id.desc()).limit(6))
+        ],
+        gates=[
+            GateView.model_validate(g)
+            for g in session.scalars(
+                select(LiteratureGate).order_by(LiteratureGate.id.desc()).limit(6)
+            )
+        ],
+    )
+
+
+@app.get("/api/gates", response_model=list[GateView], tags=["governance"])
+def list_gates(session: SessionDependency) -> list[LiteratureGate]:
+    return list(
+        session.scalars(select(LiteratureGate).order_by(LiteratureGate.id.desc()))
+    )
+
+
+@app.post(
+    "/api/gates", response_model=GateView, status_code=201, tags=["governance"]
+)
+def create_gate(payload: GateCreate, session: SessionDependency) -> LiteratureGate:
+    gate = LiteratureGate(
+        gate_key=payload.gate_key or f"GATE-{datetime.now(UTC):%Y%m%d-%H%M%S}",
+        title=payload.title,
+        research_question=payload.research_question,
+        status=payload.status,
+        verdict=payload.verdict,
+    )
+    session.add(gate)
+    session.commit()
+    session.refresh(gate)
+    return gate
+
+
+@app.patch("/api/gates/{gate_key}", response_model=GateView, tags=["governance"])
+def update_gate(
+    gate_key: str, payload: GateUpdate, session: SessionDependency
+) -> LiteratureGate:
+    gate = session.scalars(
+        select(LiteratureGate).where(LiteratureGate.gate_key == gate_key)
+    ).one_or_none()
+    if gate is None:
+        raise HTTPException(status_code=404, detail="البوابة غير موجودة")
+    changes = payload.model_dump(exclude_unset=True)
+    if not changes:
+        raise HTTPException(status_code=400, detail="لا حقول قابلة للتعديل في الطلب")
+    for field, value in changes.items():
+        setattr(gate, field, value)
+    session.commit()
+    session.refresh(gate)
+    return gate
+
+
+if STATIC_ROOT.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
+
+    @app.get("/", include_in_schema=False)
+    def index() -> FileResponse:
+        return FileResponse(STATIC_ROOT / "index.html")
+
+    @app.get("/{asset:path}", include_in_schema=False)
+    def static_asset(asset: str) -> FileResponse:
+        """يقدّم أصول الواجهة. المسارات خارج مجلد الملفات الساكنة مرفوضة."""
+        candidate = (STATIC_ROOT / asset).resolve()
+        if not candidate.is_relative_to(STATIC_ROOT) or not candidate.is_file():
+            raise HTTPException(status_code=404, detail="غير موجود")
+        return FileResponse(candidate)

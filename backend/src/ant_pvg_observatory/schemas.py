@@ -244,3 +244,41 @@ class ClaimView(BaseModel):
     novelty_note: str | None
 
     model_config = {"from_attributes": True}
+
+
+class GateCreate(BaseModel):
+    gate_key: str | None = None
+    title: str = Field(min_length=1, max_length=500)
+    research_question: str = Field(min_length=1)
+    status: str = "OPEN"
+    verdict: str | None = None
+
+
+class GateUpdate(BaseModel):
+    title: str | None = None
+    research_question: str | None = None
+    status: str | None = None
+    verdict: str | None = None
+
+
+class GateView(BaseModel):
+    id: int
+    gate_key: str
+    title: str
+    research_question: str
+    status: str
+    verdict: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class DashboardView(BaseModel):
+    """ملخّص الحالة. ``severity`` عدد ملاحظات التكامل بحسب الخطورة."""
+
+    counts: dict[str, int]
+    severity: dict[str, int]
+    revision: str | None
+    by_status: list[dict[str, object]]
+    top_findings: list[IntegrityFindingView]
+    recent_claims: list[ClaimView]
+    gates: list[GateView]
