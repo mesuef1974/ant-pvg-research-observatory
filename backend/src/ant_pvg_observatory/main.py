@@ -9,15 +9,19 @@ from .config import settings
 from .db import ensure_schema, get_session
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
-from .models import Document, ExtractionStatus, SourceLayer
+from .models import Document, ExtractionStatus, SourceFile, SourceLayer
 from .schemas import (
     DocumentPageView,
     DocumentView,
     LocalDocumentImport,
     PageIndexSummary,
     PageSearchResponseView,
+    SourceCorpusImportRequest,
+    SourceCorpusImportSummaryView,
+    SourceFileView,
 )
 from .search import search_pages
+from .source_corpus import import_encyclopedia_source, list_source_files
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 
@@ -131,3 +135,29 @@ def search_document_pages(
             offset=offset,
         )
     )
+
+
+@app.post(
+    "/api/source-corpus/import-encyclopedia",
+    response_model=SourceCorpusImportSummaryView,
+    tags=["source-corpus"],
+)
+def import_source_corpus(
+    payload: SourceCorpusImportRequest,
+    session: SessionDependency,
+) -> SourceCorpusImportSummaryView:
+    return SourceCorpusImportSummaryView.model_validate(
+        import_encyclopedia_source(
+            session,
+            repository_root=payload.repository_root,
+        )
+    )
+
+
+@app.get(
+    "/api/source-corpus/files",
+    response_model=list[SourceFileView],
+    tags=["source-corpus"],
+)
+def get_source_files(session: SessionDependency) -> list[SourceFile]:
+    return list_source_files(session)
