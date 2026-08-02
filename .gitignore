@@ -19,3 +19,8 @@ exports/*
 .DS_Store
 .idea/
 .vscode/
+
+# قواعد التشغيل المحلية
+data/*.db
+data/*.db-wal
+data/*.db-shm
