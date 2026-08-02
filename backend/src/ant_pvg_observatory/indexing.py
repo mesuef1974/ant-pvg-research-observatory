@@ -17,7 +17,20 @@ _ARABIC_PRESENTATION_FORM_RANGES = (
     (0xFB50, 0xFDFF),
     (0xFE70, 0xFEFF),
 )
-_MIRRORED_PUNCTUATION = str.maketrans("()[]{}<>«»", ")][}{><»«")
+_MIRRORED_PUNCTUATION = str.maketrans(
+    {
+        "(": ")",
+        ")": "(",
+        "[": "]",
+        "]": "[",
+        "{": "}",
+        "}": "{",
+        "<": ">",
+        ">": "<",
+        "«": "»",
+        "»": "«",
+    }
+)
 
 
 def _contains_arabic_presentation_forms(text: str) -> bool:
