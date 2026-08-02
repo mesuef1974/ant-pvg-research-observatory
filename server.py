@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS sources(
  path TEXT, authority TEXT NOT NULL, status TEXT NOT NULL,
  metadata_json TEXT DEFAULT '{}', created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS meta(
+ key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS chapters(
  id INTEGER PRIMARY KEY, number INTEGER, title TEXT NOT NULL,
  tex_path TEXT NOT NULL, volume TEXT, char_count INTEGER, ingested_at TEXT NOT NULL
@@ -521,6 +524,19 @@ class H(BaseHTTPRequestHandler):
             raise ApiError(f'قيمة غير صحيحة للمعامل {name}')
 
 
+def stale_ingest():
+    """هل تحتاج القاعدة إعادة استيراد؟
+
+    قاعدة بُنيت بنسخة أقدم من المحلل تبقى صالحة بنيويًا لكنها ناقصة المحتوى،
+    فتُعرض في الواجهة فارغة بلا خطأ. البصمة تمنع ذلك: أي تغيير في المحلل يرفع
+    INGEST_VERSION فيُعاد الاستيراد تلقائيًا عند التشغيل التالي.
+    """
+    if not one('SELECT 1 FROM chapters LIMIT 1'):
+        return True
+    row = one("SELECT value FROM meta WHERE key='ingest_version'")
+    return not row or row['value'] != str(ingest.INGEST_VERSION)
+
+
 def main():
     ap = argparse.ArgumentParser(description='ANT-PVG Local Research Observatory')
     ap.add_argument('--port', type=int, default=8765)
@@ -536,7 +552,7 @@ def main():
             DB.with_name(DB.name + suf).unlink(missing_ok=True)
     init_db()
 
-    if args.ingest or args.rebuild or not one('SELECT 1 FROM chapters LIMIT 1'):
+    if args.ingest or args.rebuild or stale_ingest():
         try:
             res = ingest.ingest(DB, args.root)
             with closing(conn()) as c, c:

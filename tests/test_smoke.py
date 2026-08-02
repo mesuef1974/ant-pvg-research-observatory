@@ -86,6 +86,30 @@ try:
             got = e.code
         check(f'{path} → {want}', got == want, got)
 
+    print('\n== سلامة الاستيراد المتكرر ==')
+    import sqlite3
+    db = str(Path(CWD)/'data'/'observatory.db')
+    s, r1 = call('/api/ingest', 'POST', {})
+    s, r2 = call('/api/ingest', 'POST', {})
+    check('الاستيراد متكافئ التنفيذ',
+          (r1.get('units'), r1.get('results'), r1.get('model_notes'))
+          == (r2.get('units'), r2.get('results'), r2.get('model_notes')), (r1, r2))
+    con = sqlite3.connect(db)
+    try:
+        check('القاعدة سليمة بعد استيرادين',
+              con.execute('pragma integrity_check').fetchone()[0] == 'ok')
+        for tbl, fts in (('units', 'units_fts'), ('model_notes', 'model_notes_fts')):
+            n = con.execute(f'select count(*) from {tbl}').fetchone()[0]
+            m = con.execute(f'select count(*) from {fts}').fetchone()[0]
+            check(f'فهرس {fts} مطابق لمحتواه', n == m, (n, m))
+        check('بصمة الاستيراد مسجَّلة',
+              con.execute("select value from meta where key='ingest_version'").fetchone()
+              is not None)
+    finally:
+        con.close()
+    s, d = call('/api/search?q=' + urllib.parse.quote('دالة زيتا'))
+    check('البحث يعمل بعد إعادة الاستيراد', len(d['results']) > 5, len(d['results']))
+
     print('\n== طبقة المعرفة المعيارية ==')
     s, mn = call('/api/model-notes')
     check('الملاحظات محمَّلة', len(mn['notes']) >= 50, len(mn['notes']))

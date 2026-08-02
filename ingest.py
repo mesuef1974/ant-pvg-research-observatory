@@ -29,6 +29,11 @@ def encyclopedia_root():
 def now():
     return datetime.now(timezone.utc).isoformat()
 
+
+# تُرفع عند كل تغيير في المحلل أو في بنية ما يُخزَّن، فيُعاد الاستيراد تلقائيًا
+# على القواعد القديمة بدل عرض بيانات ناقصة بلا خطأ.
+INGEST_VERSION = 3
+
 # ------------------------------------------------------------ تطبيع نص عربي
 
 _DIACRITICS = re.compile(r'[\u064B-\u065F\u0670\u06D6-\u06ED]')
@@ -641,9 +646,15 @@ def ingest(db_path, root=None):
                                            'subject': subj, 'detail': det}))
         ts = now()
         with c:
-            for t in ('units_fts', 'units', 'chapters', 'results', 'bib_entries',
-                      'model_notes_fts', 'model_notes', 'integrity_findings'):
+            # جداول FTS5 هنا ذات محتوى خارجي، ولا يجوز الحذف منها مباشرةً —
+            # يُفسد ذلك الفهرس ويُنتج "database disk image is malformed".
+            # المسار الصحيح: حذف جداول المحتوى وترك المُشغّلات تزامن الفهرس،
+            # ثم إعادة بناء الفهرس صراحةً.
+            for t in ('units', 'chapters', 'results', 'bib_entries',
+                      'model_notes', 'integrity_findings'):
                 c.execute(f'DELETE FROM {t}')
+            for fts in ('units_fts', 'model_notes_fts'):
+                c.execute(f"INSERT INTO {fts}({fts}) VALUES('delete-all')")
             for ch in chapters:
                 cur = c.execute(
                     'INSERT INTO chapters(number,title,tex_path,volume,char_count,ingested_at)'
@@ -702,6 +713,8 @@ def ingest(db_path, root=None):
                     'INSERT INTO integrity_findings(code,severity,subject,detail,checked_at)'
                     ' VALUES(?,?,?,?,?)',
                     (f['code'], f['severity'], f['subject'], f['detail'], ts))
+            c.execute("INSERT OR REPLACE INTO meta(key,value,updated_at)"
+                      " VALUES('ingest_version',?,?)", (str(INGEST_VERSION), ts))
         return {
             'status': 'ingested', 'root': str(root),
             'chapters': len(chapters),
