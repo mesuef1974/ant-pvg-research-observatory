@@ -176,7 +176,6 @@ def import_encyclopedia(
             )
             result_count += 1
 
-    known_keys = parsing.bib_keys(bibliography)
     for key, entry in bibliography.items():
         aliases = entry.get("aliases") or []
         session.add(

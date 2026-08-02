@@ -4,9 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session
-
 from ant_pvg_observatory.db import Base
 from ant_pvg_observatory.encyclopedia import ingestion
 from ant_pvg_observatory.models import (
@@ -17,6 +14,8 @@ from ant_pvg_observatory.models import (
     IntegrityFinding,
     ModelSynthesisNote,
 )
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.orm import Session
 
 
 @pytest.fixture()
