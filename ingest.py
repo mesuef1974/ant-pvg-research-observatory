@@ -381,6 +381,58 @@ def parse_registries(root):
                 ('/'.join(sci) or None, '/'.join(adopt) or None, cols[-1], f.name))
     return out
 
+# -------------------------------------------- طبقة المعرفة المعيارية
+
+MODEL_KINDS = {'definition', 'theorem', 'method', 'heuristic', 'caveat',
+               'context', 'gap'}
+MODEL_DIR = Path(__file__).resolve().parent/'knowledge'/'model_synthesis'
+
+
+def parse_model_notes(directory=None):
+    """يقرأ ملاحظات طبقة MODEL_SYNTHESIS من ملفات Markdown خاضعة لـ Git.
+
+    الصيغة: عنوان ``## MS-XXX-000 — العنوان`` يليه أسطر ``- مفتاح: قيمة``
+    ثم نص الملاحظة. المحتوى في ملفات لا في الكود ليبقى قابلًا للمراجعة
+    والتعديل والتأريخ مثل أي مادة علمية أخرى.
+    """
+    directory = Path(directory or MODEL_DIR)
+    notes = []
+    if not directory.is_dir():
+        return notes
+    for f in sorted(directory.glob('*.md')):
+        text = f.read_text(encoding='utf-8')
+        domain = ''
+        dm = re.match(r'#\s*المجال:\s*(.+)', text)
+        if dm:
+            domain = dm.group(1).strip()
+        parts = re.split(r'^##\s+', text, flags=re.M)[1:]
+        for part in parts:
+            head, _, rest = part.partition('\n')
+            hm = re.match(r'(MS-[A-Z]+-\d+)\s*[—–-]\s*(.+)', head.strip())
+            if not hm:
+                continue
+            meta, body_lines = {}, []
+            for line in rest.splitlines():
+                fm = re.match(r'-\s*([a-z_]+)\s*:\s*(.*)', line)
+                if fm and not body_lines:
+                    meta[fm.group(1)] = fm.group(2).strip()
+                else:
+                    body_lines.append(line)
+            body = '\n'.join(body_lines).strip()
+            anchors = [a for a in re.findall(r'ANT-[A-Z]+-\d+-\d+',
+                                             meta.get('anchors', ''))]
+            notes.append({
+                'note_id': hm.group(1), 'title': hm.group(2).strip(),
+                'kind': meta.get('kind', 'context'),
+                'domain': meta.get('domain', domain),
+                'anchors': anchors,
+                'literature_hint': meta.get('literature', ''),
+                'gap': meta.get('gap', 'no').lower(),
+                'body': body, 'source_file': f.name,
+            })
+    return notes
+
+
 def parse_bib(root):
     entries = {}
     for f in sorted((root/'manuscript').glob('*.bib')):
@@ -452,6 +504,39 @@ def policy_base(status, policy):
     if not status:
         return set()
     return {t.strip() for t in status.split('/') if t.strip() in policy}
+
+
+def check_model_notes(notes, results_by_id, add):
+    """فحوص طبقة المعرفة المعيارية.
+
+    الغرض مزدوج: ضمان أن كل إسناد إلى الموسوعة صحيح، وتحويل الملاحظات غير
+    المسنَدة إلى قائمة فجوات تغطية مرشَّحة بدل تركها معلَّقة.
+    """
+    seen = set()
+    for n in notes:
+        if n['note_id'] in seen:
+            add('MODEL_NOTE_DUPLICATE_ID', 'HIGH', n['note_id'],
+                f"معرّف ملاحظة مكرر في {n['source_file']}.")
+        seen.add(n['note_id'])
+        if n['kind'] not in MODEL_KINDS:
+            add('MODEL_NOTE_KIND_UNKNOWN', 'LOW', n['note_id'],
+                f"نوع الملاحظة {n['kind']} خارج المفردات المعتمدة.")
+        for a in n['anchors']:
+            r = results_by_id.get(a)
+            if not r:
+                add('MODEL_NOTE_ANCHOR_UNKNOWN', 'HIGH', n['note_id'],
+                    f'الملاحظة تُسنِد إلى {a} وهو غير موجود في سجل نتائج الموسوعة.')
+            elif not r['citable']:
+                add('MODEL_NOTE_ANCHOR_NONCITABLE', 'MEDIUM', n['note_id'],
+                    f'الملاحظة تُسنِد إلى {a} وحالته لا تسمح بالاستشهاد؛ '
+                    'الإسناد صالح للتوجيه لا للاعتماد.')
+        if n['gap'] in ('yes', 'partial'):
+            add('MODEL_NOTE_COVERAGE_GAP', 'INFO', n['note_id'],
+                ('فجوة تغطية كاملة: ' if n['gap'] == 'yes' else 'تغطية جزئية: ')
+                + n['title'])
+        elif not n['anchors']:
+            add('MODEL_NOTE_UNANCHORED', 'LOW', n['note_id'],
+                'ملاحظة بلا إسناد إلى الموسوعة وغير موسومة فجوةً؛ تحتاج مراجعة.')
 
 
 def run_checks(chapters, registries, policy, bib, cited, claims):
@@ -540,16 +625,24 @@ def ingest(db_path, root=None):
     policy = parse_policy(root)
     bib = parse_bib(root)
     cited = cite_keys(root)
+    notes = parse_model_notes()
 
     c = sqlite3.connect(db_path)
     c.row_factory = sqlite3.Row
     try:
         claims = [dict(r) for r in c.execute('SELECT * FROM claims')]
         findings = run_checks(chapters, registries, policy, bib, cited, claims)
+        results_by_id = {
+            r['result_id']: {'citable': 1 if registry_citable(registries.get(
+                r['result_id'], [])) else 0}
+            for ch in chapters for r in ch['results'] if r['result_id']}
+        check_model_notes(notes, results_by_id, lambda code, sev, subj, det:
+                          findings.append({'code': code, 'severity': sev,
+                                           'subject': subj, 'detail': det}))
         ts = now()
         with c:
             for t in ('units_fts', 'units', 'chapters', 'results', 'bib_entries',
-                      'integrity_findings'):
+                      'model_notes_fts', 'model_notes', 'integrity_findings'):
                 c.execute(f'DELETE FROM {t}')
             for ch in chapters:
                 cur = c.execute(
@@ -592,6 +685,18 @@ def ingest(db_path, root=None):
                     (e['key'], e['entry_type'], e['title'], e['author'], e['year'],
                      e['journal'], e['doi'], e['url'], e['bib_file'],
                      1 if k in cited else 0))
+            for n in notes:
+                blocks = parse_blocks(n['body'])
+                c.execute(
+                    'INSERT INTO model_notes(note_id,title,kind,domain,anchors,'
+                    'literature_hint,is_gap,body,body_norm,blocks,source_file,updated_at)'
+                    ' VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                    (n['note_id'], n['title'], n['kind'], n['domain'],
+                     '، '.join(n['anchors']), n['literature_hint'],
+                     1 if n['gap'] in ('yes', 'partial') else 0,
+                     blocks_text(blocks),
+                     normalize_ar(n['title'] + '\n' + blocks_text(blocks, math=False)),
+                     json.dumps(blocks, ensure_ascii=False), n['source_file'], ts))
             for f in findings:
                 c.execute(
                     'INSERT INTO integrity_findings(code,severity,subject,detail,checked_at)'
@@ -603,6 +708,8 @@ def ingest(db_path, root=None):
             'units': c.execute('SELECT count(*) FROM units').fetchone()[0],
             'results': c.execute('SELECT count(*) FROM results').fetchone()[0],
             'bib_entries': len(bib),
+            'model_notes': len(notes),
+            'coverage_gaps': sum(1 for n in notes if n['gap'] in ('yes', 'partial')),
             'findings': len(findings),
             'at': ts,
         }

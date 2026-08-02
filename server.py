@@ -47,6 +47,20 @@ CREATE TABLE IF NOT EXISTS bib_entries(
  author TEXT, year TEXT, journal TEXT, doi TEXT, url TEXT, bib_file TEXT,
  cited INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS model_notes(
+ id INTEGER PRIMARY KEY, note_id TEXT UNIQUE NOT NULL, title TEXT NOT NULL,
+ kind TEXT, domain TEXT, anchors TEXT, literature_hint TEXT,
+ is_gap INTEGER NOT NULL DEFAULT 0, body TEXT NOT NULL, body_norm TEXT NOT NULL,
+ blocks TEXT, source_file TEXT, updated_at TEXT NOT NULL
+);
+CREATE VIRTUAL TABLE IF NOT EXISTS model_notes_fts USING fts5(
+ body_norm, content='model_notes', content_rowid='id',
+ tokenize="unicode61 remove_diacritics 2");
+CREATE TRIGGER IF NOT EXISTS mnotes_ai AFTER INSERT ON model_notes BEGIN
+ INSERT INTO model_notes_fts(rowid,body_norm) VALUES(new.id,new.body_norm); END;
+CREATE TRIGGER IF NOT EXISTS mnotes_ad AFTER DELETE ON model_notes BEGIN
+ INSERT INTO model_notes_fts(model_notes_fts,rowid,body_norm)
+ VALUES('delete',old.id,old.body_norm); END;
 CREATE TABLE IF NOT EXISTS integrity_findings(
  id INTEGER PRIMARY KEY, code TEXT NOT NULL, severity TEXT NOT NULL,
  subject TEXT, detail TEXT, checked_at TEXT NOT NULL
@@ -225,6 +239,20 @@ def search(term, layer='ALL', limit=60):
                     'status': r['registry_status'], 'citable': r['citable'],
                     'chapter': r['chapter'],
                     'snippet': (r['title'] + ' — ' if r['title'] else '') + (r['statement'] or '')[:400]})
+    if tokens:
+        try:
+            for r in rows(
+                'SELECT model_notes.note_id,title,kind,domain,anchors,is_gap,body,'
+                ' bm25(model_notes_fts) rank FROM model_notes_fts'
+                ' JOIN model_notes ON model_notes.id=model_notes_fts.rowid'
+                ' WHERE model_notes_fts MATCH ? ORDER BY rank LIMIT 20', (match,)):
+                out.append({'layer': 'MODEL_SYNTHESIS', 'kind': 'model_note',
+                            'title': f"{r['note_id']} — {r['title']}",
+                            'status': r['kind'].upper(), 'citable': 0,
+                            'is_gap': r['is_gap'], 'anchors': r['anchors'],
+                            'snippet': snippet(r['body'], term)})
+        except sqlite3.OperationalError:
+            pass
     for r in rows('SELECT claim_id,statement,status,source_layer,evidence,novelty_status'
                   ' FROM claims WHERE statement LIKE ? OR evidence LIKE ? LIMIT 30',
                   (f'%{term}%', f'%{term}%')):
@@ -395,6 +423,9 @@ class H(BaseHTTPRequestHandler):
                     'results': one('SELECT count(*) n FROM results')['n'],
                     'citable': one('SELECT count(*) n FROM results WHERE citable=1')['n'],
                     'bib': one('SELECT count(*) n FROM bib_entries')['n'],
+                    'model_notes': one('SELECT count(*) n FROM model_notes')['n'],
+                    'coverage_gaps': one('SELECT count(*) n FROM model_notes'
+                                         ' WHERE is_gap=1')['n'],
                     'claims': one('SELECT count(*) n FROM claims')['n'],
                     'gates': one('SELECT count(*) n FROM literature_gates')['n'],
                     'findings': one('SELECT count(*) n FROM integrity_findings')['n'],
@@ -460,6 +491,24 @@ class H(BaseHTTPRequestHandler):
             return send_json(self, rows('SELECT * FROM references_tbl ORDER BY id DESC'))
         if u.path == '/api/bib':
             return send_json(self, rows('SELECT * FROM bib_entries ORDER BY key'))
+        if u.path == '/api/model-notes':
+            where, params = [], []
+            if arg('kind'):
+                where.append('kind=?')
+                params.append(arg('kind'))
+            if arg('gap'):
+                where.append('is_gap=?')
+                params.append(1 if arg('gap') == '1' else 0)
+            sql = 'SELECT * FROM model_notes'
+            if where:
+                sql += ' WHERE ' + ' AND '.join(where)
+            return send_json(self, {
+                'notes': rows(sql + ' ORDER BY source_file, note_id', params),
+                'by_domain': rows('SELECT domain,count(*) n,'
+                                  ' sum(is_gap) gaps FROM model_notes'
+                                  ' GROUP BY domain ORDER BY n DESC'),
+                'by_kind': rows('SELECT kind,count(*) n FROM model_notes'
+                                ' GROUP BY kind ORDER BY n DESC')})
         if u.path == '/api/gates':
             return send_json(self, rows('SELECT * FROM literature_gates ORDER BY id DESC'))
         self.send_error(404)

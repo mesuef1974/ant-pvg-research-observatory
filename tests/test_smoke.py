@@ -86,6 +86,26 @@ try:
             got = e.code
         check(f'{path} → {want}', got == want, got)
 
+    print('\n== طبقة المعرفة المعيارية ==')
+    s, mn = call('/api/model-notes')
+    check('الملاحظات محمَّلة', len(mn['notes']) >= 50, len(mn['notes']))
+    check('فجوات التغطية مرصودة',
+          sum(n['is_gap'] for n in mn['notes']) >= 10,
+          sum(n['is_gap'] for n in mn['notes']))
+    check('لكل ملاحظة كتل مهيكلة', all(n['blocks'] for n in mn['notes']))
+    s, integ = call('/api/integrity?code=MODEL_NOTE_ANCHOR_UNKNOWN')
+    check('كل إسناد إلى الموسوعة صحيح', not integ['findings'],
+          [f['subject'] for f in integ['findings']][:5])
+    s, d = call('/api/search?q=' + urllib.parse.quote('عائق التكافؤ'))
+    ms = [x for x in d['results'] if x['layer'] == 'MODEL_SYNTHESIS']
+    check('الملاحظات تظهر في البحث الموحد', ms, len(d['results']))
+    check('ولا تُعرض قابلةً للاستشهاد', all(not x.get('citable') for x in ms))
+    note_id = mn['notes'][0]['note_id']
+    s, d = call('/api/claims', 'POST',
+                {'statement': 'ادعاء يستند إلى ملاحظة معيارية', 'status': 'KNOWN',
+                 'evidence': f'يستند إلى {note_id}'})
+    check('لا يُقبل ادعاء KNOWN مستندًا إلى ملاحظة معيارية', s == 422, (s, d))
+
     print('\n== ترقيم الفصول ==')
     s, chs = call('/api/chapters')
     check('26 فصلًا لا 31 ملفًا', len(chs) == 26, len(chs))

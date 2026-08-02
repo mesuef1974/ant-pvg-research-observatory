@@ -13,6 +13,15 @@
 .inline-form input{flex:1;min-width:140px}
 .action.small{padding:7px 13px;font-size:13px}
 
+/* طبقة المعرفة المعيارية: تمييز بصري لا لبس فيه عن مادة الموسوعة */
+.warn-panel{border-color:#4b3a6b;background:linear-gradient(180deg,#241a38,#1a1428)}
+.warn-panel p{color:#d7baff;line-height:1.9;margin:6px 0 0}
+.row.note{border-inline-start:3px solid var(--b);background:#12102080}
+.row.note.gap{border-inline-start-color:var(--warn)}
+.note-body p{margin:0 0 10px;line-height:1.95;color:var(--text)}
+.note-body .math-display{margin:10px 0}
+.note-body ul,.note-body ol{padding-inline-start:22px;line-height:1.9}
+
 /* قارئ الموسوعة: فقرات عربية RTL ومعادلات LTR وبيئات مسمّاة */
 .reader{white-space:normal}
 .reader .sec-head{font-size:19px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}

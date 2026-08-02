@@ -3,13 +3,18 @@ const viewTitle = document.querySelector('#viewTitle');
 
 const TITLES = {
   dashboard: 'لوحة القيادة', search: 'البحث الموحد', results: 'نتائج الموسوعة',
-  integrity: 'تكامل الحوكمة', claims: 'سجل الادعاءات', gates: 'بوابات الأدبيات',
-  refs: 'المراجع', reader: 'قارئ الموسوعة',
+  model: 'المعرفة المعيارية', integrity: 'تكامل الحوكمة', claims: 'سجل الادعاءات',
+  gates: 'بوابات الأدبيات', refs: 'المراجع', reader: 'قارئ الموسوعة',
+};
+const NOTE_KINDS = {
+  method: 'طريقة', context: 'سياق', caveat: 'محذور', heuristic: 'حدس',
+  gap: 'فجوة', definition: 'تعريف', theorem: 'مبرهنة',
 };
 const COUNT_LABELS = {
   chapters: 'فصول', units: 'وحدات نصية', results: 'نتائج معرَّفة',
-  citable: 'قابلة للاستشهاد', bib: 'مراجع ببليوغرافية', claims: 'ادعاءات',
-  gates: 'بوابات', findings: 'ملاحظات تكامل',
+  citable: 'قابلة للاستشهاد', bib: 'مراجع ببليوغرافية',
+  model_notes: 'ملاحظات معيارية', coverage_gaps: 'فجوات تغطية',
+  claims: 'ادعاءات', gates: 'بوابات', findings: 'ملاحظات تكامل',
 };
 const SEVERITY = { CRITICAL: 'حرج', HIGH: 'مرتفع', MEDIUM: 'متوسط', LOW: 'منخفض', INFO: 'إخباري' };
 
@@ -176,6 +181,53 @@ async function results() {
   $('rgo').onclick = draw;
   $('rq').onkeydown = e => { if (e.key === 'Enter') draw(); };
   draw();
+}
+
+async function model() {
+  const d = await api('/api/model-notes');
+  const card = n => `<div class="row note${n.is_gap ? ' gap' : ''}">
+    <h4>${esc(n.note_id)} — ${esc(n.title)}</h4>
+    <div class="note-body">${blocksHtml(JSON.parse(n.blocks || '[]'))}</div>
+    <div class="meta">
+      <span class="tag model">MODEL_SYNTHESIS</span>
+      <span class="badge">${esc(NOTE_KINDS[n.kind] || n.kind)}</span>
+      <span class="badge no">لا يُستشهد بها</span>
+      ${n.is_gap ? '<span class="badge sev-HIGH">فجوة تغطية</span>' : ''}
+      ${n.anchors ? `<span class="badge ok">مسنَدة إلى ${esc(n.anchors)}</span>` : ''}
+      ${n.literature_hint ? `<span class="badge">تلميح غير محقق: ${esc(n.literature_hint)}</span>` : ''}
+    </div></div>`;
+
+  app.innerHTML = `
+    <div class="panel warn-panel">
+      <h3>طبقة المعرفة المعيارية</h3>
+      <p>معرفة رياضية مولَّدة، سلطتها <b>UNVERIFIED_UNTIL_SOURCED</b>. تصلح خريطةً
+      تدلّ على الموضع وقائمةَ تحقق قبل البحث وتنبيهًا إلى مزلق. لا تصلح للاستشهاد،
+      ويمنع المرصد آليًا استناد أي ادعاء إليها. وأسماء الأوراق المذكورة تلميحات بحث
+      غير محققة يجب التثبت منها عبر DOI أو الناشر.</p>
+    </div>
+    <div class="panel"><h3>حسب المجال</h3><div class="table">
+      ${d.by_domain.map(x => `<div class="row inline"><span>${esc(x.domain)}</span>
+        <b>${x.n}${x.gaps ? ` <span class="badge sev-HIGH">${x.gaps} فجوة</span>` : ''}</b>
+      </div>`).join('')}
+    </div></div>
+    <div class="panel"><div class="searchbar">
+      <select id="nk"><option value="">كل الأنواع</option>
+        ${d.by_kind.map(k => `<option value="${esc(k.kind)}">${esc(NOTE_KINDS[k.kind] || k.kind)} (${k.n})</option>`).join('')}</select>
+      <select id="ng"><option value="">الكل</option>
+        <option value="1">فجوات التغطية فقط</option>
+        <option value="0">المسنَدة فقط</option></select>
+      <button class="action" id="ngo">ترشيح</button>
+    </div></div>
+    <div class="panel"><div id="nlist" class="table">${d.notes.map(card).join('')}</div></div>`;
+
+  $('ngo').onclick = () => {
+    const k = $('nk').value, g = $('ng').value;
+    const f = d.notes.filter(n =>
+      (!k || n.kind === k) && (g === '' || String(n.is_gap) === g));
+    $('nlist').innerHTML = `<p class="muted">${f.length} من ${d.notes.length}</p>`
+      + f.map(card).join('');
+    typeset($('nlist'));
+  };
 }
 
 async function integrity() {
@@ -366,7 +418,8 @@ async function reader() {
 
 // -------------------------------------------------------------------- التوجيه
 
-const VIEWS = { dashboard, search: searchView, results, integrity, claims, gates, refs, reader };
+const VIEWS = { dashboard, search: searchView, results, model, integrity,
+                claims, gates, refs, reader };
 
 async function render() {
   viewTitle.textContent = TITLES[current];
