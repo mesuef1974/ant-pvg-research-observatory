@@ -15,6 +15,9 @@ data/*.db
 data/*.db-*
 exports/*
 !exports/.gitkeep
+# الطبقة البحثية تُتتبَّع عمدًا: هي المدخلات اليدوية لا مخرجات مُشتقّة،
+# ولا توجد إلا هنا وفي قاعدة بيانات غير متتبَّعة.
+!exports/research-layer.json
 *.pdf
 .DS_Store
 .idea/

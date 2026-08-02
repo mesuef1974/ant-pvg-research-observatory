@@ -13,5 +13,9 @@ class Settings(BaseSettings):
     library_root: Path = Path("./library")
     allow_model_synthesis: bool = True
 
+    # Server networking defaults; can be overridden via ANT_PVG_HOST / ANT_PVG_PORT
+    host: str = "127.0.0.1"
+    port: int = 8000
+
 
 settings = Settings()
