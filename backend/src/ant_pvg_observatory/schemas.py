@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from .models import SourceLayer
+from .models import ExtractionStatus, SourceLayer
 
 
 class LocalDocumentImport(BaseModel):
@@ -23,3 +23,25 @@ class DocumentView(BaseModel):
     import_status: str
 
     model_config = {"from_attributes": True}
+
+
+class DocumentPageView(BaseModel):
+    id: int
+    document_id: int
+    page_number: int
+    text: str
+    char_count: int
+    word_count: int
+    text_sha256: str
+    extraction_status: ExtractionStatus
+    extraction_error: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class PageIndexSummary(BaseModel):
+    document_id: int
+    page_count: int
+    extracted_count: int
+    empty_count: int
+    failed_count: int
