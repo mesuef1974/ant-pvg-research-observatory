@@ -420,3 +420,11 @@ class NeighbourhoodView(BaseModel):
 class DerivedLinksView(BaseModel):
     created: int
     links: list[KnowledgeLinkView]
+
+
+class GateRecordView(BaseModel):
+    """السجل الدائم للبوابة: عبارات البحث وتاريخ القطع والحصيلة وبنود المتابعة."""
+
+    gate_key: str
+    path: str
+    markdown: str

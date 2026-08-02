@@ -53,6 +53,7 @@ from .schemas import (
     EncyclopediaImportSummaryView,
     EvidenceRecordView,
     GateCreate,
+    GateRecordView,
     GateReferenceLink,
     GateReferenceView,
     GateUpdate,
@@ -826,6 +827,32 @@ def derive_links(session: SessionDependency) -> DerivedLinksView:
     return DerivedLinksView(
         created=len(created),
         links=[KnowledgeLinkView.model_validate(link) for link in created],
+    )
+
+
+@app.get(
+    "/api/gates/{gate_key}/record",
+    response_model=GateRecordView,
+    tags=["governance"],
+)
+def gate_record(gate_key: str, session: SessionDependency) -> GateRecordView:
+    """السجل الدائم للبوابة من ``docs/gates/``.
+
+    الحكم في القاعدة خلاصة؛ أما عبارات البحث وتاريخ القطع وبنود المتابعة
+    والحجر الصحي فتعيش في ملف خاضع لـGit. وبلا هذا المسار يبقى ذلك العمل
+    غير مرئي من المنصة أصلًا.
+    """
+    _gate_or_404(session, gate_key)
+    path = graph.gate_record_path(STATIC_ROOT.parent, gate_key)
+    if path is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"لا سجل دائم لهذه البوابة في {graph.GATE_RECORD_DIR}/",
+        )
+    return GateRecordView(
+        gate_key=gate_key,
+        path=f"{graph.GATE_RECORD_DIR}/{gate_key}.md",
+        markdown=path.read_text(encoding="utf-8"),
     )
 
 

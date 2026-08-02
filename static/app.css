@@ -48,3 +48,18 @@
 .row.edge{border-inline-start:3px solid var(--a)}
 .row.edge.dangling{border-inline-start-color:#c05a6a;background:#1d1218}
 .row.edge h4{font-size:14px}
+
+/* السجل الدائم للبوابة داخل بطاقتها */
+.record{margin-top:14px}
+.record:not(:empty){border-top:1px solid var(--line);padding-top:14px}
+.record p{line-height:1.95;margin:0 0 11px}
+.record ul,.record ol{padding-inline-start:24px;line-height:1.95;margin:0 0 11px}
+.record blockquote{margin:0 0 12px;padding:10px 14px;border-inline-start:3px solid var(--warn);
+  background:#241d10;border-radius:8px;color:#ffe0ac}
+.record hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.record a{color:var(--a)}
+.record code{background:#0a1622;padding:2px 6px;border-radius:5px;font-size:13px}
+.tablewrap{overflow-x:auto;margin:0 0 13px}
+.record table{border-collapse:collapse;width:100%;font-size:14px}
+.record th,.record td{border:1px solid var(--line);padding:8px 11px;text-align:right;vertical-align:top}
+.record th{background:#12283c;font-weight:600}

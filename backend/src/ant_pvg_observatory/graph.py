@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -202,3 +203,19 @@ def derive_links_from_claims(session: Session) -> list[KnowledgeLink]:
             created.append(link)
     session.commit()
     return created
+
+
+#: السجلات الدائمة للبوابات: ملفات Markdown خاضعة لـGit بجانب الكود.
+GATE_RECORD_DIR = "docs/gates"
+
+
+def gate_record_path(repo_root, gate_key: str) -> Path | None:
+    """مسار السجل الدائم لبوابة، أو ``None`` إن لم يوجد.
+
+    الاحتواء مفروض: المفتاح يأتي من الطلب، فلا يُركَّب في مسار بلا فحص.
+    """
+    directory = (Path(repo_root).resolve() / GATE_RECORD_DIR).resolve()
+    candidate = (directory / f"{gate_key}.md").resolve()
+    if not candidate.is_relative_to(directory) or not candidate.is_file():
+        return None
+    return candidate

@@ -18,6 +18,77 @@ const COUNT_LABELS = {
   model_notes: 'ملاحظات معيارية', coverage_gaps: 'فجوات تغطية',
   claims: 'ادعاءات', gates: 'بوابات', findings: 'ملاحظات تكامل',
 };
+/** يصيّر Markdown السجلات: عناوين وجداول وقوائم واقتباسات وشيفرة.
+ *  مُصغَّر عمدًا — سجلات البوابات تكتبها أنت بصيغة معروفة، ولا داعي لمكتبة
+ *  كاملة تُضاف إلى أصول تعمل دون اتصال. */
+function renderMarkdown(md) {
+  const inline = t => esc(t)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      (m, txt, href) => /^https?:\/\//.test(href)
+        ? `<a href="${esc(href)}" target="_blank" rel="noopener">${txt}</a>` : txt);
+
+  const out = [];
+  const lines = md.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (/^```/.test(line)) {
+      const buf = [];
+      for (i++; i < lines.length && !/^```/.test(lines[i]); i++) buf.push(lines[i]);
+      i++;
+      out.push(`<pre class="tex-pre">${esc(buf.join('\n'))}</pre>`);
+      continue;
+    }
+    const heading = line.match(/^(#{1,4})\s+(.*)$/);
+    if (heading) {
+      const level = Math.min(heading[1].length + 2, 6);
+      out.push(`<h${level} class="sec-head">${inline(heading[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+    if (/^\s*\|/.test(line) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
+      const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => inline(c.trim()));
+      const head = cells(line);
+      i += 2;
+      const body = [];
+      for (; i < lines.length && /^\s*\|/.test(lines[i]); i++) body.push(cells(lines[i]));
+      out.push(`<div class="tablewrap"><table>
+        <thead><tr>${head.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${body.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>`);
+      continue;
+    }
+    if (/^\s*>/.test(line)) {
+      const buf = [];
+      for (; i < lines.length && /^\s*>/.test(lines[i]); i++) buf.push(lines[i].replace(/^\s*>\s?/, ''));
+      out.push(`<blockquote>${inline(buf.join(' '))}</blockquote>`);
+      continue;
+    }
+    const listMatch = /^\s*([-*]|\d+\.)\s+/;
+    if (listMatch.test(line)) {
+      const ordered = /^\s*\d+\./.test(line);
+      const items = [];
+      for (; i < lines.length && listMatch.test(lines[i]); i++) {
+        items.push(`<li>${inline(lines[i].replace(listMatch, ''))}</li>`);
+      }
+      out.push(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+      continue;
+    }
+    if (/^\s*---+\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
+    if (!line.trim()) { i++; continue; }
+
+    const para = [];
+    for (; i < lines.length && lines[i].trim()
+           && !/^(#{1,4}\s|\s*\||\s*>|```|\s*---+\s*$)/.test(lines[i])
+           && !listMatch.test(lines[i]); i++) para.push(lines[i]);
+    out.push(`<p>${inline(para.join(' '))}</p>`);
+  }
+  return out.join('');
+}
+
 const NODE_TYPES = {
   result: 'نتيجة', claim: 'ادعاء', gate: 'بوابة',
   reference: 'مرجع', model_note: 'ملاحظة معيارية',
@@ -467,6 +538,7 @@ async function gates() {
         <button class="action small glink" data-gate="${esc(x.gate_key)}">ربط مرجع</button>
       </div>
       <div class="inline-form">
+        <button class="action small grecord" data-gate="${esc(x.gate_key)}">السجل الدائم</button>
         <select class="gstat" data-gate="${esc(x.gate_key)}">
           ${GATE_STATUSES.map(v => `<option${v === x.status ? ' selected' : ''}>${v}</option>`).join('')}
         </select>
@@ -476,6 +548,7 @@ async function gates() {
         <button class="action small gsave" data-gate="${esc(x.gate_key)}">حفظ</button>
       </div>
       <p class="err" id="gerr-${i}"></p>
+      <div class="record" id="grec-${esc(x.gate_key)}"></div>
     </div>`).join('')}`;
 
   $('ga').onclick = async () => {
@@ -509,6 +582,25 @@ async function gates() {
       if (!r.ok) throw new Error('تعذّر فك الربط');
       render();
     } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll('.grecord').forEach(b => b.onclick = async () => {
+    const key = b.dataset.gate;
+    const box = document.getElementById(`grec-${key}`);
+    if (box.dataset.open === '1') {
+      box.innerHTML = ''; box.dataset.open = '0';
+      b.textContent = 'السجل الدائم';
+      return;
+    }
+    try {
+      const r = await api(`/api/gates/${encodeURIComponent(key)}/record`);
+      box.innerHTML = `<p class="path">${esc(r.path)}</p>${renderMarkdown(r.markdown)}`;
+      box.dataset.open = '1';
+      b.textContent = 'إخفاء السجل';
+      typeset(box);
+    } catch (e) {
+      box.innerHTML = `<p class="err">${esc(e.message)}</p>`;
+      box.dataset.open = '1';
+    }
   });
   document.querySelectorAll('.gsave').forEach((b, i) => b.onclick = async () => {
     const key = b.dataset.gate;

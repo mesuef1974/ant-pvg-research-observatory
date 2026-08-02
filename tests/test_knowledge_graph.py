@@ -174,3 +174,16 @@ def test_a_mere_mention_is_not_an_act_of_leaning(session: Session) -> None:
     graph.check_links(session, lambda c, s, subj, d: findings.append(c))
 
     assert "LINK_TO_NONCITABLE" not in findings
+
+
+def test_gate_record_path_requires_containment(tmp_path) -> None:
+    """المفتاح يأتي من الطلب، فلا يُركَّب في مسار بلا فحص احتواء."""
+    gates = tmp_path / graph.GATE_RECORD_DIR
+    gates.mkdir(parents=True)
+    (gates / "GATE-0001.md").write_text("# سجل", encoding="utf-8")
+    (tmp_path / "secret.md").write_text("سرّي", encoding="utf-8")
+
+    assert graph.gate_record_path(tmp_path, "GATE-0001") is not None
+    assert graph.gate_record_path(tmp_path, "GATE-MISSING") is None
+    assert graph.gate_record_path(tmp_path, "../secret") is None
+    assert graph.gate_record_path(tmp_path, r"..\secret") is None
