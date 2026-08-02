@@ -3,7 +3,16 @@ from __future__ import annotations
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -29,6 +38,14 @@ class ClaimStatus(StrEnum):
     RETRACTED = "RETRACTED"
 
 
+class ExtractionStatus(StrEnum):
+    PENDING = "PENDING"
+    EXTRACTED = "EXTRACTED"
+    EMPTY = "EMPTY"
+    PARTIAL = "PARTIAL"
+    FAILED = "FAILED"
+
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -44,6 +61,46 @@ class Document(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     claims: Mapped[list[Claim]] = relationship(back_populates="document")
+    pages: Mapped[list[DocumentPage]] = relationship(
+        back_populates="document",
+        cascade="all, delete-orphan",
+        order_by="DocumentPage.page_number",
+    )
+
+
+class DocumentPage(Base):
+    __tablename__ = "document_pages"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "page_number",
+            name="uq_document_pages_document_page",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"),
+        index=True,
+    )
+    page_number: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text, default="")
+    char_count: Mapped[int] = mapped_column(Integer, default=0)
+    word_count: Mapped[int] = mapped_column(Integer, default=0)
+    text_sha256: Mapped[str] = mapped_column(String(64), index=True)
+    extraction_status: Mapped[ExtractionStatus] = mapped_column(
+        Enum(ExtractionStatus),
+        index=True,
+    )
+    extraction_error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    document: Mapped[Document] = relationship(back_populates="pages")
 
 
 class Claim(Base):
@@ -59,7 +116,9 @@ class Claim(Base):
     document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now()
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     document: Mapped[Document | None] = relationship(back_populates="claims")
