@@ -12,7 +12,10 @@ All notable changes are recorded here. The project is pre-release and follows se
 - Page text hashes, character counts, word counts, statuses, and error recording.
 - Idempotent full-document re-indexing.
 - Page indexing and page listing API endpoints.
-- Regression tests for re-indexing and legacy documents without registered paths.
+- Paginated page-text search with document and source-layer filters.
+- Context snippets for Arabic, Latin, and mathematical-symbol queries.
+- Regression tests for re-indexing, pre-existing page tables, legacy documents,
+  Arabic search, filters, and pagination.
 
 ### Governance
 
@@ -20,6 +23,8 @@ All notable changes are recorded here. The project is pre-release and follows se
 - Extraction failures are stored explicitly rather than silently discarded.
 - Registered paths remain constrained to the local library root.
 - Page indexing preserves document identity and source-layer classification.
+- Text search returns literal page evidence; it does not infer claims, relevance,
+  novelty, or semantic equivalence.
 
 ## [0.2.0-dev] — 2026-08-02
 
