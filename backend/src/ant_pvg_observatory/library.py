@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import HTTPException, status
@@ -67,6 +68,7 @@ def import_local_pdf(session: Session, payload: LocalDocumentImport) -> Document
         file_size_bytes=path.stat().st_size,
         media_type="application/pdf",
         import_status="IMPORTED",
+        created_at=datetime.now(UTC),
     )
     session.add(document)
     session.commit()
