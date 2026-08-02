@@ -116,6 +116,91 @@ REFERENCES = [
         "relation": GateRelation.PARTIAL,
         "coverage_note": "الأصل النظري للتخصيص عند الأوليات.",
     },
+    {
+        "reference_key": "Weising2025HigherOrderBell",
+        "title": "Higher Order Bell Symmetric Functions",
+        "authors": "Milo Bechtloff Weising",
+        "year": "2025",
+        "venue": "arXiv:2505.18504 — نسخة أولية، لا مرجع دورية",
+        "doi": "10.48550/arXiv.2505.18504",
+        "url": "https://arxiv.org/abs/2505.18504",
+        "reading_status": ReadingStatus.DISCOVERED,
+        "notes": (
+            "أخطر ورقة على ادعاء الجِدّة في CLAIM-0003: أبراج أسّية plethystic "
+            "متكرّرة، وعلاقات تكرار صريحة لمعاملات الفكّ في الأساس الأحادي، "
+            "وسلوك تقاربي توبيري. أولوية القراءة الأولى."
+        ),
+        "relation": GateRelation.PARTIAL,
+        "coverage_note": (
+            "يغطي بنية البرج ومعاملات الفكّ وعلاقات التكرار، ولا يُخصّص عند "
+            "x_p = p^{-s} ولا يمسّ Selberg–Delange."
+        ),
+    },
+    {
+        "reference_key": "Filmus2016SliceOrthogonalBasis",
+        "title": "An Orthogonal Basis for Functions over a Slice of the Boolean Hypercube",
+        "authors": "Yuval Filmus",
+        "year": "2016",
+        "venue": "Electronic Journal of Combinatorics 23(1) #P23 — محكَّم",
+        "url": "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v23i1p23",
+        "reading_status": ReadingStatus.DISCOVERED,
+        "notes": (
+            "الموضع الطبيعي لـCLAIM-0002: أساس متعامد للشريحة مبني على تمثيل "
+            "Young المتعامد، ومتجهات ذاتية لبيانَي Johnson وKneser."
+        ),
+        "relation": GateRelation.COVERS,
+        "coverage_note": (
+            "يغطي طرف التحليل التوافقي على الشرائح تغطيةً مباشرة بأساس محكَّم."
+        ),
+    },
+    {
+        "reference_key": "Elliott2008RingStructures",
+        "title": "Ring structures on groups of arithmetic functions",
+        "authors": "Jesse Elliott",
+        "year": "2008",
+        "venue": "Journal of Number Theory — محكَّم",
+        "reading_status": ReadingStatus.DISCOVERED,
+        "notes": (
+            "بنية حلقية على الدوال الضربية عبر متجهات Witt: الجمع التفاف "
+            "ديريشلي والضرب نقطي على تامّة الضربية. مسار بديل محتمل لا يمرّ "
+            "بالدوال المتناظرة أصلًا."
+        ),
+        "relation": GateRelation.ADJACENT,
+        "coverage_note": "بنية جبرية موحدة على الدوال الحسابية، بلا أبراج معاملات.",
+    },
+    {
+        "reference_key": "Gross1998SatakeIsomorphism",
+        "title": "On the Satake isomorphism",
+        "authors": "Benedict H. Gross",
+        "year": "1998",
+        "venue": "Galois Representations in Arithmetic Algebraic Geometry — عرض تفسيري مرجعي",
+        "reading_status": ReadingStatus.DISCOVERED,
+        "notes": (
+            "الجذر النظري: تماثل جبر Hecke الكروي بحلقة تمثيلات الزمرة الثنوية، "
+            "وتحويله إلى عوامل L محلية."
+        ),
+        "relation": GateRelation.PARTIAL,
+        "coverage_note": "الأصل الذي تنبع منه علاقة الأساس المتناظر بالعوامل المحلية.",
+    },
+    {
+        "reference_key": "QUARANTINE-2604-14596-PrimeZeroDuality",
+        "title": (
+            "Prime–Zero Duality: Fractal Geometry, Renormalization-Group Flow, "
+            "and an Information-Ontological Framework for Number Theory"
+        ),
+        "authors": "غير محقق",
+        "year": "2026",
+        "venue": "arXiv:2604.14596 — نسخة أولية",
+        "url": "https://arxiv.org/abs/2604.14596",
+        "reading_status": ReadingStatus.DISCOVERED,
+        "notes": (
+            "محجور: لا يُستشهد به ولا يُبنى عليه. إطار «معلوماتي-أنطولوجي»، "
+            "واستقرار عددي مزعوم بتغيّر 17% على مدى L≤2000 يُقدَّم دليلًا، "
+            "ولا مرجع دورية. أُدرج هنا لتوثيق تضارب التسمية لا للاعتماد."
+        ),
+        "relation": GateRelation.NOT_RELEVANT,
+        "coverage_note": "تضارب تسمية مع مصطلحات مسار PVG. حجر صحي.",
+    },
 ]
 
 
