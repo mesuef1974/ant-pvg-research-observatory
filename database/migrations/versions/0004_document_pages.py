@@ -9,6 +9,7 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy import inspect
 
 revision: str = "0004_document_pages"
 down_revision: str | Sequence[str] | None = "0003_canonicalize_document_metadata"
@@ -16,7 +17,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
-def upgrade() -> None:
+def _create_table() -> None:
     op.create_table(
         "document_pages",
         sa.Column("id", sa.Integer(), primary_key=True),
@@ -51,28 +52,42 @@ def upgrade() -> None:
             name="uq_document_pages_document_page",
         ),
     )
-    op.create_index(
-        "ix_document_pages_document_id",
-        "document_pages",
-        ["document_id"],
+
+
+def _create_missing_indexes() -> None:
+    inspector = inspect(op.get_bind())
+    indexes = {index["name"] for index in inspector.get_indexes("document_pages")}
+    specifications = (
+        ("ix_document_pages_document_id", ["document_id"]),
+        ("ix_document_pages_text_sha256", ["text_sha256"]),
+        ("ix_document_pages_extraction_status", ["extraction_status"]),
     )
-    op.create_index(
-        "ix_document_pages_text_sha256",
-        "document_pages",
-        ["text_sha256"],
-    )
-    op.create_index(
-        "ix_document_pages_extraction_status",
-        "document_pages",
-        ["extraction_status"],
-    )
+    for name, columns in specifications:
+        if name not in indexes:
+            op.create_index(name, "document_pages", columns)
+
+
+def upgrade() -> None:
+    tables = set(inspect(op.get_bind()).get_table_names())
+    if "document_pages" not in tables:
+        _create_table()
+    _create_missing_indexes()
 
 
 def downgrade() -> None:
-    op.drop_index(
+    tables = set(inspect(op.get_bind()).get_table_names())
+    if "document_pages" not in tables:
+        return
+
+    indexes = {
+        index["name"]
+        for index in inspect(op.get_bind()).get_indexes("document_pages")
+    }
+    for name in (
         "ix_document_pages_extraction_status",
-        table_name="document_pages",
-    )
-    op.drop_index("ix_document_pages_text_sha256", table_name="document_pages")
-    op.drop_index("ix_document_pages_document_id", table_name="document_pages")
+        "ix_document_pages_text_sha256",
+        "ix_document_pages_document_id",
+    ):
+        if name in indexes:
+            op.drop_index(name, table_name="document_pages")
     op.drop_table("document_pages")
