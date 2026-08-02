@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from .models import ExtractionStatus, SourceLayer
+from .models import ClaimStatus, ExtractionStatus, SourceLayer
 
 
 class LocalDocumentImport(BaseModel):
@@ -213,5 +213,34 @@ class UnifiedSearchResponseView(BaseModel):
     query: str
     total: int
     results: list[UnifiedSearchResultView]
+
+    model_config = {"from_attributes": True}
+
+
+class ClaimCreate(BaseModel):
+    claim_key: str | None = None
+    statement: str = Field(min_length=1)
+    source_layer: SourceLayer = SourceLayer.MODEL_SYNTHESIS
+    status: ClaimStatus = ClaimStatus.MODEL_SYNTHESIS
+    evidence_note: str | None = None
+    novelty_note: str | None = None
+
+
+class ClaimUpdate(BaseModel):
+    statement: str | None = Field(default=None, min_length=1)
+    source_layer: SourceLayer | None = None
+    status: ClaimStatus | None = None
+    evidence_note: str | None = None
+    novelty_note: str | None = None
+
+
+class ClaimView(BaseModel):
+    id: int
+    claim_key: str
+    statement: str
+    source_layer: SourceLayer
+    status: ClaimStatus
+    evidence_note: str | None
+    novelty_note: str | None
 
     model_config = {"from_attributes": True}

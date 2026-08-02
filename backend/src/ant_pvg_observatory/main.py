@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,10 +10,12 @@ from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
 from .encyclopedia.search import search_corpus
+from .governance import enforce_citation_policy
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
 from .models import (
     BibliographyEntry,
+    Claim,
     Document,
     EncyclopediaChapter,
     EncyclopediaResult,
@@ -26,6 +29,9 @@ from .models import (
 from .schemas import (
     BibliographyEntryView,
     ChapterView,
+    ClaimCreate,
+    ClaimUpdate,
+    ClaimView,
     DocumentPageView,
     DocumentView,
     EncyclopediaImportRequest,
@@ -323,3 +329,82 @@ def search_unified(
     return UnifiedSearchResponseView.model_validate(
         search_corpus(session, query=q, source_layer=source_layer, limit=limit)
     )
+
+
+@app.get("/api/claims", response_model=list[ClaimView], tags=["governance"])
+def list_claims(session: SessionDependency) -> list[Claim]:
+    return list(session.scalars(select(Claim).order_by(Claim.id.desc())))
+
+
+@app.post(
+    "/api/claims",
+    response_model=ClaimView,
+    status_code=201,
+    tags=["governance"],
+)
+def create_claim(payload: ClaimCreate, session: SessionDependency) -> Claim:
+    """ينشئ ادعاءً بعد إنفاذ قاعدة الاعتماد الخارجي."""
+    enforce_citation_policy(
+        session,
+        statement=payload.statement,
+        claim_status=payload.status,
+        source_layer=payload.source_layer,
+        evidence_note=payload.evidence_note,
+        novelty_note=payload.novelty_note,
+    )
+    claim = Claim(
+        claim_key=payload.claim_key
+        or f"CLAIM-{datetime.now(UTC):%Y%m%d-%H%M%S-%f}",
+        statement=payload.statement,
+        source_layer=payload.source_layer,
+        status=payload.status,
+        evidence_note=payload.evidence_note,
+        novelty_note=payload.novelty_note,
+    )
+    session.add(claim)
+    session.commit()
+    session.refresh(claim)
+    return claim
+
+
+@app.patch(
+    "/api/claims/{claim_key}",
+    response_model=ClaimView,
+    tags=["governance"],
+)
+def update_claim(
+    claim_key: str,
+    payload: ClaimUpdate,
+    session: SessionDependency,
+) -> Claim:
+    """يحدّث ادعاءً. الحالة الناتجة تُفحص كاملةً لا الحقول المتغيرة وحدها."""
+    claim = session.scalars(
+        select(Claim).where(Claim.claim_key == claim_key)
+    ).one_or_none()
+    if claim is None:
+        raise HTTPException(status_code=404, detail="الادعاء غير موجود")
+
+    changes = payload.model_dump(exclude_unset=True)
+    if not changes:
+        raise HTTPException(status_code=400, detail="لا حقول قابلة للتعديل في الطلب")
+
+    merged = {
+        "statement": changes.get("statement", claim.statement),
+        "source_layer": changes.get("source_layer", claim.source_layer),
+        "status": changes.get("status", claim.status),
+        "evidence_note": changes.get("evidence_note", claim.evidence_note),
+        "novelty_note": changes.get("novelty_note", claim.novelty_note),
+    }
+    enforce_citation_policy(
+        session,
+        statement=merged["statement"],
+        claim_status=merged["status"],
+        source_layer=merged["source_layer"],
+        evidence_note=merged["evidence_note"],
+        novelty_note=merged["novelty_note"],
+    )
+    for field, value in merged.items():
+        setattr(claim, field, value)
+    session.commit()
+    session.refresh(claim)
+    return claim
