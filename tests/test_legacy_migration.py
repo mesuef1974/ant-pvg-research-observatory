@@ -6,6 +6,9 @@ import subprocess
 from pathlib import Path
 
 
+LATEST_REVISION = "0005_structured_source_corpus"
+
+
 def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
     database_path = tmp_path / "legacy.db"
     with sqlite3.connect(database_path) as connection:
@@ -76,9 +79,11 @@ def test_alembic_removes_legacy_source_model(tmp_path: Path) -> None:
 
     assert "sources" not in tables
     assert "document_pages" in tables
+    assert "source_files" in tables
+    assert "source_sections" in tables
     assert "source_id" not in columns
     assert "file_name" not in columns
     assert "source_layer" in columns
     assert defaults["created_at"] == "CURRENT_TIMESTAMP"
     assert row == (1, "Legacy volume", 292, "2026-08-01T23:32:54+00:00")
-    assert revision == ("0004_document_pages",)
+    assert revision == (LATEST_REVISION,)
