@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
@@ -13,7 +14,7 @@ from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
 from .encyclopedia.search import search_corpus
-from .governance import enforce_citation_policy
+from .governance import enforce_citation_policy, enforce_gate_closure
 from .indexing import index_document_pages, list_document_pages
 from .library import import_local_pdf
 from .models import (
@@ -24,9 +25,14 @@ from .models import (
     EncyclopediaResult,
     EncyclopediaUnit,
     ExtractionStatus,
+    GateReference,
+    GateVerdict,
     IntegrityFinding,
+    KnowledgeLink,
     LiteratureGate,
     ModelSynthesisNote,
+    ObservatoryReference,
+    ReadingStatus,
     SourceFile,
     SourceLayer,
 )
@@ -42,13 +48,20 @@ from .schemas import (
     EncyclopediaImportRequest,
     EncyclopediaImportSummaryView,
     GateCreate,
+    GateReferenceLink,
+    GateReferenceView,
     GateUpdate,
     GateView,
     IntegrityFindingView,
+    KnowledgeLinkCreate,
+    KnowledgeLinkView,
     LocalDocumentImport,
     ModelSynthesisNoteView,
     PageIndexSummary,
     PageSearchResponseView,
+    ReferenceCreate,
+    ReferenceUpdate,
+    ReferenceView,
     ResultView,
     SourceCorpusImportRequest,
     SourceCorpusImportSummaryView,
@@ -58,6 +71,16 @@ from .schemas import (
 )
 from .search import search_pages
 from .source_corpus import import_encyclopedia_source, list_source_files
+
+
+def _mint_key(prefix: str) -> str:
+    """مفتاح مقروء ومتفرّد.
+
+    الطابع الزمني وحده لا يكفي: دقة الساعة على Windows قد تبلغ أجزاء من
+    الألف من الثانية، فإنشاءان متتاليان يتصادمان على قيد التفرّد.
+    """
+    return f"{prefix}-{datetime.now(UTC):%Y%m%d-%H%M%S}-{uuid4().hex[:6]}"
+
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 
@@ -364,8 +387,7 @@ def create_claim(payload: ClaimCreate, session: SessionDependency) -> Claim:
         novelty_note=payload.novelty_note,
     )
     claim = Claim(
-        claim_key=payload.claim_key
-        or f"CLAIM-{datetime.now(UTC):%Y%m%d-%H%M%S-%f}",
+        claim_key=payload.claim_key or _mint_key("CLAIM"),
         statement=payload.statement,
         source_layer=payload.source_layer,
         status=payload.status,
@@ -506,7 +528,7 @@ def list_gates(session: SessionDependency) -> list[LiteratureGate]:
 )
 def create_gate(payload: GateCreate, session: SessionDependency) -> LiteratureGate:
     gate = LiteratureGate(
-        gate_key=payload.gate_key or f"GATE-{datetime.now(UTC):%Y%m%d-%H%M%S}",
+        gate_key=payload.gate_key or _mint_key("GATE"),
         title=payload.title,
         research_question=payload.research_question,
         status=payload.status,
@@ -530,11 +552,210 @@ def update_gate(
     changes = payload.model_dump(exclude_unset=True)
     if not changes:
         raise HTTPException(status_code=400, detail="لا حقول قابلة للتعديل في الطلب")
+    merged_status = changes.get("status", gate.status)
+    merged_verdict = changes.get("verdict", gate.verdict)
+    enforce_gate_closure(
+        session,
+        gate=gate,
+        status=merged_status,
+        verdict=GateVerdict(merged_verdict) if merged_verdict else None,
+    )
     for field, value in changes.items():
         setattr(gate, field, value)
     session.commit()
     session.refresh(gate)
     return gate
+
+
+# ---------------------------------------------------------- سجل مراجع المرصد
+
+
+def _reference_or_404(session: Session, reference_key: str) -> ObservatoryReference:
+    reference = session.scalars(
+        select(ObservatoryReference).where(
+            ObservatoryReference.reference_key == reference_key
+        )
+    ).one_or_none()
+    if reference is None:
+        raise HTTPException(status_code=404, detail="المرجع غير موجود")
+    return reference
+
+
+def _gate_or_404(session: Session, gate_key: str) -> LiteratureGate:
+    gate = session.scalars(
+        select(LiteratureGate).where(LiteratureGate.gate_key == gate_key)
+    ).one_or_none()
+    if gate is None:
+        raise HTTPException(status_code=404, detail="البوابة غير موجودة")
+    return gate
+
+
+@app.get("/api/references", response_model=list[ReferenceView], tags=["literature"])
+def list_references(
+    session: SessionDependency,
+    reading_status: ReadingStatus | None = None,
+) -> list[ObservatoryReference]:
+    statement = select(ObservatoryReference).order_by(ObservatoryReference.id.desc())
+    if reading_status is not None:
+        statement = statement.where(
+            ObservatoryReference.reading_status == reading_status
+        )
+    return list(session.scalars(statement))
+
+
+@app.post(
+    "/api/references",
+    response_model=ReferenceView,
+    status_code=201,
+    tags=["literature"],
+)
+def create_reference(
+    payload: ReferenceCreate, session: SessionDependency
+) -> ObservatoryReference:
+    reference = ObservatoryReference(
+        reference_key=payload.reference_key or _mint_key("REF"),
+        **payload.model_dump(exclude={"reference_key"}),
+    )
+    session.add(reference)
+    session.commit()
+    session.refresh(reference)
+    return reference
+
+
+@app.patch(
+    "/api/references/{reference_key}",
+    response_model=ReferenceView,
+    tags=["literature"],
+)
+def update_reference(
+    reference_key: str, payload: ReferenceUpdate, session: SessionDependency
+) -> ObservatoryReference:
+    reference = _reference_or_404(session, reference_key)
+    changes = payload.model_dump(exclude_unset=True)
+    if not changes:
+        raise HTTPException(status_code=400, detail="لا حقول قابلة للتعديل في الطلب")
+    for field, value in changes.items():
+        setattr(reference, field, value)
+    session.commit()
+    session.refresh(reference)
+    return reference
+
+
+# ------------------------------------------------- ربط المراجع بالبوابات
+
+
+@app.get(
+    "/api/gates/{gate_key}/references",
+    response_model=list[GateReferenceView],
+    tags=["governance"],
+)
+def list_gate_references(
+    gate_key: str, session: SessionDependency
+) -> list[GateReferenceView]:
+    gate = _gate_or_404(session, gate_key)
+    links = session.scalars(
+        select(GateReference).where(GateReference.gate_id == gate.id)
+    ).all()
+    return [
+        GateReferenceView(
+            reference_key=link.reference.reference_key,
+            title=link.reference.title,
+            reading_status=link.reference.reading_status,
+            relation=link.relation,
+            coverage_note=link.coverage_note,
+        )
+        for link in links
+    ]
+
+
+@app.post(
+    "/api/gates/{gate_key}/references",
+    response_model=GateReferenceView,
+    status_code=201,
+    tags=["governance"],
+)
+def link_gate_reference(
+    gate_key: str, payload: GateReferenceLink, session: SessionDependency
+) -> GateReferenceView:
+    """يربط مرجعًا ببوابة. الربط هو ما يحوّل البوابة من سؤال إلى مراجعة."""
+    gate = _gate_or_404(session, gate_key)
+    reference = _reference_or_404(session, payload.reference_key)
+
+    link = session.get(GateReference, (gate.id, reference.id))
+    if link is None:
+        link = GateReference(gate_id=gate.id, reference_id=reference.id)
+        session.add(link)
+    link.relation = payload.relation
+    link.coverage_note = payload.coverage_note
+    session.commit()
+    return GateReferenceView(
+        reference_key=reference.reference_key,
+        title=reference.title,
+        reading_status=reference.reading_status,
+        relation=link.relation,
+        coverage_note=link.coverage_note,
+    )
+
+
+@app.delete(
+    "/api/gates/{gate_key}/references/{reference_key}",
+    status_code=204,
+    tags=["governance"],
+)
+def unlink_gate_reference(
+    gate_key: str, reference_key: str, session: SessionDependency
+) -> None:
+    gate = _gate_or_404(session, gate_key)
+    reference = _reference_or_404(session, reference_key)
+    link = session.get(GateReference, (gate.id, reference.id))
+    if link is None:
+        raise HTTPException(status_code=404, detail="الربط غير موجود")
+    session.delete(link)
+    session.commit()
+
+
+# ------------------------------------------------------------- شبكة الروابط
+
+
+@app.get("/api/links", response_model=list[KnowledgeLinkView], tags=["governance"])
+def list_links(
+    session: SessionDependency,
+    from_key: str | None = None,
+    to_key: str | None = None,
+) -> list[KnowledgeLink]:
+    statement = select(KnowledgeLink).order_by(KnowledgeLink.id.desc())
+    if from_key is not None:
+        statement = statement.where(KnowledgeLink.from_key == from_key)
+    if to_key is not None:
+        statement = statement.where(KnowledgeLink.to_key == to_key)
+    return list(session.scalars(statement))
+
+
+@app.post(
+    "/api/links",
+    response_model=KnowledgeLinkView,
+    status_code=201,
+    tags=["governance"],
+)
+def create_link(
+    payload: KnowledgeLinkCreate, session: SessionDependency
+) -> KnowledgeLink:
+    existing = session.scalars(
+        select(KnowledgeLink).where(
+            KnowledgeLink.from_type == payload.from_type,
+            KnowledgeLink.from_key == payload.from_key,
+            KnowledgeLink.relation == payload.relation,
+            KnowledgeLink.to_type == payload.to_type,
+            KnowledgeLink.to_key == payload.to_key,
+        )
+    ).one_or_none()
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="الرابط موجود سلفًا")
+    link = KnowledgeLink(**payload.model_dump())
+    session.add(link)
+    session.commit()
+    session.refresh(link)
+    return link
 
 
 if STATIC_ROOT.is_dir():

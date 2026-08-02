@@ -296,3 +296,113 @@ class IntegrityFinding(Base):
     subject: Mapped[str | None] = mapped_column(String(300), index=True)
     detail: Mapped[str] = mapped_column(Text)
     checked_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class ReadingStatus(StrEnum):
+    """حالة قراءة المرجع. الاكتشاف ليس قراءة، والقراءة ليست تحققًا."""
+
+    DISCOVERED = "DISCOVERED"
+    ABSTRACT_READ = "ABSTRACT-READ"
+    FULLY_READ = "FULLY-READ"
+    VERIFIED = "VERIFIED"
+
+
+class GateRelation(StrEnum):
+    """علاقة المرجع بسؤال البوابة."""
+
+    COVERS = "COVERS"
+    PARTIAL = "PARTIAL"
+    ADJACENT = "ADJACENT"
+    CONTRADICTS = "CONTRADICTS"
+    NOT_RELEVANT = "NOT-RELEVANT"
+
+
+class GateVerdict(StrEnum):
+    """حكم البوابة على سؤالها."""
+
+    NOT_ASSESSED = "NOT-ASSESSED"
+    KNOWN = "KNOWN"
+    EQUIVALENT = "EQUIVALENT"
+    PARTIAL = "PARTIAL"
+    NOT_FOUND_YET = "NOT-FOUND-YET"
+
+
+class ObservatoryReference(Base):
+    """مرجع في سجل المرصد، مستقل عن ببليوغرافيا الموسوعة.
+
+    ``bibliography_key`` وصلة اختيارية إلى مدخل في الموسوعة حين يكون المرجع
+    نفسه مستشهدًا به هناك، فلا يُكرَّر التوثيق.
+    """
+
+    __tablename__ = "observatory_references"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reference_key: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    title: Mapped[str] = mapped_column(Text)
+    authors: Mapped[str | None] = mapped_column(Text)
+    year: Mapped[str | None] = mapped_column(String(20), index=True)
+    venue: Mapped[str | None] = mapped_column(Text)
+    doi: Mapped[str | None] = mapped_column(String(300), index=True)
+    url: Mapped[str | None] = mapped_column(String(2000))
+    reading_status: Mapped[ReadingStatus] = mapped_column(
+        Enum(ReadingStatus), default=ReadingStatus.DISCOVERED, index=True
+    )
+    notes: Mapped[str | None] = mapped_column(Text)
+    bibliography_key: Mapped[str | None] = mapped_column(String(200), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+
+    gate_links: Mapped[list[GateReference]] = relationship(
+        back_populates="reference", cascade="all, delete-orphan"
+    )
+
+
+class GateReference(Base):
+    """ربط مرجع ببوابة أدبيات، بعلاقة صريحة ومدى تغطية.
+
+    هذا الجدول هو موضع القيمة في البوابة: البوابة بلا مراجع مربوطة سؤال بلا
+    مسح، وحكمها حينئذ رأي لا نتيجة مراجعة.
+    """
+
+    __tablename__ = "gate_references"
+
+    gate_id: Mapped[int] = mapped_column(
+        ForeignKey("literature_gates.id", ondelete="CASCADE"), primary_key=True
+    )
+    reference_id: Mapped[int] = mapped_column(
+        ForeignKey("observatory_references.id", ondelete="CASCADE"), primary_key=True
+    )
+    relation: Mapped[GateRelation] = mapped_column(Enum(GateRelation), index=True)
+    coverage_note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    gate: Mapped[LiteratureGate] = relationship()
+    reference: Mapped[ObservatoryReference] = relationship(back_populates="gate_links")
+
+
+class KnowledgeLink(Base):
+    """رابط صريح بين كائنين في المرصد.
+
+    الطرفان يُعرَّفان بنوعٍ ومفتاحٍ نصي لا بمفتاح أجنبي، لأن الأنواع متغايرة
+    (نتيجة، ادعاء، بوابة، مرجع، ملاحظة معيارية) ولأن الرابط قد يسبق وجود
+    الطرف الآخر في القاعدة.
+    """
+
+    __tablename__ = "knowledge_links"
+    __table_args__ = (
+        UniqueConstraint(
+            "from_type", "from_key", "relation", "to_type", "to_key",
+            name="uq_knowledge_link",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    from_type: Mapped[str] = mapped_column(String(40), index=True)
+    from_key: Mapped[str] = mapped_column(String(200), index=True)
+    relation: Mapped[str] = mapped_column(String(60), index=True)
+    to_type: Mapped[str] = mapped_column(String(40), index=True)
+    to_key: Mapped[str] = mapped_column(String(200), index=True)
+    note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

@@ -17,6 +17,10 @@ const COUNT_LABELS = {
   model_notes: 'ملاحظات معيارية', coverage_gaps: 'فجوات تغطية',
   claims: 'ادعاءات', gates: 'بوابات', findings: 'ملاحظات تكامل',
 };
+const READING = ['DISCOVERED', 'ABSTRACT-READ', 'FULLY-READ', 'VERIFIED'];
+const RELATIONS = ['COVERS', 'PARTIAL', 'ADJACENT', 'CONTRADICTS', 'NOT-RELEVANT'];
+// حالات القراءة التي تكفي لإسناد حكم بوابة؛ يطابقها الخادم في governance.py
+const READ_ENOUGH = ['FULLY-READ', 'VERIFIED'];
 const SEVERITY = { CRITICAL: 'حرج', HIGH: 'مرتفع', MEDIUM: 'متوسط', LOW: 'منخفض', INFO: 'إخباري' };
 
 let current = 'dashboard';
@@ -26,8 +30,15 @@ const esc = s => (s ?? '').toString().replace(/[&<>"']/g,
 
 async function api(url, opt) {
   const r = await fetch(url, opt);
-  const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
-  if (!r.ok) throw new Error(j.error || r.status);
+  const j = await r.json().catch(() => null);
+  if (!r.ok) {
+    // FastAPI يضع سبب الرفض في detail، وهو نص القاعدة التي مُنعت المخالفة بها.
+    const detail = j && (j.detail ?? j.error);
+    throw new Error(
+      typeof detail === 'string' ? detail
+        : Array.isArray(detail) ? detail.map(d => d.msg || JSON.stringify(d)).join('؛ ')
+        : `HTTP ${r.status}`);
+  }
   return j;
 }
 
@@ -303,66 +314,179 @@ async function claims() {
 }
 
 const GATE_STATUSES = ['OPEN', 'REVIEW-IN-PROGRESS', 'CLOSED-COVERED', 'CLOSED-GAP'];
+const VERDICTS = ['NOT-ASSESSED', 'KNOWN', 'EQUIVALENT', 'PARTIAL', 'NOT-FOUND-YET'];
 
 async function gates() {
-  const d = await api('/api/gates');
+  const [d, refsList] = await Promise.all([
+    api('/api/gates'), api('/api/references')]);
+  const linked = await Promise.all(
+    d.map(g => api(`/api/gates/${encodeURIComponent(g.gate_key)}/references`)));
+
   app.innerHTML = `
     <div class="panel"><h3>فتح بوابة جديدة</h3><div class="formgrid">
       ${field('gt', 'عنوان البوابة')}${field('gq', 'السؤال البحثي')}
-      ${field('gk', 'الكلمات المفتاحية', 'input', 'wide')}
-      ${field('gs', 'النطاق', 'textarea', 'wide')}
       <button id="ga" class="action wide">فتح البوابة</button>
-    </div><p id="gerr" class="err"></p></div>
-    <div class="panel"><div class="table">${d.map(x => row(x, `
+    </div><p class="muted">البوابة بلا مراجع مربوطة سؤال بلا مسح: لا تُغلق بحكم
+    <code>KNOWN</code> إلا بمرجع مربوط بعلاقة <code>COVERS</code> وحالته مقروءة.</p>
+    <p id="gerr" class="err"></p></div>
+
+    ${d.map((x, i) => `<div class="panel"><h3>${esc(x.title)}</h3>
       <p>${esc(x.research_question)}</p>
-      <p><b>النطاق:</b> ${esc(x.scope)}</p><p><b>الحكم:</b> ${esc(x.verdict)}</p>
+      <div class="meta"><span class="badge">${esc(x.gate_key)}</span>
+        <span class="badge">${esc(x.status)}</span>
+        <span class="badge">${esc(x.verdict || 'NOT-ASSESSED')}</span>
+        <span class="badge ${linked[i].length ? 'ok' : 'no'}">${linked[i].length} مرجعًا مربوطًا</span>
+      </div>
+      <div class="table" style="margin-top:10px">
+        ${linked[i].map(l => `<div class="row inline">
+          <span>${esc(l.title)}
+            <span class="badge">${esc(l.relation)}</span>
+            <span class="badge ${READ_ENOUGH.includes(l.reading_status) ? 'ok' : 'no'}">${esc(l.reading_status)}</span>
+          </span>
+          <button class="action small gunlink" data-gate="${esc(x.gate_key)}"
+            data-ref="${esc(l.reference_key)}">فك الربط</button>
+        </div>`).join('') || '<p class="muted">لا مراجع مربوطة.</p>'}
+      </div>
+      <div class="inline-form">
+        <select class="glink-ref" data-gate="${esc(x.gate_key)}">
+          ${refsList.map(r => `<option value="${esc(r.reference_key)}">${esc(r.title)}</option>`).join('')
+            || '<option value="">لا مراجع في السجل</option>'}
+        </select>
+        <select class="glink-rel" data-gate="${esc(x.gate_key)}">
+          ${RELATIONS.map(v => `<option>${v}</option>`).join('')}
+        </select>
+        <button class="action small glink" data-gate="${esc(x.gate_key)}">ربط مرجع</button>
+      </div>
       <div class="inline-form">
         <select class="gstat" data-gate="${esc(x.gate_key)}">
-          ${GATE_STATUSES.map(s => `<option${s === x.status ? ' selected' : ''}>${s}</option>`).join('')}
+          ${GATE_STATUSES.map(v => `<option${v === x.status ? ' selected' : ''}>${v}</option>`).join('')}
         </select>
-        <input class="gverd" data-gate="${esc(x.gate_key)}" value="${esc(x.verdict)}" placeholder="الحكم">
+        <select class="gverd" data-gate="${esc(x.gate_key)}">
+          ${VERDICTS.map(v => `<option${v === x.verdict ? ' selected' : ''}>${v}</option>`).join('')}
+        </select>
         <button class="action small gsave" data-gate="${esc(x.gate_key)}">حفظ</button>
-      </div>`)).join('')}</div></div>`;
+      </div>
+      <p class="err" id="gerr-${i}"></p>
+    </div>`).join('')}`;
 
   $('ga').onclick = async () => {
     $('gerr').textContent = '';
     try {
       await api('/api/gates', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: $('gt').value, research_question: $('gq').value,
-          keywords: $('gk').value, scope: $('gs').value }),
+        body: JSON.stringify({ title: $('gt').value, research_question: $('gq').value }),
       });
       render();
     } catch (e) { $('gerr').textContent = e.message; }
   };
-  document.querySelectorAll('.gsave').forEach(b => b.onclick = async () => {
-    const id = b.dataset.gate, sel = q => document.querySelector(`${q}[data-gate="${CSS.escape(id)}"]`);
+  const pick = (cls, key) => document.querySelector(`${cls}[data-gate="${CSS.escape(key)}"]`);
+  document.querySelectorAll('.glink').forEach(b => b.onclick = async () => {
+    const key = b.dataset.gate;
+    const ref = pick('.glink-ref', key).value;
+    if (!ref) return alert('أضف مرجعًا إلى السجل أولًا.');
     try {
-      await api(`/api/gates/${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: sel('.gstat').value, verdict: sel('.gverd').value }),
+      await api(`/api/gates/${encodeURIComponent(key)}/references`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference_key: ref, relation: pick('.glink-rel', key).value }),
       });
       render();
     } catch (e) { alert(e.message); }
   });
+  document.querySelectorAll('.gunlink').forEach(b => b.onclick = async () => {
+    try {
+      const r = await fetch(
+        `/api/gates/${encodeURIComponent(b.dataset.gate)}/references/${encodeURIComponent(b.dataset.ref)}`,
+        { method: 'DELETE' });
+      if (!r.ok) throw new Error('تعذّر فك الربط');
+      render();
+    } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll('.gsave').forEach((b, i) => b.onclick = async () => {
+    const key = b.dataset.gate;
+    const box = $(`gerr-${i}`);
+    if (box) box.textContent = '';
+    try {
+      await api(`/api/gates/${encodeURIComponent(key)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: pick('.gstat', key).value, verdict: pick('.gverd', key).value }),
+      });
+      render();
+    } catch (e) { if (box) box.textContent = e.message; else alert(e.message); }
+  });
 }
 
 async function refs() {
-  const bib = await api('/api/encyclopedia/bibliography');
+  const [own, bib] = await Promise.all([
+    api('/api/references'), api('/api/encyclopedia/bibliography')]);
   const cited = bib.filter(x => x.cited).length;
   app.innerHTML = `
+    <div class="panel"><h3>إضافة مرجع إلى سجل المرصد</h3><div class="formgrid">
+      ${field('rt', 'العنوان', 'input', 'wide')}${field('ra', 'المؤلفون')}
+      ${field('ry', 'السنة')}${field('rv', 'الدورية/الناشر')}
+      ${field('rd', 'DOI')}${field('ru', 'الرابط')}
+      <select id="rr">${READING.map(x => `<option>${x}</option>`).join('')}</select>
+      ${field('rb', 'مفتاح ببليوغرافيا الموسوعة (اختياري)')}
+      ${field('rn', 'الملاحظات', 'textarea', 'wide')}
+      <button id="radd" class="action wide">إضافة</button>
+    </div><p id="rerr" class="err"></p></div>
+
+    <div class="panel"><h3>سجل المرصد (${own.length})</h3><div class="table">
+      ${own.map(x => `<div class="row">
+        <h4>${esc(x.title)}</h4>
+        <p>${esc(x.authors || '')} (${esc(x.year || '')}) — ${esc(x.venue || '')}</p>
+        ${x.notes ? `<p class="muted">${esc(x.notes)}</p>` : ''}
+        <div class="meta">
+          <span class="tag lit">${esc(x.reference_key)}</span>
+          <span class="badge ${READ_ENOUGH.includes(x.reading_status) ? 'ok' : 'no'}">${esc(x.reading_status)}</span>
+          ${x.doi ? `<span class="badge">${esc(x.doi)}</span>` : ''}
+          ${x.bibliography_key ? `<span class="badge">في الموسوعة: ${esc(x.bibliography_key)}</span>` : ''}
+        </div>
+        <div class="inline-form">
+          <select class="rstat" data-ref="${esc(x.reference_key)}">
+            ${READING.map(v => `<option${v === x.reading_status ? ' selected' : ''}>${v}</option>`).join('')}
+          </select>
+          <button class="action small rsave" data-ref="${esc(x.reference_key)}">حفظ حالة القراءة</button>
+        </div></div>`).join('') || '<p class="muted">لا مراجع بعد.</p>'}
+    </div></div>
+
     <div class="panel"><h3>ببليوغرافيا الموسوعة (${bib.length})</h3>
       <p class="muted">${cited} مستشهد به، و${bib.length - cited} يظهر عبر
-      <code>\\nocite{*}</code> فقط. سجل مراجع المرصد المستقل — بحالة قراءة
-      وربط بالبوابات — لم يُنقل بعد.</p>
+      <code>\nocite{*}</code> فقط.</p>
       <div class="table">
       ${bib.map(x => row({ title: x.entry_key, layer: 'LITERATURE' },
         `<p>${esc(x.author)} (${esc(x.year)}). ${esc(x.title)}. ${esc(x.journal)}</p>
          <div class="meta"><span class="badge">${esc(x.bib_file)}</span>
          <span class="badge ${x.cited ? 'ok' : 'no'}">${x.cited ? 'مستشهد به' : 'غير مستشهد'}</span>
-         ${x.aliases ? `<span class="badge">مرادفات: ${esc(x.aliases)}</span>` : ''}
-         ${x.doi ? `<span class="badge">${esc(x.doi)}</span>` : ''}</div>`)).join('')}
+         ${x.aliases ? `<span class="badge">مرادفات: ${esc(x.aliases)}</span>` : ''}</div>`)).join('')}
       </div></div>`;
+
+  $('radd').onclick = async () => {
+    $('rerr').textContent = '';
+    try {
+      await api('/api/references', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: $('rt').value, authors: $('ra').value, year: $('ry').value,
+          venue: $('rv').value, doi: $('rd').value, url: $('ru').value,
+          reading_status: $('rr').value, notes: $('rn').value,
+          bibliography_key: $('rb').value || null,
+        }),
+      });
+      render();
+    } catch (e) { $('rerr').textContent = e.message; }
+  };
+  document.querySelectorAll('.rsave').forEach(b => b.onclick = async () => {
+    const key = b.dataset.ref;
+    const sel = document.querySelector(`.rstat[data-ref="${CSS.escape(key)}"]`);
+    try {
+      await api(`/api/references/${encodeURIComponent(key)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reading_status: sel.value }),
+      });
+      render();
+    } catch (e) { alert(e.message); }
+  });
 }
 
 async function reader() {

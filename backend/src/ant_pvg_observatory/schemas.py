@@ -2,7 +2,14 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from .models import ClaimStatus, ExtractionStatus, SourceLayer
+from .models import (
+    ClaimStatus,
+    ExtractionStatus,
+    GateRelation,
+    GateVerdict,
+    ReadingStatus,
+    SourceLayer,
+)
 
 
 class LocalDocumentImport(BaseModel):
@@ -251,14 +258,14 @@ class GateCreate(BaseModel):
     title: str = Field(min_length=1, max_length=500)
     research_question: str = Field(min_length=1)
     status: str = "OPEN"
-    verdict: str | None = None
+    verdict: GateVerdict = GateVerdict.NOT_ASSESSED
 
 
 class GateUpdate(BaseModel):
     title: str | None = None
     research_question: str | None = None
     status: str | None = None
-    verdict: str | None = None
+    verdict: GateVerdict | None = None
 
 
 class GateView(BaseModel):
@@ -268,6 +275,7 @@ class GateView(BaseModel):
     research_question: str
     status: str
     verdict: str | None
+    reference_count: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -282,3 +290,81 @@ class DashboardView(BaseModel):
     top_findings: list[IntegrityFindingView]
     recent_claims: list[ClaimView]
     gates: list[GateView]
+
+
+class ReferenceCreate(BaseModel):
+    reference_key: str | None = None
+    title: str = Field(min_length=1)
+    authors: str | None = None
+    year: str | None = None
+    venue: str | None = None
+    doi: str | None = None
+    url: str | None = None
+    reading_status: ReadingStatus = ReadingStatus.DISCOVERED
+    notes: str | None = None
+    bibliography_key: str | None = None
+
+
+class ReferenceUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1)
+    authors: str | None = None
+    year: str | None = None
+    venue: str | None = None
+    doi: str | None = None
+    url: str | None = None
+    reading_status: ReadingStatus | None = None
+    notes: str | None = None
+    bibliography_key: str | None = None
+
+
+class ReferenceView(BaseModel):
+    id: int
+    reference_key: str
+    title: str
+    authors: str | None
+    year: str | None
+    venue: str | None
+    doi: str | None
+    url: str | None
+    reading_status: ReadingStatus
+    notes: str | None
+    bibliography_key: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class GateReferenceLink(BaseModel):
+    reference_key: str
+    relation: GateRelation
+    coverage_note: str | None = None
+
+
+class GateReferenceView(BaseModel):
+    reference_key: str
+    title: str
+    reading_status: ReadingStatus
+    relation: GateRelation
+    coverage_note: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class KnowledgeLinkCreate(BaseModel):
+    from_type: str = Field(min_length=1, max_length=40)
+    from_key: str = Field(min_length=1, max_length=200)
+    relation: str = Field(min_length=1, max_length=60)
+    to_type: str = Field(min_length=1, max_length=40)
+    to_key: str = Field(min_length=1, max_length=200)
+    note: str | None = None
+
+
+class KnowledgeLinkView(BaseModel):
+    id: int
+    from_type: str
+    from_key: str
+    relation: str
+    to_type: str
+    to_key: str
+    note: str | None
+
+    model_config = {"from_attributes": True}

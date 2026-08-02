@@ -16,7 +16,17 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .models import ClaimStatus, EncyclopediaResult, ModelSynthesisNote, SourceLayer
+from .models import (
+    ClaimStatus,
+    EncyclopediaResult,
+    GateReference,
+    GateRelation,
+    GateVerdict,
+    LiteratureGate,
+    ModelSynthesisNote,
+    ReadingStatus,
+    SourceLayer,
+)
 
 _RESULT_KEY = re.compile(r"ANT-[A-Z]+-\d+-\d+")
 _NOTE_KEY = re.compile(r"MS-[A-Z]+-\d+")
@@ -96,4 +106,60 @@ def enforce_citation_policy(
         _fail(
             "لا تنتقل معلومة من طبقة MODEL_SYNTHESIS إلى حالة موثقة إلا بتغيير "
             "طبقتها إلى مصدر موثق أولًا."
+        )
+
+
+#: أحكام تعني أن المسألة موجودة في الأدبيات، فتستوجب مرجعًا مقروءًا يغطيها.
+COVERAGE_VERDICTS = frozenset({GateVerdict.KNOWN, GateVerdict.EQUIVALENT})
+
+#: حالات القراءة التي تكفي لإسناد حكم بوابة. الاكتشاف وقراءة المستخلص لا تكفيان.
+READ_ENOUGH = frozenset({ReadingStatus.FULLY_READ, ReadingStatus.VERIFIED})
+
+_CLOSED_PREFIX = "CLOSED"
+
+
+def enforce_gate_closure(
+    session: Session,
+    *,
+    gate: LiteratureGate,
+    status: str,
+    verdict: GateVerdict | None,
+) -> None:
+    """يمنع إغلاق بوابة بحكم لا تسنده مراجع مقروءة.
+
+    البوابة عملية مراجعة لا رأي. وحكم ``KNOWN`` أو ``EQUIVALENT`` يقول إن
+    المسألة موجودة في الأدبيات، فيلزمه مرجع واحد على الأقل مربوط بعلاقة
+    ``COVERS`` وحالة قراءته ``FULLY-READ`` أو ``VERIFIED``.
+
+    والحكم ``NOT-FOUND-YET`` لا يستوجب ذلك بطبيعته — لكنه أيضًا **ليس جِدّة**:
+    هو واقعة عن مسحنا لا عن العالم.
+    """
+    if not status.upper().startswith(_CLOSED_PREFIX):
+        return
+
+    if verdict in (None, GateVerdict.NOT_ASSESSED):
+        _fail(
+            "لا تُغلق البوابة بحكم غير مُقيَّم. سجّل حكمًا صريحًا: "
+            "KNOWN أو EQUIVALENT أو PARTIAL أو NOT-FOUND-YET."
+        )
+
+    if verdict not in COVERAGE_VERDICTS:
+        return
+
+    supporting = session.scalars(
+        select(GateReference).where(
+            GateReference.gate_id == gate.id,
+            GateReference.relation == GateRelation.COVERS,
+        )
+    ).all()
+    if not supporting:
+        _fail(
+            f"الحكم {verdict.value} يقول إن المسألة موجودة في الأدبيات، "
+            "ولا يوجد مرجع مربوط بالبوابة بعلاقة COVERS."
+        )
+    if not any(link.reference.reading_status in READ_ENOUGH for link in supporting):
+        _fail(
+            f"الحكم {verdict.value} يستوجب مرجعًا مقروءًا. المراجع المربوطة "
+            "بعلاقة COVERS حالتها DISCOVERED أو ABSTRACT-READ، والاطلاع على "
+            "المستخلص لا يكفي لإسناد حكم."
         )
