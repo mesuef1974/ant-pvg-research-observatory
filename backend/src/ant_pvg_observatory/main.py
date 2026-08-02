@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from sqlalchemy import select
@@ -9,6 +10,8 @@ from .db import ensure_schema, get_session
 from .library import import_local_pdf
 from .models import Document
 from .schemas import DocumentView, LocalDocumentImport
+
+SessionDependency = Annotated[Session, Depends(get_session)]
 
 
 @asynccontextmanager
@@ -48,7 +51,7 @@ def source_layers() -> list[dict[str, str]]:
 
 
 @app.get("/api/documents", response_model=list[DocumentView], tags=["library"])
-def list_documents(session: Session = Depends(get_session)) -> list[Document]:
+def list_documents(session: SessionDependency) -> list[Document]:
     return list(session.scalars(select(Document).order_by(Document.id.desc())))
 
 
@@ -60,6 +63,6 @@ def list_documents(session: Session = Depends(get_session)) -> list[Document]:
 )
 def import_document(
     payload: LocalDocumentImport,
-    session: Session = Depends(get_session),
+    session: SessionDependency,
 ) -> Document:
     return import_local_pdf(session, payload)
