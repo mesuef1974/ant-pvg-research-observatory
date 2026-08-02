@@ -103,6 +103,46 @@ class DocumentPage(Base):
     document: Mapped[Document] = relationship(back_populates="pages")
 
 
+class SourceFile(Base):
+    __tablename__ = "source_files"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    repository: Mapped[str] = mapped_column(String(300), index=True)
+    revision: Mapped[str] = mapped_column(String(100), index=True)
+    path: Mapped[str] = mapped_column(String(2000), unique=True, index=True)
+    order_index: Mapped[int] = mapped_column(Integer, index=True)
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    line_count: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    source_layer: Mapped[SourceLayer] = mapped_column(
+        Enum(SourceLayer), default=SourceLayer.ENCYCLOPEDIA, index=True
+    )
+    imported_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    sections: Mapped[list[SourceSection]] = relationship(
+        back_populates="source_file",
+        cascade="all, delete-orphan",
+        order_by="SourceSection.start_line",
+    )
+
+
+class SourceSection(Base):
+    __tablename__ = "source_sections"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_file_id: Mapped[int] = mapped_column(
+        ForeignKey("source_files.id", ondelete="CASCADE"), index=True
+    )
+    heading_type: Mapped[str] = mapped_column(String(40), index=True)
+    title: Mapped[str] = mapped_column(String(1000), index=True)
+    start_line: Mapped[int] = mapped_column(Integer)
+    end_line: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    text_sha256: Mapped[str] = mapped_column(String(64), index=True)
+
+    source_file: Mapped[SourceFile] = relationship(back_populates="sections")
+
+
 class Claim(Base):
     __tablename__ = "claims"
 
