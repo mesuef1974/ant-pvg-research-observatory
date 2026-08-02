@@ -31,7 +31,8 @@ from .models import (
 
 _RESULT_KEY = re.compile(r"ANT-[A-Z]+-\d+-\d+")
 _NOTE_KEY = re.compile(r"MS-[A-Z]+-\d+")
-_PVG_KEY = re.compile(r"\b(?:PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)\b")
+# الحدّ ``(?<![\w-])`` لا ``\b``: انظر التعليل في ``pvg.RESULT_KEY``.
+_PVG_KEY = re.compile(r"(?<![\w-])(?:PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)(?![\w-])")
 
 #: حالات الادعاء التي تعني أن المعلومة موثقة، فتستوجب إسنادًا.
 ANCHORED_STATUSES = frozenset({ClaimStatus.KNOWN, ClaimStatus.KNOWN_EQUIVALENT})

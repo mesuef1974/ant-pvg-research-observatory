@@ -31,6 +31,8 @@ CORPUS = """# مدونة اختبارية
 | `ADD-03` | اشتقاق رمزي مشروط بإطار | `FORMALLY-DERIVED` |
 
 ويُذكر هنا `PVG-CALC-99` بلا سطر في السجل.
+
+وهنا اسم مهارة لا معرّف نتيجة: `SKILL-MATH-PVG-AXIS-ADD-001`.
 """
 
 
@@ -99,6 +101,13 @@ def test_check_flags_unregistered_and_not_a_proof(corpus_dir: Path) -> None:
     assert ("PVG_RESULT_UNREGISTERED", "PVG-CALC-99") in codes
     assert ("PVG_RESULT_NOT_A_PROOF", "PVFC-07") in codes
     assert ("PVG_RESULT_NOT_A_PROOF", "PVG-FND-01") not in codes
+    # الشرطة محرف غير كلمي، فـ\b كان يقرأ ADD-001 داخل اسم المهارة نتيجةً
+    assert not any(subject == "ADD-001" for _, subject in codes)
+
+
+def test_a_longer_identifier_is_not_read_as_a_result_key() -> None:
+    text = "SKILL-MATH-PVG-AXIS-ADD-001 و PVG-FND-01x و PVFC-07"
+    assert pvg.RESULT_KEY.findall(text) == ["PVFC-07"]
 
 
 def test_manifest_mismatch_is_reported(corpus_dir: Path) -> None:

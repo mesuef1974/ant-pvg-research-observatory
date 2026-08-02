@@ -22,7 +22,11 @@ PVG_DIR = Path(__file__).resolve().parents[3] / "knowledge" / "pvg"
 VISUALS_DIR = Path(__file__).resolve().parents[3] / "static" / "pvg"
 
 #: معرّفات نتائج PVG: PVG-FND-01، PVFC-07، ADD-03.
-RESULT_KEY = re.compile(r"\b(PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)\b")
+#:
+#: الحدّ اليساري ``(?<![\w-])`` لا ``\b``: الشرطة محرف غير كلمي، فـ``\b`` يقبل
+#: بدايةً في وسط معرّف أطول. ومن ذلك ``SKILL-MATH-PVG-AXIS-ADD-001`` في سجل
+#: البرمجيات، يُقرأ ``ADD-001`` نتيجةً غير مسجّلة وهو اسم مهارة.
+RESULT_KEY = re.compile(r"(?<![\w-])(PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)(?![\w-])")
 
 #: حالات تعني أن النتيجة مبرهنة، فيجوز الاستناد إليها داخليًا.
 PROVEN_MARKERS = frozenset({"PROVED", "IDENTITY", "REFORMULATION"})
