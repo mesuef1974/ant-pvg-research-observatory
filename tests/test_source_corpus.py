@@ -1,11 +1,10 @@
 from pathlib import Path
 
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session
-
 from ant_pvg_observatory.db import Base
 from ant_pvg_observatory.models import SourceFile, SourceSection
 from ant_pvg_observatory.source_corpus import import_encyclopedia_source
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.orm import Session
 
 
 def test_import_encyclopedia_source_follows_main_input_order(tmp_path: Path) -> None:
