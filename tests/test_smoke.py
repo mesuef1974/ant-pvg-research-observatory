@@ -86,8 +86,20 @@ try:
             got = e.code
         check(f'{path} → {want}', got == want, got)
 
-    print('\n== بنية القارئ: المعادلات والبيئات ==')
+    print('\n== ترقيم الفصول ==')
     s, chs = call('/api/chapters')
+    check('26 فصلًا لا 31 ملفًا', len(chs) == 26, len(chs))
+    check('الترقيم متصل 1..26',
+          sorted(c['number'] for c in chs) == list(range(1, 27)),
+          sorted(c['number'] for c in chs))
+    check('الفصل 26 هو خريطة الجبهات',
+          'الجبهات' in next(c['title'] for c in chs if c['number'] == 26))
+    s, res = call('/api/results')
+    bad = [r['result_id'] for r in res
+           if int(r['result_id'].rsplit('-', 2)[1]) != r['chapter']]
+    check('رقم فصل كل نتيجة يطابق معرّفها', not bad, bad[:5])
+
+    print('\n== بنية القارئ: المعادلات والبيئات ==')
     kinds, envs, no_blocks = {}, {}, 0
 
     def walk(bs):

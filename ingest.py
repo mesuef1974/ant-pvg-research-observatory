@@ -261,17 +261,18 @@ def chapter_files(root):
     return out
 
 def parse_chapter(path, root):
+    """يقرأ ملف مصدر واحدًا. ليس كل ملف فصلًا: بعض الفصول مقسَّمة على دفعات.
+
+    يُستدل على بداية فصل بوجود ``\\chapter{}``؛ والملفات الخالية منه امتداد
+    للفصل السابق في ترتيب ``main.tex``. ولا يُعتمد على رقم اسم الملف لأنه
+    مضلِّل: ``chapter-01-frontiers-map.tex`` هو الفصل السادس والعشرون.
+    """
     raw = path.read_text(encoding='utf-8')
     m = re.search(r'\\chapter\s*\{', raw)
-    title = ''
-    if m:
-        title = clean_inline(_balanced(raw, m.end()-1)[0] or '')
+    title = clean_inline(_balanced(raw, m.end()-1)[0] or '') if m else ''
     rel = path.relative_to(root).as_posix()
     volume = rel.split('/')[1] if rel.startswith('volumes/') else ''
     num = None
-    mn = re.search(r'chapter-(\d+)', path.name)
-    if mn:
-        num = int(mn.group(1))
 
     sections = []
     marks = [(mm.start(), mm.end()) for mm in re.finditer(r'\\section\s*\{', raw)]
@@ -309,7 +310,33 @@ def parse_chapter(path, root):
                 'statement': blocks_text(parse_blocks(body))[:4000], 'tex_path': rel,
             })
     return {'number': num, 'title': title, 'tex_path': rel, 'volume': volume,
+            'starts_chapter': m is not None,
             'char_count': len(raw), 'sections': sections, 'results': results}
+
+
+def read_chapters(root):
+    """يدمج ملفات الدفعات في فصولها، فيُرجع 26 فصلًا لا 31 ملفًا.
+
+    الترقيم من ترتيب ``main.tex``، وهو ما يطابق معرّفات ``ANT-*-NN-*``.
+    """
+    chapters = []
+    for path in chapter_files(root):
+        part = parse_chapter(path, root)
+        if part['starts_chapter'] or not chapters:
+            part['number'] = len(chapters) + 1
+            part['files'] = [part['tex_path']]
+            chapters.append(part)
+            continue
+        cur = chapters[-1]                       # ملف امتداد: يُضم إلى سابقه
+        cur['sections'] += part['sections']
+        cur['results'] += part['results']
+        cur['char_count'] += part['char_count']
+        cur['files'].append(part['tex_path'])
+    for ch in chapters:
+        for r in ch['results']:
+            r['chapter'] = ch['number']
+        ch['tex_path'] = '، '.join(ch['files'])
+    return chapters
 
 # ------------------------------------------------------ سياسة الحالات والسجلات
 
@@ -508,7 +535,7 @@ def run_checks(chapters, registries, policy, bib, cited, claims):
 
 def ingest(db_path, root=None):
     root = Path(root) if root else encyclopedia_root()
-    chapters = [parse_chapter(p, root) for p in chapter_files(root)]
+    chapters = read_chapters(root)
     registries = parse_registries(root)
     policy = parse_policy(root)
     bib = parse_bib(root)
