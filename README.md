@@ -13,13 +13,22 @@
 ## بدء التشغيل محليًا
 
 ```powershell
-cd D:\ant_pvg_research_observatory
+cd D:\ant-pvg-research-observatory
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
+alembic upgrade head
 uvicorn ant_pvg_observatory.main:app --reload --app-dir backend/src
 ```
+
+يجب تشغيل:
+
+```powershell
+alembic upgrade head
+```
+
+بعد كل `git pull` يتضمن تغييرات في مخطط قاعدة البيانات، وقبل تشغيل الخادم. الترحيل الأول يحافظ على قاعدة SQLite القديمة ويضيف أعمدة مكتبة الوثائق الناقصة بدل مطالبتك بحذفها.
 
 ثم افتح:
 
@@ -47,10 +56,40 @@ library/
 └── notes/
 ```
 
+ضع أي PDF داخل أحد هذه المجلدات، ثم استخدم من صفحة Swagger:
+
+```text
+POST /api/documents/import-local
+```
+
+مثال الطلب:
+
+```json
+{
+  "relative_path": "encyclopedia/volume-01.pdf",
+  "source_layer": "ENCYCLOPEDIA",
+  "title": "الموسوعة الشاملة في نظرية الأعداد التحليلية — المجلد الأول"
+}
+```
+
+المستورد:
+
+- يمنع المسارات خارج `library/`؛
+- يقبل PDF فقط في هذه المرحلة؛
+- يسجل SHA-256 والحجم وعدد الصفحات؛
+- يعيد السجل الموجود إذا أُعيد استيراد الملف نفسه؛
+- يحفظ المسار النسبي فقط، ولا يرفع الملف إلى Git.
+
+لعرض الوثائق المسجلة:
+
+```text
+GET /api/documents
+```
+
 ## الحالة
 
 ```text
-VERSION = 0.1.0-dev
-PHASE   = PLATFORM FOUNDATION
-BRANCH  = agent/platform-v1-foundation
+VERSION = 0.2.0-dev
+PHASE   = MULTI-DOCUMENT LOCAL LIBRARY
+BRANCH  = agent/library-multidoc-import-v0.2
 ```

@@ -2,6 +2,38 @@
 
 All notable changes are recorded here. The project is pre-release and follows semantic-versioning intent.
 
+## [0.2.0-dev] — 2026-08-02
+
+### Added
+
+- Governed local PDF import from paths inside `library/`.
+- Multi-document registry API.
+- SHA-256 deduplication.
+- PDF page-count and file-size metadata.
+- Explicit source-layer assignment for every imported document.
+- Path-containment and PDF-type validation.
+- Compatibility upgrade for v0.1 SQLite document tables.
+- Alembic migrations `0002_remove_legacy_source_model` and
+  `0003_canonicalize_document_metadata`.
+- Tests for PDF import, duplicate detection, and migration from the legacy MVP schema.
+
+### Changed
+
+- Removed the abandoned `sources` table and `documents.source_id` relationship.
+- Removed the obsolete `documents.file_name` column.
+- `Document.source_layer` is now the sole authoritative source classification.
+- New imports set `created_at` explicitly and the database supplies
+  `CURRENT_TIMESTAMP` as a fallback.
+- Legacy documents with unresolved `local_path` or `sha256` remain readable through
+  the API instead of causing response-validation failure.
+
+### Governance
+
+- Imported files remain local and are referenced by relative path only.
+- A document cannot escape the configured library root.
+- Reimporting identical bytes does not create a second record.
+- Legacy schema cleanup preserves document rows and does not fabricate source relationships.
+
 ## [0.1.0-dev] — 2026-08-02
 
 ### Added

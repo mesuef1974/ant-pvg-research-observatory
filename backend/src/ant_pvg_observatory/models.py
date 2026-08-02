@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -35,8 +35,12 @@ class Document(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(500), index=True)
     source_layer: Mapped[SourceLayer] = mapped_column(Enum(SourceLayer), index=True)
-    local_path: Mapped[str | None] = mapped_column(String(2000))
-    sha256: Mapped[str | None] = mapped_column(String(64), unique=True)
+    local_path: Mapped[str | None] = mapped_column(String(2000), unique=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+    media_type: Mapped[str] = mapped_column(String(120), default="application/pdf")
+    page_count: Mapped[int] = mapped_column(Integer, default=0)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, default=0)
+    import_status: Mapped[str] = mapped_column(String(40), default="IMPORTED", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     claims: Mapped[list[Claim]] = relationship(back_populates="document")
