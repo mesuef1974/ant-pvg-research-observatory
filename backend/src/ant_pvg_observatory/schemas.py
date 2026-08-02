@@ -117,6 +117,7 @@ class EncyclopediaImportSummaryView(BaseModel):
     model_note_count: int
     coverage_gap_count: int
     finding_count: int
+    evidence_record_count: int
 
     # model_note_count يصطدم بمجال pydantic المحجوز model_؛ الحقل مقصود بهذا الاسم.
     model_config = {"from_attributes": True, "protected_namespaces": ()}
@@ -366,5 +367,19 @@ class KnowledgeLinkView(BaseModel):
     to_type: str
     to_key: str
     note: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class EvidenceRecordView(BaseModel):
+    chapter_number: int | None
+    document_kind: str
+    source_file: str
+    ordinal: int
+    statement: str | None
+    source_note: str | None
+    verdict: str | None
+    doi: str | None
+    cutoff_date: str | None
 
     model_config = {"from_attributes": True}

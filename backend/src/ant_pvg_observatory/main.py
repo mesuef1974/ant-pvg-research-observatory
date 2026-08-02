@@ -24,6 +24,7 @@ from .models import (
     EncyclopediaChapter,
     EncyclopediaResult,
     EncyclopediaUnit,
+    EvidenceRecord,
     ExtractionStatus,
     GateReference,
     GateVerdict,
@@ -48,6 +49,7 @@ from .schemas import (
     DocumentView,
     EncyclopediaImportRequest,
     EncyclopediaImportSummaryView,
+    EvidenceRecordView,
     GateCreate,
     GateReferenceLink,
     GateReferenceView,
@@ -499,6 +501,7 @@ def dashboard(session: SessionDependency) -> DashboardView:
             "claims": count(Claim),
             "gates": count(LiteratureGate),
             "findings": count(IntegrityFinding),
+            "evidence": count(EvidenceRecord),
         },
         severity={row[0]: row[1] for row in severity_rows},
         revision=revision,
@@ -767,6 +770,27 @@ def export_research(session: SessionDependency) -> dict:
     يكتب في القاعدة، فلا يُعرَّض على واجهة تُفتح بالنقر.
     """
     return export_research_layer(session)
+
+
+@app.get(
+    "/api/encyclopedia/evidence",
+    response_model=list[EvidenceRecordView],
+    tags=["encyclopedia"],
+)
+def list_evidence_records(
+    session: SessionDependency,
+    chapter_number: Annotated[int | None, Query(gt=0)] = None,
+    document_kind: str | None = None,
+) -> list[EvidenceRecord]:
+    """صفوف سجلات الأدلة وخرائط البراهين، بحالة تحقق كل مصدر."""
+    statement = select(EvidenceRecord).order_by(
+        EvidenceRecord.source_file, EvidenceRecord.ordinal
+    )
+    if chapter_number is not None:
+        statement = statement.where(EvidenceRecord.chapter_number == chapter_number)
+    if document_kind is not None:
+        statement = statement.where(EvidenceRecord.document_kind == document_kind)
+    return list(session.scalars(statement))
 
 
 if STATIC_ROOT.is_dir():

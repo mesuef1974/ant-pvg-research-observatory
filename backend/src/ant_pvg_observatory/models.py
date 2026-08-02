@@ -406,3 +406,27 @@ class KnowledgeLink(Base):
     to_key: Mapped[str] = mapped_column(String(200), index=True)
     note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class EvidenceRecord(Base):
+    """صف من سجل أدلة أو خريطة برهان في مستودع الموسوعة.
+
+    هذه الملفات هي عمل التحقق الببليوغرافي الذي يسبق تأليف الفصل: لكل مصدر
+    صياغةٌ مسموح بها وموضعٌ في المصدر وحكمٌ على درجة التحقق. المرصد يقرأها
+    ولا يعيد إنتاجها، فتصير حالة التحقق قابلة للاستعلام والفحص الآلي.
+    """
+
+    __tablename__ = "evidence_records"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter_number: Mapped[int | None] = mapped_column(Integer, index=True)
+    document_kind: Mapped[str] = mapped_column(String(40), index=True)
+    source_file: Mapped[str] = mapped_column(String(300), index=True)
+    ordinal: Mapped[int] = mapped_column(Integer)
+    columns_json: Mapped[str] = mapped_column(Text)
+    statement: Mapped[str | None] = mapped_column(Text)
+    source_note: Mapped[str | None] = mapped_column(Text)
+    verdict: Mapped[str | None] = mapped_column(String(300), index=True)
+    doi: Mapped[str | None] = mapped_column(String(300), index=True)
+    cutoff_date: Mapped[str | None] = mapped_column(String(40))
+    imported_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
