@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import itertools
+import sys
 from math import prod
 
 
@@ -32,6 +33,9 @@ def majorizes(a: tuple[int, ...], b: tuple[int, ...]) -> bool:
 
 
 def main() -> int:
+    # الطرفية على ويندوز قد تكون cp1256، ولا تسع الحروف اليونانية
+    sys.stdout.reconfigure(encoding="utf-8")
+
     shift_ok = schur_ok = pairs = 0
     for k in range(2, 6):
         for total in range(k, 16):

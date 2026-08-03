@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import random
+import sys
 
 import numpy as np
 
@@ -23,6 +24,9 @@ def face_matrix(a: list[int]) -> np.ndarray:
 
 
 def main() -> int:
+    # الطرفية على ويندوز قد تكون cp1256، ولا تسع الحروف اليونانية
+    sys.stdout.reconfigure(encoding="utf-8")
+
     random.seed(7)
     checks = {"التطابق": 0, "التوقيع": 0, "المحدد": 0}
     trials = 0
