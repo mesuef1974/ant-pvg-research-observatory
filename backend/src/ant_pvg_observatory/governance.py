@@ -24,6 +24,7 @@ from .models import (
     GateVerdict,
     LiteratureGate,
     ModelSynthesisNote,
+    ObservatoryReference,
     PvgResult,
     ReadingStatus,
     SourceLayer,
@@ -53,6 +54,24 @@ def referenced_result_keys(*texts: str | None) -> set[str]:
 
 def referenced_note_keys(*texts: str | None) -> set[str]:
     return set(_NOTE_KEY.findall(" ".join(t or "" for t in texts)))
+
+
+#: حالات المرجع التي تعني أنك قرأته فعلًا، فيصلح إسنادًا.
+READ_STATUSES = frozenset({ReadingStatus.FULLY_READ, ReadingStatus.VERIFIED})
+
+
+def referenced_reference_keys(session: Session, blob: str) -> list[ObservatoryReference]:
+    """المراجع المذكورة بمفاتيحها في نصّ الادعاء.
+
+    المطابقة على المفتاح لا على اسم المؤلف: «Cashwell–Everett 1959» نثرٌ لا
+    يُفحص آليًا، أما ``CashwellEverett1959RingOfNTFunctions`` فيُفحص. وهذا
+    التشدّد مقصود — الإسناد الذي لا تستطيع الآلة التحقق منه ليس إسنادًا.
+    """
+    found = []
+    for row in session.scalars(select(ObservatoryReference)):
+        if re.search(rf"(?<![\w-]){re.escape(row.reference_key)}(?![\w-])", blob):
+            found.append(row)
+    return found
 
 
 def enforce_citation_policy(
@@ -120,18 +139,32 @@ def enforce_citation_policy(
                 "أنزل حالة الادعاء إلى FINITE_VERIFIED أو OPEN."
             )
 
-    if claim_status in ANCHORED_STATUSES and not result_keys:
+    references = referenced_reference_keys(session, blob)
+    read = [r for r in references if r.reading_status in READ_STATUSES]
+
+    if claim_status in ANCHORED_STATUSES and not result_keys and not read:
+        # مرجعٌ مذكور لكنك لم تقرأه: عنوانٌ لا شهادة. تسميته صراحةً أنفع من
+        # رسالة عامة، لأن العلاج معروف — اقرأه ثم حدّث حالته.
+        if references:
+            unread = "، ".join(
+                f"{r.reference_key} ({r.reading_status.value})" for r in references
+            )
+            _fail(
+                f"المرجع {unread} لم يُقرأ بعد، فلا يصلح إسنادًا لحالة موثقة. "
+                "اقرأه وحدّث حالته إلى FULLY-READ أو VERIFIED، أو أنزل حالة "
+                "الادعاء."
+            )
         # KNOWN تعني «معروف في الأدبيات». وطبقة PVG غير منشورة، فمهما بلغت
         # قوة نتيجتها لا تجعل العبارة معروفةً عند أحد سوانا.
         if pvg_keys:
             _fail(
                 f"الإسناد الوحيد هنا نتيجةُ PVG ({'، '.join(pvg_keys)})، وهي "
                 "طبقة داخلية غير منشورة فلا تُثبت أن العبارة معروفة في "
-                "الأدبيات. استعمل PROVED_HERE، أو أضف مرجعًا منشورًا."
+                "الأدبيات. استعمل PROVED_HERE، أو أضف مرجعًا منشورًا مقروءًا."
             )
         _fail(
             "لا يجوز رفع ادعاء إلى حالة موثقة دون إسناد إلى نتيجة معتمدة في "
-            "الموسوعة أو إلى مرجع خارجي موثق."
+            "الموسوعة أو إلى مرجع خارجي موثق مقروء."
         )
 
     if source_layer is SourceLayer.MODEL_SYNTHESIS and claim_status in ANCHORED_STATUSES:

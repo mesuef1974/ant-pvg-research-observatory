@@ -13,7 +13,13 @@ from ant_pvg_observatory import pvg
 from ant_pvg_observatory.db import Base, get_session
 from ant_pvg_observatory.governance import enforce_citation_policy
 from ant_pvg_observatory.main import app
-from ant_pvg_observatory.models import ClaimStatus, PvgResult, SourceLayer
+from ant_pvg_observatory.models import (
+    ClaimStatus,
+    ObservatoryReference,
+    PvgResult,
+    ReadingStatus,
+    SourceLayer,
+)
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
@@ -196,6 +202,46 @@ def test_pvg_alone_cannot_make_a_claim_known(session: Session) -> None:
 
 def test_a_proven_pvg_result_supports_proved_here(session: Session) -> None:
     assert _enforce(session, "يستند إلى PVG-FND-01", ClaimStatus.PROVED_HERE) is None
+
+
+# ── الإسناد إلى مرجع منشور ──────────────────────────────────────────────
+
+
+def _add_reference(db: Session, key: str, status: ReadingStatus) -> None:
+    db.add(
+        ObservatoryReference(
+            reference_key=key, title="ورقة", reading_status=status
+        )
+    )
+    db.commit()
+
+
+def test_an_unread_reference_cannot_anchor_a_documented_claim(
+    session: Session,
+) -> None:
+    """المرجع المكتشَف عنوانٌ لا شهادة. عشرة مراجع غير مقروءة لا تُثبت شيئًا."""
+    _add_reference(session, "Someone1959Paper", ReadingStatus.DISCOVERED)
+
+    detail = _enforce(session, "يستند إلى Someone1959Paper", ClaimStatus.KNOWN)
+    assert detail is not None
+    assert "Someone1959Paper" in detail and "DISCOVERED" in detail
+
+
+def test_a_read_reference_anchors_a_documented_claim(session: Session) -> None:
+    """وهذه الحالة كانت مستحيلة: لا شيء يصير KNOWN إلا بنتيجة موسوعة."""
+    _add_reference(session, "CashwellEverett1959", ReadingStatus.FULLY_READ)
+
+    assert _enforce(session, "يستند إلى CashwellEverett1959", ClaimStatus.KNOWN) is None
+
+
+def test_a_reference_key_inside_a_longer_token_is_not_an_anchor(
+    session: Session,
+) -> None:
+    """المطابقة محدودة الطرفين، وإلا صار أي نصّ يحوي المفتاح إسنادًا."""
+    _add_reference(session, "Weising2025", ReadingStatus.FULLY_READ)
+
+    detail = _enforce(session, "يستند إلى Weising2025b-preprint", ClaimStatus.KNOWN)
+    assert detail is not None
 
 
 # ── الواجهة ─────────────────────────────────────────────────────────────

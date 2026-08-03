@@ -2,24 +2,93 @@
   "format_version": 1,
   "claims": [
     {
-      "claim_key": "CLAIM-20260802-184636-c2a363",
-      "statement": "ادعاء",
-      "source_layer": "MODEL_SYNTHESIS",
-      "status": "MODEL-SYNTHESIS",
-      "evidence_note": "يستند إلى PVFC-99",
-      "novelty_note": null
+      "claim_key": "CLAIM-ADD-05",
+      "statement": "غولدباخ الثنائي للعدد الزوجي N يكافئ G_N ∩ (P₁×P₁) ≠ ∅، حيث G_N ليفُ الجمع وP₁={e_p} المحلُّ الأولي (ADD-05).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "المكافأة تُفَكّ من التعريف مباشرةً: عضوُ G_N زوجٌ (ν(a),ν(N−a))، ووقوعه في P₁×P₁ يعني a وN−a أوليّان. الأرشيف نفسه يصرّح: «هذه إعادة صياغة تامة، لا برهان» (ADD-05). راجع GATE-ADD-GOLDBACH-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع، ولذلك ليست `KNOWN`: لم أجد في الأدبيات نصًّا على هذه الصياغة الهندسية بعينها، وعدمُ العثور ليس جِدّة كما أنه ليس معرفة. إعادات صياغة غولدباخ جنسٌ مزدحم — هندسية وتحليلية ومصفوفية — وأيٌّ منها لم يُثبت شيئًا، وهذا هو الدرس. قيمة الصياغة تنظيمية: تضع السؤال في الإطار الهندسي، ولا تنقل السقف قيد أنملة."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-09",
+      "statement": "لا توجد بصمة أولية محلية مستقرة ذات رتبة محدودة داخل s>1: عند s₀ ومستوى N ورتبة m منتهية، تقرّب أبجدية منتهية غير أولية جميع المشتقات ضمن ε (PVFC-09).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "المبرهنة صحيحة ومبرهنة داخليًا (PVFC-09). ومضمونها يقع في ميدان أعداد Beurling المعمَّمة القائم منذ 1937، ومقدّمةُ ذلك الميدان هي عينُ خلاصتها. راجع GATE-PVFC-JET-001.",
+      "novelty_note": "ليست `KNOWN-IN-EQUIVALENT-FORM` بعد، وإن بدت كذلك: قرأتُ مقدّمة الميدان لا ورقةً بعينها تنصّ على العبارة. ورفعُها إلى «مكافئة لمعلوم» قبل قراءة مصدر محدَّد هو الخطأ الذي تمنعه هذه المنصة. بند المتابعة: تثبيت ورقة Beurling أو خلَف بعينها.\nوقيمة المبرهنة لا تنقص بذلك: سالبةٌ تحدّ مسار البحث بنفسها وتغلق تمييز الأوليات بعدد منتهٍ من العزوم. وما بقي مفتوحًا هو السلوك عند s→1⁺ والحدود الموحّدة في N، وهو خارجها."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-01",
+      "statement": "تمثيل الأعداد الصحيحة الموجبة بمتجه أُسُسها الأولية تماثلٌ ℕ≥1 ≅ ⊕_p ℕ₀ (PVG-FND-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982، محكَّم: «every integer n may be written uniquely in the form n=p₁^{a₁}p₂^{a₂}⋯ and uniquely described by a vector (a₁,a₂,…)». راجع GATE-PVG-FND-001.",
+      "novelty_note": "لا جِدّة، ولم تُدَّع. هذه المبرهنة الأساسية في الحساب مصوغةً بلغة الشبكات، وعمر الصياغة بهذه العبارة 67 سنة على الأقل."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-06",
+      "statement": "تحت تمثيل متجه الأُسُس، يصير التفاف ديريشليه التفافًا جمعيًا على المخروط ⊕_p ℕ₀ (PVG-FND-06).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982، محكَّم: «addition is preserved, and P(α·β)=P(α)P(β)» حيث P متسلسلة قوى في متغيّرات مفهرسة بالأوليات؛ وضربُ متسلسلات القوى هو التفافُ المعاملات الجمعي. راجع GATE-PVG-FND-001.",
+      "novelty_note": "لا جِدّة. وهذه أهمّ حصيلة المسح: النتيجة كانت غير مفحوصة، وقد تبيّن أنها منشورة محكَّمة منذ 1959. عدمُ العثور كان واقعةً عن مسحنا لا عن العالم."
     }
   ],
   "gates": [
+    {
+      "gate_key": "GATE-ADD-GOLDBACH-001",
+      "title": "غولدباخ بوصفه تقاطع الليف الجمعي مع المحل الأولي",
+      "research_question": "ADD-05: G_N ∩ (P₁×P₁) ≠ ∅ حيث P₁={e_p}. هل لهذه الصياغة الهندسية سابقة، وهل تحمل مضمونًا زائدًا على العبارة الأصلية؟",
+      "status": "CLOSED",
+      "verdict": "NOT-FOUND-YET"
+    },
+    {
+      "gate_key": "GATE-PVFC-JET-001",
+      "title": "عدم التمييز بالنفاثة المحدودة وأعداد Beurling المعمَّمة",
+      "research_question": "PVFC-09 تقول: عند s₀>1 ومستوى N ورتبة اشتقاق m، كلّها منتهية، توجد أبجدية منتهية غير أولية تقرّب عزوم الأوليات ومشتقاتها ضمن ε — فلا بصمة أولية محلية مستقرة ذات رتبة محدودة داخل s>1.\nهل هذا معروف؟ النطاق: أعداد Beurling المعمَّمة، شمولية Voronin، أمثلة مضادة في نصف مستوى التقارب المطلق.",
+      "status": "REVIEW-IN-PROGRESS",
+      "verdict": "PARTIAL"
+    },
     {
       "gate_key": "GATE-PVFC-SD-001",
       "title": "مؤثرات انتقال الألياف وأبراج Selberg–Delange",
       "research_question": "هل يوجد في الأدبيات تمثيل موحد لانتقالات الألياف على جميع معاملات Selberg–Delange، بحيث يُعطى برج المعاملات التقاربية بمؤثرات رفع/خفض على بنية دوال متناظرة مخصَّصة عند x_p = p^{-s}؟",
       "status": "REVIEW-IN-PROGRESS",
       "verdict": "PARTIAL"
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "title": "متجه الأُسُس والتفاف ديريشليه بوصفه التفافًا جمعيًا",
+      "research_question": "هل تمثيل ℕ≥1 ≅ ⊕_p ℕ₀ بمتجه الأُسُس، وتحوّلُ التفاف ديريشليه تحته إلى التفاف جمعي على المخروط، موجودان في الأدبيات؟\nالنطاق: حلقة الدوال الحسابية، متسلسلات القوى بعدد قابل للعدّ من المتغيرات، حلقة Witt/القلائد، الدوال المتناظرة الحسابية.",
+      "status": "CLOSED",
+      "verdict": "KNOWN"
     }
   ],
   "references": [
+    {
+      "reference_key": "Baez2025DirichletSpecies",
+      "title": "Dirichlet Species and Arithmetic Zeta Functions",
+      "authors": "John C. Baez",
+      "year": "2025",
+      "venue": "Theory and Applications of Categories 44(39), 1316–1336 — محكَّم",
+      "doi": "10.48550/arXiv.2502.01833",
+      "url": "https://arxiv.org/abs/2502.01833",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "الملخّص فقط. تصنيفٌ فئوي لسلاسل ديريشليه عبر أنواع Joyal: كل نوع F يعطي سلسلة ديريشليه، ودالة زيتا الحسابية لمخطط تنشأ هكذا. مجاور لإطار PVFC (وWeising يستعمل الأنواع أيضًا)، ولم أتحقق بعد إن كان يخصّص المتغيرات عند p^{-s}. محكَّم، فيُستشهد به بحذر في حدود ملخّصه.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Beurling1937GeneralizedPrimes",
+      "title": "Beurling generalized prime systems (الميدان لا ورقةً بعينها)",
+      "authors": "Arne Beurling وما تلاه",
+      "year": "1937",
+      "venue": "Acta Mathematica 68 — محكَّم؛ وأدبيات متّصلة إلى 2025",
+      "doi": null,
+      "url": "https://cage.ugent.be/~fabrouck/Talks/Introduction_Beurling_g_primes.pdf",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "مُدخَل بوصفه ميدانًا لا ورقةً مفردة، فلا يُستشهد به استشهادًا نقطيًا قبل تثبيت الورقة المعيّنة. مقدّمةُ الميدان بعينها: أي متتالية 1<p₁≤p₂≤… تُولّد «أعدادًا صحيحة معمَّمة» تحاكي سلوك الأوليات التحليلي. وهذا يعني أن «السلوك الشبيه بالأوليات ليس خاصًّا بالأوليات» مقدّمةُ ميدان قائم منذ 1937، لا اكتشافًا.",
+      "bibliography_key": null
+    },
     {
       "reference_key": "BretecheTenenbaum2020Remarks",
       "title": "Remarks on the Selberg–Delange method",
@@ -29,7 +98,19 @@
       "doi": null,
       "url": null,
       "reading_status": "DISCOVERED",
-      "notes": "أحدث معالجة للفروض التي تُنتج تقديرات حادة. لا بنية مؤثرات.",
+      "notes": "لم يُقرأ. طرف Selberg–Delange ناضج وبلا بنية مؤثرات — وهذا حكم مسحٍ لا حكم قراءة، فيبقى بندَ متابعة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "title": "The ring of number-theoretic functions",
+      "authors": "E. D. Cashwell, C. J. Everett",
+      "year": "1959",
+      "venue": "Pacific Journal of Mathematics 9(4), 975–985 — محكَّم",
+      "doi": null,
+      "url": "https://projecteuclid.org/journals/pacific-journal-of-mathematics/volume-9/issue-4/The-ring-of-number-theoretic-functions/pjm/1103038878",
+      "reading_status": "FULLY-READ",
+      "notes": "قُرئ المقال نفسه لا ملخّصًا عنه. المقدمة ص975 تنصّ: «The domain Ω is isomorphic to the domain P of formal power series over F in a countable set of indeterminates». والبند 14 ص982 يبني التماثل صراحةً: تُرتَّب الأوليات p₁,p₂,…، ويوصف كل عدد صحيح توصيفًا وحيدًا بمتجه أُسُس (a₁,a₂,…) منتهي الحامل، ثم α ↦ Σα(n)x₁^{a₁}x₂^{a₂}⋯، و«addition is preserved, and P(α·β)=P(α)P(β)». وضربُ متسلسلات القوى هو التفافُ معاملاتها الجمعي. أي أن PVG-FND-01 وPVG-FND-06 مذكورتان معًا في فقرة واحدة سنة 1959.",
       "bibliography_key": null
     },
     {
@@ -93,6 +174,18 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "MacHenry2010ConvolutionRingSymmetric",
+      "title": "The Convolution Ring of Arithmetic Functions and Symmetric Polynomials",
+      "authors": "Trueman MacHenry, Kieh Wong",
+      "year": "2010",
+      "venue": "arXiv:1009.1892 — نسخة أولية؛ وللمؤلفين عمل محكَّم في Rocky Mountain J. Math. 42(4) 2012",
+      "doi": null,
+      "url": "https://arxiv.org/abs/1009.1892",
+      "reading_status": "DISCOVERED",
+      "notes": "لم يُقرأ بعد. تمثيل زمرة الدوال الضربية بتقييمات متعدّدات حدود Schur الخطّافية. الرِّجل الخامسة في GATE-PVFC-SD-001 كانت Elliott 2008؛ هذا خطّها الموازي. بند متابعة.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Macdonald1995SymmetricFunctions",
       "title": "Symmetric Functions and Hall Polynomials",
       "authors": "I. G. Macdonald",
@@ -101,7 +194,7 @@
       "doi": null,
       "url": null,
       "reading_status": "DISCOVERED",
-      "notes": "الفصل الخامس: تماثل Satake وربط الأساس المتناظر بالعوامل المحلية. الجذر الأقدم للإطار كله، ويلزم فحصه قراءةً مباشرة.",
+      "notes": "لم يُقرأ. البند الثاني في متابعة GATE-PVFC-SD-001: الفصل الخامس (تماثل Satake) قراءةً مباشرة لا نقلًا عن الآخرين. لا يزال مفتوحًا.",
       "bibliography_key": null
     },
     {
@@ -124,8 +217,8 @@
       "venue": "arXiv:2409.09643v3 — نسخة أولية، لا مرجع دورية",
       "doi": "10.48550/arXiv.2409.09643",
       "url": "https://arxiv.org/abs/2409.09643",
-      "reading_status": "DISCOVERED",
-      "notes": "أقرب إطار وجدته إلى CLAIM-0001: حلقة دوال متناظرة مفهرسة بالمثاليات الأولية، وفكّ في أساس Hall–Littlewood، وتحويلات Mellin إلى جداءات دوال L لأرتين. نسخة أولية — لا تُعامل معاملة المحكَّم.",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "الملخّص وصفحة arXiv فقط. نسخة أولية بلا مرجع دورية.",
       "bibliography_key": null
     },
     {
@@ -136,12 +229,18 @@
       "venue": "arXiv:2505.18504 — نسخة أولية، لا مرجع دورية",
       "doi": "10.48550/arXiv.2505.18504",
       "url": "https://arxiv.org/abs/2505.18504",
-      "reading_status": "DISCOVERED",
-      "notes": "أخطر ورقة على ادعاء الجِدّة في CLAIM-0003: أبراج أسّية plethystic متكرّرة، وعلاقات تكرار صريحة لمعاملات الفكّ في الأساس الأحادي، وسلوك تقاربي توبيري. أولوية القراءة الأولى.",
+      "reading_status": "FULLY-READ",
+      "notes": "قُرئ النصّ الكامل (v2، 2025-09-21). الحكم على بند المتابعة الأول في GATE-PVFC-SD-001: المتغيّرات صورية بحتة، ولا تخصيص عند الأوليات، ولا ذكر لسلاسل ديريشليه ولا زيتا ولا الدوال الضربية. التخصيص الوحيد ψ:Λ→ℚ[[p₁]] أحاديُّ المتغيّر. وتظهر مجاميع القواسم σ_{ℓ(μ)-1}(gcd(μ)) في مفكوك المجاميع القوّية (Prop. 2.15)، وهي مكوّن حسابي لا تخصيصًا عند الأوليات. ومبرهنة Hardy–Littlewood التوبيرية تُستعمل على معاملات التقييد لا على دوال حسابية. فالمساحة المتبقية لـCLAIM-0003 لم تسقط بهذه الورقة. ولا تزال نسخةً أولية بلا مرجع دورية.",
       "bibliography_key": null
     }
   ],
   "gate_references": [
+    {
+      "gate_key": "GATE-PVFC-JET-001",
+      "reference_key": "Beurling1937GeneralizedPrimes",
+      "relation": "COVERS",
+      "coverage_note": "المبرهنة صحيحة، والميدان الذي تقع فيه قائم منذ 1937 ومقدّمتُه هي عينُ خلاصتها: السلوك التحليلي الشبيه بالأوليات لا يميّز الأوليات. بل إن حيلة «إضافة أوليّ مختار مرارًا منتهية للتحكّم في قيمة زيتا عند نقاط بعينها» تقنيةٌ قياسية هناك، وهي عينُ حجّة القطع والإزاحة في برهان PVFC-09. وصياغة PVFC-09 أضعف: نقطة واحدة s₀ ورتبة منتهية، لا سلوك عالمي."
+    },
     {
       "gate_key": "GATE-PVFC-SD-001",
       "reference_key": "BretecheTenenbaum2020Remarks",
@@ -201,9 +300,91 @@
       "reference_key": "Weising2025HigherOrderBell",
       "relation": "PARTIAL",
       "coverage_note": "يغطي بنية البرج ومعاملات الفكّ وعلاقات التكرار، ولا يُخصّص عند x_p = p^{-s} ولا يمسّ Selberg–Delange."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "relation": "COVERS",
+      "coverage_note": "البند 14 ص982 يبني التماثل نفسه حرفًا بحرف: متجه الأُسُس، ثم α↦Σα(n)∏x_i^{a_i}، وحفظُ الجمع، وP(α·β)=P(α)P(β). لا فجوة."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "Elliott2008RingStructures",
+      "relation": "ADJACENT",
+      "coverage_note": "يمضي أبعد: بنية حلقية عبر متجهات Witt، الجمع فيها التفافُ ديريشليه. يؤكّد أن الميدان مطروق منذ عقود."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "MacHenry2010ConvolutionRingSymmetric",
+      "relation": "ADJACENT",
+      "coverage_note": "خط موازٍ عبر متعدّدات Schur الخطّافية. لم يُقرأ بعد."
     }
   ],
   "links": [
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-05",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-05",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-GOLDBACH-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-09",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-09",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-09",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-JET-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-06",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-06",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-06",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-001",
+      "note": null
+    },
     {
       "from_type": "pvg_document",
       "from_key": "90_SESSION_MEMORY_2026-08-01_v2",
