@@ -1,16 +1,283 @@
 {
   "format_version": 1,
-  "claims": [],
+  "claims": [
+    {
+      "claim_key": "CLAIM-ADD-01",
+      "statement": "ι_N : {(a,b) : a+b=N} → G_N، (a,b) ↦ (ν(a),ν(b))، تقابلٌ واحد لواحد؛ فتمثيل ليف الجمع في PVG ليس ضغطًا للمعلومة (ADD-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "تتبع مباشرةً من حقن خريطة التقييم، وهي CLAIM-PVG-FND-01 المسنَدة إلى CashwellEverett1959RingOfNTFunctions. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة: نتيجةٌ في سطر من تقابلٍ عمره 67 سنة. وقيمتها **سلبية نافعة**: تمنع وهمًا محتملًا بأن الانتقال إلى إحداثيات PVG يضغط المسألة الجمعية أو يبسّطها. لا يفعل — يعيد ترميزها."
+    },
+    {
+      "claim_key": "CLAIM-ADD-02",
+      "statement": "هوية التفاف الليف: (f *₊ g)(N) = ∫_{G_N} f̂(x)ĝ(y) dμ_N(x,y) حيث μ_N = Σ_a δ_{(ν(a),ν(N−a))} (ADD-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "‏μ_N مُعرَّفة مجموعَ كتل ديراك على نقاط الليف، فالتكامل عليها هو المجموع نفسه. الأرشيف يصرّح: «هذه ترجمة دقيقة، وليست تقديرًا تقاربيًا». راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. تغييرُ ترميز لا مبرهنة، والأرشيف يقولها. وقيمتها تنظيمية: تكتب المجموع الجمعي بلغة القياس على الليف، فتفتح الباب لأدوات تحليلية — ولم تُدخل بعدُ أيَّ أداة."
+    },
+    {
+      "claim_key": "CLAIM-ADD-03",
+      "statement": "rank D_{N,r} = min(N−1, r/gcd(2,r))، ومنه D_{N,r} حقني ⟺ r/gcd(2,r) ≥ N−1 (ADD-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "العمودان a وb يتطابقان ⟺ 2(a−b) ≡ 0 (mod r)، فعدد الأعمدة المتمايزة هو min(N−1, r/gcd(2,r)). **فُحص: 437 حالة من 437** (N من 3 إلى 25، r من 1 إلى 19، رتبة عددية) — scripts/verify_addition_fiber_ranks.py. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "المؤثر D_{N,r} من بناء الأرشيف، فلا سابقة تُطلب ولا جِدّة تُدَّعى: NOT-FOUND-YET هنا خاليةٌ من المعنى. المطلوب الصحةُ وحدها، وقد فُحصت."
+    },
+    {
+      "claim_key": "CLAIM-ADD-04",
+      "statement": "للمعايير r₁,…,r_s وL=lcm(rᵢ): rank J_{N;r} = min(N−1, L/gcd(2,L))؛ ولا يُساوى المؤثر المشترك J بالمكدَّس M لأن الهوامش قد تفقد اقتران المعلومات (ADD-04).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "**فُحص: 119 حالة من 119** (N من 3 إلى 19، سبع مجموعات معايير منها (3,5) و(6,10) و(3,4,5)) — scripts/verify_addition_fiber_ranks.py. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة تُدَّعى. والتمييز بين J المشترك وM المكدَّس هو المضمون الحقيقي هنا، وهو تحذيرٌ منهجي صحيح: الهوامش ليست الاقتران."
+    },
+    {
+      "claim_key": "CLAIM-ADD-05",
+      "statement": "غولدباخ الثنائي للعدد الزوجي N يكافئ G_N ∩ (P₁×P₁) ≠ ∅، حيث G_N ليفُ الجمع وP₁={e_p} المحلُّ الأولي (ADD-05).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "المكافأة تُفَكّ من التعريف مباشرةً: عضوُ G_N زوجٌ (ν(a),ν(N−a))، ووقوعه في P₁×P₁ يعني a وN−a أوليّان. الأرشيف نفسه يصرّح: «هذه إعادة صياغة تامة، لا برهان» (ADD-05). راجع GATE-ADD-GOLDBACH-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع، ولذلك ليست `KNOWN`: لم أجد في الأدبيات نصًّا على هذه الصياغة الهندسية بعينها، وعدمُ العثور ليس جِدّة كما أنه ليس معرفة. إعادات صياغة غولدباخ جنسٌ مزدحم — هندسية وتحليلية ومصفوفية — وأيٌّ منها لم يُثبت شيئًا، وهذا هو الدرس. قيمة الصياغة تنظيمية: تضع السؤال في الإطار الهندسي، ولا تنقل السقف قيد أنملة."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-01",
+      "statement": "‏D_λ(s) = Σ_{n∈F_λ} n^{-s} تُعطى باحتواء–استبعاد على تقسيمات مواضع الأجزاء بدلالة P(ks) (PVFC-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏D_λ هي **الدالة الأحادية المتناظرة** m_λ مقيَّمةً عند x_p=p^{-s}. فُحص: 27 حالة من 27، تسعةُ تقسيمات وثلاث قيم لـs (scripts/verify_pvfc_symmetric.py). و{m_λ} أساسٌ كلاسيكي على ℤ — Savage2021SymmetricFunctionsNotes، البند 2.1 المعادلة (2.3) والنتيجة 2.1.3 (قُرئت). وصيغةُ الاحتواء–الاستبعاد نفسها هي انتقالُ الأساس الأحادي إلى مجاميع القوى عبر موبيوس شبكة التقسيمات.",
+      "novelty_note": "لا جِدّة في الجبر، والأرشيف يعلنها: رأسُ الفصل «NOVELTY NOT ESTABLISHED»، وبندُه العاشر يصنّف «تحويل القواعد بين الدوال الأحادية ومجاميع القوى» CLASSICAL صراحةً.\nالإضافةُ هنا **تسمية دقيقة**: ليست الصيغة شبيهةً بانتقال الأساس، بل هي هو، بتخصيص x_p=p^{-s}. وما يبقى خاصًّا بالمشروع هو الربط: أن لكل رأس λ ليفًا من الأعداد ودالةَ عدّ π_λ(x)."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-02",
+      "statement": "قانون الانتقال: P(rs)D_λ = (m_r+1)D_{sort(λ,r)} + Σ_j (m_{j+r}+1) D_{R_{j→j+r}λ} (PVFC-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "هذا بعينه مفكوكُ الجداء p_r·m_λ في الأساس الأحادي، مخصَّصًا عند x_p=p^{-s}: حدُّ الولادة هو إضافة جزء جديد، وحدود الرفع هي زيادة جزء قائم. فُحص: 48 حالة من 48، ثمانيةُ تقسيمات وثلاث قيم لـr وقيمتان لـs (scripts/verify_pvfc_symmetric.py). راجع Savage2021SymmetricFunctionsNotes وGATE-PVFC-SD-001.",
+      "novelty_note": "لا جِدّة في القاعدة. ومعاملاتها — كما يقول الأرشيف — «ناتجة من مضاعفات الأجزاء المتساوية، وليست معاملات تجريبية»، وهو وصفٌ صحيح لمعاملات مفكوك كلاسيكي. المرجع المعياري Doubilet1972SymmetricFunctionsOccupancy، ولم يُقرأ بعد."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-03",
+      "statement": "تحت الجداء الداخلي الموزون w(λ)=∏_r m_r(λ)!: يكون L=U* ومن ثم K=U*U ≥ 0 (PVFC-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏LiuSmith2021UpDownOperatorsYoung، ص2، محكَّمة (قُرئت): مؤثرات الهبوط **منقولاتُ** مؤثرات الصعود — «the down-operators can be thought of as transposes of the up-operators». والنقل هو التضايف تحت الجداء الداخلي الذي تكون فيه التقسيمات أساسًا متعامدًا، ومنه K=U*U نصفُ معرَّفة موجبة تلقائيًا. وص1 تنسب U وD إلى Stanley في دراسته للمجموعات التفاضلية جزئية الترتيب. راجع GATE-PVFC-SD-001.",
+      "novelty_note": "لا جِدّة في التضايف ولا في K≥0: الأول مقرَّر، والثاني يتبعه في سطر. وكانت هذه `LITERATURE-UNCLEAR` حتى وُجد المصدر وقُرئ.\n**وما يبقى سؤالًا حقيقيًا** هو الوزن w(λ)=∏_r m_r(λ)! بعينه: هل هو الجداء الداخلي الذي تكون فيه التقسيمات متعامدة متجانسة، أم جداء Hall، أم ثالث؟ التضايف يتوقف على هذا الاختيار، والمصدر لا يحسمه لأنه يعمل بأساس متعامد معياري. بند متابعة دقيق."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-04",
+      "statement": "مؤثرات الأنماط الصورية تحقق [D,B]=I و[L,R]=y₁∂_{y₁}، و[B,B]=[T,T]=0 و[T_r,B_a]=B_{a+r} (PVFC-04).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏LiuSmith2021UpDownOperatorsYoung، المبرهنة 1 ص2، محكَّمة (قُرئت): جبر مؤثرات الصعود والهبوط على شبكة يونغ يُقدَّم بعلاقات تربيعية، منها d_i u_j = u_j d_i لـi≠j و**d₁u₁ = id** — وهي نمطُ [D,B]=I نفسُه. والأرشيف يصرّح في بنده الثامن أنها «مؤثرات تقسيمات كلاسيكية في جوهرها». راجع GATE-PVFC-SD-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. والمؤثرات في PVFC مصوغة على ℚ[y_j] لا على شبكة يونغ مباشرةً، فالتطابق **بنيوي لا حرفي**: الجبر واحد، والتحقيق مختلف. وهذا كافٍ لـKNOWN-IN-EQUIVALENT-FORM ولا يزيد."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-05",
+      "statement": "وحدة birth–jet مغلقة (PVFC-05).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "النتيجة مبرهنة داخليًا. وانغلاقُ الوحدة تحت مؤثّرَي الولادة والرفع مسألةُ تمثيلٍ لجبر المؤثرات في CLAIM-PVFC-04، فوجهتُها نفسها. راجع GATE-PVFC-SD-001.",
+      "novelty_note": "لم يبلغها المسح بعمق. لا يُدَّعى لها جِدّة ولا تُنفى: بند متابعة صريح، ومحلُّه الطبيعي أدبيات تمثيلات جبر هايزنبرغ على فضاء فوك المتناظر."
+    },
+    {
+      "claim_key": "CLAIM-PVFC-09",
+      "statement": "لا توجد بصمة أولية محلية مستقرة ذات رتبة محدودة داخل s>1: عند s₀ ومستوى N ورتبة m منتهية، تقرّب أبجدية منتهية غير أولية جميع المشتقات ضمن ε (PVFC-09).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "المبرهنة صحيحة ومبرهنة داخليًا (PVFC-09)، و**بُنيت أبجدياتُها صراحةً**: قطعُ الذيل ثم إزاحةُ العناصر، وهما خطوتا برهان الأرشيف نفسه (scripts/verify_finite_jet_nondiscrimination.py). عند s₀=1.3 وN=6 وm=3:\n• ε=10⁻³ → أبجدية من 801 عنصرًا غير صحيح، خطأ 9.7×10⁻⁴.\n• ε=10⁻⁶ → أبجدية من 62946 عنصرًا غير صحيح، خطأ 8.6×10⁻⁷.\n• ε=10⁻⁹ → **منحطّ**: حدُّ القطع تجاوز قائمة الأوليات المستعملة، فصارت المقارنة مع القائمة نفسها. يُعلَن ولا يُحتسب.\nوالميدان الذي تقع فيه حيٌّ ومحكَّم: DebruyneSchlagePuchtaVindas2016BeurlingExamples، Acta Arith. 176 (2016). راجع GATE-PVFC-JET-001.",
+      "novelty_note": "تبقى LITERATURE-UNCLEAR رغم البناء الصريح، وهذا مقصود: **البناء يُظهر أن المبرهنة صحيحة، ولا يقول شيئًا عن كونها معروفة**. وهما سؤالان مختلفان، وخلطُهما هو الخطأ الذي بُنيت هذه المنصة لمنعه.\nولم أجد ورقةً تنصّ على العبارة بعينها. ومقدّمةُ ميدان Beurling (1937) هي عينُ خلاصتها — أن السلوك الشبيه بالأوليات ليس خاصًّا بالأوليات — لكن المقدّمة ليست استشهادًا.\nوقيمة المبرهنة لا تنقص: سالبةٌ تحدّ مسار البحث بنفسها، وتغلق تمييز الأوليات بعدد منتهٍ من العزوم في نقطة داخلية. وما بقي مفتوحًا — السلوك عند s→1⁺ والحدود الموحّدة في N — خارجها تمامًا."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CALC-01",
+      "statement": "‏d²=0 على شبكة PVG، فدورانُ حقل التدرج حول كل مربع صفر — ولا يصحّ ذلك لكل حقل، بل للحقول التدرجية وحدها (PVG-CALC-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "‏d²=0 بديهيةُ المركّب المشترك، وشبكة الأُسُس ℤ^k مركّبُ مكعّبات. راجع CochainComplexAndCubicalCohomology وGATE-PVG-GEO-001.",
+      "novelty_note": "الترجيح القاطع أنها تعريفية لا نتيجة، ولم أقرأ مصدرًا بعينه فلا تُرفع. وقيمتها هنا **تصحيحية** أيضًا: الأرشيف يسجّل أن الادعاء القديم بأن كل حقل على PVG عديم الدوران كان خطأ، ويعطي المثال المضاد V=(−b,a)."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CALC-02",
+      "statement": "دالة موجبة f ضربيةٌ ⟺ انعدام انحنائها المختلط اللوغاريتمي D_pD_q log f = 0 لكل p≠q (PVG-CALC-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "انعدامُ الفرق المختلط يعني أن log f ينفصل جمعًا على محاور الأوليات، أي أن f تُحدَّد كليًا بقيمها على قوى الأوليات. وهذا نصّ CashwellEverett1959RingOfNTFunctions، البند 6 ص977 (قُرئ): «α(Πp^a)=Πα(p^a) is multiplicative, α(p^a) being quite arbitrary for each power a … two multiplicative functions identical on all such p^a are equal». راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. الصياغة بلغة «الانحناء المختلط» تسمّي الشرط المعروف ولا تضيف إليه؛ وهي النظير المتقطّع لمعيار الانفصال الكلاسيكي ∂²log f/∂x∂y = 0 ⟺ f = g(x)h(y)."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CALC-03",
+      "statement": "الفرق الثاني المحوري لدالة القواسم الخام ينعدم: D_p^{+2}τ = 0 (PVG-CALC-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏τ(p^a·m)=(a+1)τ(m) عند p∤m، وهي خطّية في a، فالفرق الثاني صفر. وصيغة τ=∏(a_p+1) مسنَدة في CLAIM-PVG-FND-05 إلى Haukkanen2016UnitaryDivisorSemilattice. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. وقيمة هذه النتيجة **تصحيحية**: الأرشيف يسجّل أن الادعاء القديم بسالبية الانحناء المحوري الخام كان خطأ، وأن السالب يظهر لـlog τ لا لـτ. وتصحيح الذات أنفع من نتيجة جديدة."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CONE-01",
+      "statement": "n²=π₂₃(n)π₂₅(n)π₃₅(n)، وn=∏ جداءات gcd الثنائية للإسقاطات (PVG-CONE-01، PVG-CONE-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "صياغةٌ مكافئة لحساب الأُسُس على الشبكة المعروفة في Haukkanen2016UnitaryDivisorSemilattice: كلُّ أُسٍّ يظهر في وجهين من الثلاثة بالضبط، فيتضاعف؛ وgcd هو min. الحالة العامة ∏_{وجوه} π_F(n)=n^{k−1}. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. عدُّ ظهور كل أُسٍّ في الوجوه حسابٌ مباشر، والصياغة الهندسية تسمّيه لا تضيف إليه."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FACE-01",
+      "statement": "العمق الوجهي d_{pq}=min(a,b)، وبعد نزع (pq)^d تقع البقية على أحد المحورين (PVG-FACE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "min على متجهات الأُسُس هو gcd، وهذا نصّ Haukkanen2016UnitaryDivisorSemilattice. والعمق هو ν_{pq} لأكبر قوة من الجذر تقسم العدد. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. استخراجُ أكبر قوة للجذر عمليةٌ قياسية."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FM-01",
+      "statement": "لمصفوفة الوجوه F=vvᵀ−diag(a_i²): Inertia(F)=(1,k−1,0)، وdet F=(−1)^{k+1}(k−1)(∏a_i)² (PVG-FM-01، PVG-FM-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "مصفوفة الوجوه F = vvᵀ − diag(a_i²) هي مصفوفة **DPR1**: بوضع D = −diag(a²) وρ=1 وz=a في المعادلة (1) من JakovcevicStor2015DPR1Eigen. ومعادلةُ الأرشيف الطيفية 1 = Σ a_i²/(λ+a_i²) هي عينُ المعادلة السرّية (3)، ومتجهُه الذاتي x_i ∝ a_i/(λ+a_i²) هو عينُ (D−λI)⁻¹z.\nفُحص: 1620 قيمة ذاتية من 1620 عند تمايز الأُسُس (scripts/verify_face_matrix_secular.py). والتوقيع والمحدد فُحصا سابقًا 360/360 عبر التطابق F = D_a(J−I)D_a. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة: البنية DPR1 وأدبياتُها قائمة منذ Golub 1973 وBunch–Nielsen–Sorensen 1978، والمعادلة السرّية معياريةٌ فيها. وكانت هذه LITERATURE-UNCLEAR حتى وُجد المصدر وقُرئ.\n**والأهمّ ثغرة كشفها المصدر**: الأرشيف يعطي المعادلة الطيفية بلا شرط، وأدبيات DPR1 تشترط d_i ≠ d_j — أي **تمايز الأُسُس**. فعند تكرار أُسّ بتضاعف m يصير −a² قيمةً ذاتية بتضاعف m−1، وهي قطبٌ للمعادلة السرّية لا جذر، فلا تحكمها. فُحص: 291/291. وهذا لا يمسّ التوقيع ولا المحدد، وكلاهما يصحّ مع التكرار."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-01",
+      "statement": "تمثيل الأعداد الصحيحة الموجبة بمتجه أُسُسها الأولية تماثلٌ ℕ≥1 ≅ ⊕_p ℕ₀ (PVG-FND-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982، محكَّم: «every integer n may be written uniquely in the form n=p₁^{a₁}p₂^{a₂}⋯ and uniquely described by a vector (a₁,a₂,…)». راجع GATE-PVG-FND-001.",
+      "novelty_note": "لا جِدّة، ولم تُدَّع. هذه المبرهنة الأساسية في الحساب مصوغةً بلغة الشبكات، وعمر الصياغة بهذه العبارة 67 سنة على الأقل."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-02",
+      "statement": "ℚ_{>0} ≅ ⊕_p ℤ، أي زمرة حرة أبيلية على الأوليات (PVG-FND-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982: التوصيف الوحيد لكل صحيح بمتجه أُسُس منتهي الحامل. وℚ_{>0} تتمّةُ ذلك الأحادي الزمرية، فيصير المتجه صحيحَ المركّبات. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. هذه المبرهنة الأساسية في الحساب بلغة الزمر."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-03",
+      "statement": "ν(mn)=ν(m)+ν(n): التقييم تماثلُ أحاديات (PVG-FND-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982: كونُ n ↦ (a₁,a₂,…) توصيفًا وحيدًا يجعل جمع المتجهات هو ضربَ الأعداد. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. بل هذه صيغةُ تعريف التقييم p-adic نفسِه، فالسؤال عن سابقتها سؤالٌ عن سابقة التعريف."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-04",
+      "statement": "القسمة ترتيبٌ جزئي على ℤ₊، وgcd وlcm هما الالتقاء والاتحاد، أي min وmax على متجهات الأُسُس (PVG-FND-04).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "Haukkanen2016UnitaryDivisorSemilattice، المقدمة ص68، محكَّم: «the gcd and the lcm operations serve as the meet and the join on this poset. Thus ℤ₊ is a lattice … known as the divisor lattice. This lattice is distributive.» راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. وللبنية اسمٌ مستقرّ في الأدبيات — «the divisor lattice» — والمصدر يصفها «well known» مرّتين في سطرين."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-05",
+      "statement": "قواسم n نقاطُ صندوق: B(n)=∏[0,a_p]∩ℤ، وعددُها ∏(a_p+1)=τ(n) (PVG-FND-05).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "تتبع مباشرةً من Haukkanen2016UnitaryDivisorSemilattice (ترتيب القسمة مركَّبيّ) مع CashwellEverett1959RingOfNTFunctions (متجه الأُسُس): d|n ⟺ 0 ≤ ν_p(d) ≤ ν_p(n) لكل p. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. وصيغة τ(n)=∏(a_p+1) في كل مقرَّر في نظرية الأعداد."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-06",
+      "statement": "تحت تمثيل متجه الأُسُس، يصير التفاف ديريشليه التفافًا جمعيًا على المخروط ⊕_p ℕ₀ (PVG-FND-06).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982، محكَّم: «addition is preserved, and P(α·β)=P(α)P(β)» حيث P متسلسلة قوى في متغيّرات مفهرسة بالأوليات؛ وضربُ متسلسلات القوى هو التفافُ المعاملات الجمعي. راجع GATE-PVG-FND-001.",
+      "novelty_note": "لا جِدّة. وهذه أهمّ حصيلة المسح: النتيجة كانت غير مفحوصة، وقد تبيّن أنها منشورة محكَّمة منذ 1959. عدمُ العثور كان واقعةً عن مسحنا لا عن العالم."
+    },
+    {
+      "claim_key": "CLAIM-PVG-GLUE-01",
+      "statement": "ثلاث نقاط وجهية تلصق إلى نقطة واحدة في المخروط إذا وفقط إذا اتفقت على المحاور المشتركة (PVG-GLUE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "المبرهنة صحيحة (PVG-GLUE-01). وصياغتها «تتفق على التقاطعات ⟺ تلصق» هي **شرط الحُزمة** بعينه — معادلُ المُسوّي (equalizer) على غطاء. والأرشيف يعرف ذلك: بندُه المفتوح هو «صياغة شيقية/حزمية كاملة للّصق». راجع GATE-PVG-GEO-001.",
+      "novelty_note": "الترجيح القوي أنها كلاسيكية (بديهية الحُزمة على الأحادي التآلفي ℕ₀^k في الهندسة التوريّة)، لكنّي لم أقرأ مصدرًا يقولها في هذا السياق. والترجيح ليس دليلًا. بند متابعة: تثبيت مصدر في نظرية الأحاديات التآلفية أو الهندسة التوريّة."
+    },
+    {
+      "claim_key": "CLAIM-PVG-TAU-01",
+      "statement": "عند ثبات ω(n)=k وΩ(n)=A، تبلغ τ(n)=∏(a_i+1) أقصاها عند التوزيع المتوازن (q+1)^r q^{k−r} حيث A=kq+r؛ وlog τ مقعَّرة بمعنى Schur (PVG-TAU-01، PVG-SHAPE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "تختزل إلى تقعّر Schur للجداء ∏x_i على الربع الموجب، مع كون التغليب محفوظًا تحت الإزاحة a↦a+1. فُحص استقصاءً تامًّا: 9,681,337 زوجًا مغلِّبًا، k من 2 إلى 5 وΩ حتى 15 — إزاحة التغليب وتقعّر Schur يصحّان في كل الحالات، والشكل الأمثل يطابق (q+1)^r q^{k−r} في كل حالة (scripts/verify_tau_majorization.py). راجع GATE-PVG-GEO-001.",
+      "novelty_note": "الوجهة معروفة — MarshallOlkinArnold2011Majorization — والأرشيف يستعمل مصطلح Schur-concave بنفسه، فالجِدّة غير مدَّعاة. ولم أقرأ الكتاب، فلا تُرفع إلى KNOWN.\nوملاحظة منهجية: مُلخِّصٌ آلي زعم أثناء المسح أن التغليب لا يُحفظ تحت الإزاحة، والفحص الاستقصائي أثبت خطأه. مخرَجُ أداةٍ ليس مصدرًا."
+    }
+  ],
   "gates": [
+    {
+      "gate_key": "GATE-ADD-FIBER-001",
+      "title": "ألياف الجمع: الحفظ، والالتفاف، ورتب قنوات الفرق",
+      "research_question": "أربع نتائج على ليف الجمع G_N = {(ν(a), ν(N−a))}:\nADD-01: التقييم على الليف تقابلٌ فلا تُفقد معلومة.\nADD-02: هوية التفاف الليف.\nADD-03: rank D_{N,r} = min(N−1, r/gcd(2,r)).\nADD-04: rank J_{N;r} = min(N−1, L/gcd(2,L))، L=lcm(r_i).\nالمؤثرات من بناء الأرشيف، فالسؤال عن الصحة لا عن السابقة.",
+      "status": "CLOSED",
+      "verdict": "NOT-FOUND-YET"
+    },
+    {
+      "gate_key": "GATE-ADD-GOLDBACH-001",
+      "title": "غولدباخ بوصفه تقاطع الليف الجمعي مع المحل الأولي",
+      "research_question": "ADD-05: G_N ∩ (P₁×P₁) ≠ ∅ حيث P₁={e_p}. هل لهذه الصياغة الهندسية سابقة، وهل تحمل مضمونًا زائدًا على العبارة الأصلية؟",
+      "status": "CLOSED",
+      "verdict": "NOT-FOUND-YET"
+    },
+    {
+      "gate_key": "GATE-PVFC-JET-001",
+      "title": "عدم التمييز بالنفاثة المحدودة وأعداد Beurling المعمَّمة",
+      "research_question": "PVFC-09 تقول: عند s₀>1 ومستوى N ورتبة اشتقاق m، كلّها منتهية، توجد أبجدية منتهية غير أولية تقرّب عزوم الأوليات ومشتقاتها ضمن ε — فلا بصمة أولية محلية مستقرة ذات رتبة محدودة داخل s>1.\nهل هذا معروف؟ النطاق: أعداد Beurling المعمَّمة، شمولية Voronin، أمثلة مضادة في نصف مستوى التقارب المطلق.",
+      "status": "REVIEW-IN-PROGRESS",
+      "verdict": "PARTIAL"
+    },
     {
       "gate_key": "GATE-PVFC-SD-001",
       "title": "مؤثرات انتقال الألياف وأبراج Selberg–Delange",
       "research_question": "هل يوجد في الأدبيات تمثيل موحد لانتقالات الألياف على جميع معاملات Selberg–Delange، بحيث يُعطى برج المعاملات التقاربية بمؤثرات رفع/خفض على بنية دوال متناظرة مخصَّصة عند x_p = p^{-s}؟",
       "status": "REVIEW-IN-PROGRESS",
       "verdict": "PARTIAL"
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "title": "متجه الأُسُس والتفاف ديريشليه بوصفه التفافًا جمعيًا",
+      "research_question": "هل تمثيل ℕ≥1 ≅ ⊕_p ℕ₀ بمتجه الأُسُس، وتحوّلُ التفاف ديريشليه تحته إلى التفاف جمعي على المخروط، موجودان في الأدبيات؟\nالنطاق: حلقة الدوال الحسابية، متسلسلات القوى بعدد قابل للعدّ من المتغيرات، حلقة Witt/القلائد، الدوال المتناظرة الحسابية.",
+      "status": "CLOSED",
+      "verdict": "KNOWN"
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "title": "أسس PVG الحسابية والشبكية: التقييم، والقسمة ترتيبًا، وصندوق القواسم",
+      "research_question": "أربع نتائج من طبقة الأسس بقيت بلا فحص بعد أن تبيّن أن PVG-FND-01 وPVG-FND-06 هما Cashwell–Everett 1959:\nPVG-FND-02: ℚ_{>0} ≅ ⊕_p ℤ.\nPVG-FND-03: ν(mn)=ν(m)+ν(n).\nPVG-FND-04: القسمة ترتيب، وgcd/lcm هما min/max.\nPVG-FND-05: القواسم نقاط صندوق.\nهل كلٌّ منها في الأدبيات؟",
+      "status": "CLOSED",
+      "verdict": "KNOWN"
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "title": "هندسة المخروط والوجوه ومصفوفة الوجوه",
+      "research_question": "تسع نتائج هندسية على المخروط ℕ₀^k:\nCONE-01: n²=∏ الإسقاطات الوجهية الثلاثة. CONE-02: إعادة البناء بجداءات gcd. FACE-01: عمق الوجه min(a,b). GLUE-01: شرط توافق المحاور المشتركة مكافئ للّصق. FM-01: توقيع (1,k−1,0). FM-02: صيغة المحدد. CALC-01: d²=0. CALC-02: الضربية تكافئ انعدام الانحناء المختلط. TAU-01: تعظيم τ عند التوازن.\nإلى أي مبرهنة كلاسيكية تختزل كلٌّ منها؟",
+      "status": "REVIEW-IN-PROGRESS",
+      "verdict": "PARTIAL"
     }
   ],
   "references": [
+    {
+      "reference_key": "Baez2025DirichletSpecies",
+      "title": "Dirichlet Species and Arithmetic Zeta Functions",
+      "authors": "John C. Baez",
+      "year": "2025",
+      "venue": "Theory and Applications of Categories 44(39), 1316–1336 — محكَّم",
+      "doi": "10.48550/arXiv.2502.01833",
+      "url": "https://arxiv.org/abs/2502.01833",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "الملخّص فقط. تصنيفٌ فئوي لسلاسل ديريشليه عبر أنواع Joyal: كل نوع F يعطي سلسلة ديريشليه، ودالة زيتا الحسابية لمخطط تنشأ هكذا. مجاور لإطار PVFC (وWeising يستعمل الأنواع أيضًا)، ولم أتحقق بعد إن كان يخصّص المتغيرات عند p^{-s}. محكَّم، فيُستشهد به بحذر في حدود ملخّصه.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Beurling1937GeneralizedPrimes",
+      "title": "Beurling generalized prime systems (الميدان لا ورقةً بعينها)",
+      "authors": "Arne Beurling وما تلاه",
+      "year": "1937",
+      "venue": "Acta Mathematica 68 — محكَّم؛ وأدبيات متّصلة إلى 2025",
+      "doi": null,
+      "url": "https://cage.ugent.be/~fabrouck/Talks/Introduction_Beurling_g_primes.pdf",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "مُدخَل بوصفه ميدانًا لا ورقةً مفردة، فلا يُستشهد به استشهادًا نقطيًا قبل تثبيت الورقة المعيّنة. مقدّمةُ الميدان بعينها: أي متتالية 1<p₁≤p₂≤… تُولّد «أعدادًا صحيحة معمَّمة» تحاكي سلوك الأوليات التحليلي. وهذا يعني أن «السلوك الشبيه بالأوليات ليس خاصًّا بالأوليات» مقدّمةُ ميدان قائم منذ 1937، لا اكتشافًا.",
+      "bibliography_key": null
+    },
     {
       "reference_key": "BretecheTenenbaum2020Remarks",
       "title": "Remarks on the Selberg–Delange method",
@@ -20,7 +287,55 @@
       "doi": null,
       "url": null,
       "reading_status": "DISCOVERED",
-      "notes": "أحدث معالجة للفروض التي تُنتج تقديرات حادة. لا بنية مؤثرات.",
+      "notes": "لم يُقرأ. طرف Selberg–Delange ناضج وبلا بنية مؤثرات — وهذا حكم مسحٍ لا حكم قراءة، فيبقى بندَ متابعة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "title": "The ring of number-theoretic functions",
+      "authors": "E. D. Cashwell, C. J. Everett",
+      "year": "1959",
+      "venue": "Pacific Journal of Mathematics 9(4), 975–985 — محكَّم",
+      "doi": null,
+      "url": "https://projecteuclid.org/journals/pacific-journal-of-mathematics/volume-9/issue-4/The-ring-of-number-theoretic-functions/pjm/1103038878",
+      "reading_status": "FULLY-READ",
+      "notes": "قُرئ المقال نفسه لا ملخّصًا عنه. المقدمة ص975 تنصّ: «The domain Ω is isomorphic to the domain P of formal power series over F in a countable set of indeterminates». والبند 14 ص982 يبني التماثل صراحةً: تُرتَّب الأوليات p₁,p₂,…، ويوصف كل عدد صحيح توصيفًا وحيدًا بمتجه أُسُس (a₁,a₂,…) منتهي الحامل، ثم α ↦ Σα(n)x₁^{a₁}x₂^{a₂}⋯، و«addition is preserved, and P(α·β)=P(α)P(β)». وضربُ متسلسلات القوى هو التفافُ معاملاتها الجمعي. أي أن PVG-FND-01 وPVG-FND-06 مذكورتان معًا في فقرة واحدة سنة 1959.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "CochainComplexAndCubicalCohomology",
+      "title": "بديهية المركّب المشترك d∘d=0 على مركّب المكعّبات",
+      "authors": "أدبيات الطوبولوجيا الجبرية والتفاضل الخارجي المتقطّع",
+      "year": null,
+      "venue": "نتيجة تعريفية — لم يُثبَّت مصدر بعينه بعد",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة. \\(d^2=0\\) بديهيةُ المركّب المشترك، وعلى شبكة \\(\\mathbb Z^k\\) (مركّب مكعّبات) هي واقعة قياسية في الكوهومولوجيا المكعّبية وحساب التفاضل الخارجي المتقطّع. لم أقرأ مصدرًا بعينه.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "DebruyneSchlagePuchtaVindas2016BeurlingExamples",
+      "title": "Some examples in the theory of Beurling's generalized prime numbers",
+      "authors": "Gregory Debruyne, Jan-Christoph Schlage-Puchta, Jasson Vindas",
+      "year": "2016",
+      "venue": "Acta Arithmetica 176، ص101–129 — **محكَّمة**",
+      "doi": null,
+      "url": "https://arxiv.org/abs/1505.04174",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "الملخّص وبيانات النشر فقط. «Several examples of generalized number systems are constructed to compare various conditions occurring in the literature for the prime number theorem in the context of Beurling generalized primes».\nيُستبدل به المُدخَل السابق Beurling1937GeneralizedPrimes الذي كان «ميدانًا لا ورقةً» — وهذا ضعفٌ في التسجيل صُحّح. الورقة محكَّمة وحديثة وتُثبت أن الميدان حيّ، لكنها لا تنصّ على عبارة PVFC-09 بعينها، ولم تُقرأ. فلا تصلح إسنادًا لحالة موثقة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Doubilet1972SymmetricFunctionsOccupancy",
+      "title": "On the Foundations of Combinatorial Theory VII: Symmetric Functions through the Theory of Distribution and Occupancy",
+      "authors": "Peter Doubilet",
+      "year": "1972",
+      "venue": "Studies in Applied Mathematics 51، ص377–395 — محكَّم",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "لم يُقرأ (محجوب). المرجع المعياري لمصفوفات الانتقال بين أُسُس الدوال المتناظرة عبر دالة موبيوس لشبكة التقسيمات — وهو الموضع الطبيعي لصيغة PVFC-01. بند متابعة أولوي.",
       "bibliography_key": null
     },
     {
@@ -72,6 +387,30 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "title": "Embedding the unitary divisor meet semilattice in a lattice",
+      "authors": "Pentti Haukkanen",
+      "year": "2016",
+      "venue": "Notes on Number Theory and Discrete Mathematics 22(3), 68–78 — محكَّم",
+      "doi": null,
+      "url": "https://nntdm.net/papers/nntdm-22/NNTDM-22-3-68-78.pdf",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت المقدمة (ص68–69) قراءةً كاملة في ملف PDF الأصلي؛ وبقيّة المقال عن القواسم الأحادية وهي خارج غرضنا. المقدمة تنصّ حرفيًا: «It is well known that the set ℤ₊ of positive integers is a poset under the usual divisibility relation. It is likewise well known that the gcd and the lcm operations serve as the meet and the join on this poset. Thus ℤ₊ is a lattice under the usual divisibility relation, known as the divisor lattice. This lattice is distributive.»\nولها اسم مستقرّ: **the divisor lattice**. وتكرار «well known» مرّتين في سطرين هو بنفسه شهادةٌ على كلاسيكيّتها.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "JakovcevicStor2015DPR1Eigen",
+      "title": "Forward stable eigenvalue decomposition of rank-one modifications of diagonal matrices",
+      "authors": "N. Jakovčević Stor, I. Slapničar, J. L. Barlow",
+      "year": "2015",
+      "venue": "arXiv:1405.7537v2 — نسخة أولية؛ والمؤلفون لهم عمل محكَّم في Lin. Alg. Appl. 464 (2015)",
+      "doi": null,
+      "url": "https://arxiv.org/abs/1405.7537",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت الصفحتان 1–2 في الملف الأصلي. المعادلة (1): A = D + ρ z zᵀ، وتُسمّى «diagonal-plus-rank-one» (DPR1). والمعادلة (3): «The eigenvalues of A are the zeros of the secular function … f(λ) = 1 + ρ Σ ζ_i²/(d_i − λ)».\nوتشترط الورقة صراحةً عدمَ قابلية الاختزال: «ζ_i ≠ 0 … and d_i ≠ d_j, for all i ≠ j».\nنسخة أولية، فلا تُرقَّى إلى محكَّمة؛ وهي تُسند المعادلة السرّية إلى مراجع قياسية (Golub–Van Loan، البند 8.5.3).",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Jing1991VertexOperators",
       "title": "Vertex operators and Hall-Littlewood symmetric functions",
       "authors": "Naihuan Jing",
@@ -84,6 +423,30 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "LiuSmith2021UpDownOperatorsYoung",
+      "title": "Up- and Down-operators on Young's Lattice",
+      "authors": "Ricky Ini Liu, Christian Smith",
+      "year": "2021",
+      "venue": "Electronic Journal of Combinatorics 28(3) #P3.30 — **محكَّمة**، مفتوحة",
+      "doi": "10.37236/10099",
+      "url": "https://doi.org/10.37236/10099",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت الصفحتان 1–2. المقدمة ص1 تنصّ أن مؤثرات Schur «can also be seen as refinements of the **raising and lowering operators U and D acting on Young's lattice** as defined by Stanley in his study of **differential posets**».\nوص2 تنصّ صراحةً على التضايف: «using the fact that the down-operators can be thought of as **transposes of the up-operators**». وتُدرج العلاقات: d_i u_j = u_j d_i لـi≠j، و**d₁u₁ = id**، وd_{i+1}u_{i+1} = u_i d_i (المبرهنة 1).\nأي أن تضايف الصعود والهبوط على شبكة يونغ، وعلاقةَ التبديل من نمط هايزنبرغ، كلاهما مقرَّر في دورية محكَّمة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "MacHenry2010ConvolutionRingSymmetric",
+      "title": "The Convolution Ring of Arithmetic Functions and Symmetric Polynomials",
+      "authors": "Trueman MacHenry, Kieh Wong",
+      "year": "2010",
+      "venue": "arXiv:1009.1892 — نسخة أولية؛ وللمؤلفين عمل محكَّم في Rocky Mountain J. Math. 42(4) 2012",
+      "doi": null,
+      "url": "https://arxiv.org/abs/1009.1892",
+      "reading_status": "DISCOVERED",
+      "notes": "لم يُقرأ بعد. تمثيل زمرة الدوال الضربية بتقييمات متعدّدات حدود Schur الخطّافية. الرِّجل الخامسة في GATE-PVFC-SD-001 كانت Elliott 2008؛ هذا خطّها الموازي. بند متابعة.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Macdonald1995SymmetricFunctions",
       "title": "Symmetric Functions and Hall Polynomials",
       "authors": "I. G. Macdonald",
@@ -92,7 +455,19 @@
       "doi": null,
       "url": null,
       "reading_status": "DISCOVERED",
-      "notes": "الفصل الخامس: تماثل Satake وربط الأساس المتناظر بالعوامل المحلية. الجذر الأقدم للإطار كله، ويلزم فحصه قراءةً مباشرة.",
+      "notes": "لم يُقرأ. البند الثاني في متابعة GATE-PVFC-SD-001: الفصل الخامس (تماثل Satake) قراءةً مباشرة لا نقلًا عن الآخرين. لا يزال مفتوحًا.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "MarshallOlkinArnold2011Majorization",
+      "title": "Inequalities: Theory of Majorization and Its Applications",
+      "authors": "Albert W. Marshall, Ingram Olkin, Barry C. Arnold",
+      "year": "2011",
+      "venue": "Springer Series in Statistics، الطبعة الثانية — كتاب معياري",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة لا إسنادًا. المرجع المعياري لتقعّر Schur، وفيه أن الجداء ∏x_i (والدوال المتناظرة الأولية عمومًا) مقعَّرةٌ بمعنى Schur على الربع الموجب — وهذه هي المبرهنة التي تختزل إليها PVG-TAU-01. لم يُقرأ، فلا يصلح إسنادًا.",
       "bibliography_key": null
     },
     {
@@ -108,6 +483,42 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "Savage2021SymmetricFunctionsNotes",
+      "title": "Symmetric Functions (ملاحظات محاضرات)",
+      "authors": "Alistair Savage",
+      "year": "2021",
+      "venue": "جامعة أوتاوا — ملاحظات محاضرات، **غير محكَّمة**",
+      "doi": null,
+      "url": "https://alistairsavage.ca/symfunc/notes/Savage-SymmetricFunctions.pdf",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئ البند 2.1 (ص20–22) في الملف الأصلي. المعادلة (2.3) تعرّف الدالة الأحادية المتناظرة m_λ := Σ_{α∈λ𝔖_n} x^α، والملاحظة 2.1.1 تشدّد على عدّ الحدود مرّةً واحدة. والقضية 2.1.2 مع النتيجة 2.1.3 تثبتان أن {m_λ} أساسٌ على ℤ لحلقة الدوال المتناظرة.\n**غير محكَّمة** — ملاحظات تدريس. تصلح إسنادًا لواقعة مقرَّرة مثل هذه، ولا تصلح لادعاء دقيق. والمرجع المعياري Macdonald أو Doubilet لا يزال بندَ متابعة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "Stanley1988DifferentialPosets",
+      "title": "Differential posets",
+      "authors": "Richard P. Stanley",
+      "year": "1988",
+      "venue": "Journal of the American Mathematical Society 1(4) — محكَّم",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "لم يُقرأ. شبكة يونغ مجموعةٌ جزئية الترتيب تفاضلية، ومؤثّرا الصعود والهبوط U وD متضايفان مع DU−UD=I. هذا الموضع الطبيعي لـPVFC-03 (L=U*، K=U*U≥0) ولـPVFC-04. والأرشيف نفسه يدرج «differential posets وشبكة يونغ» في برنامجه المفتوح (الفصل 17). بند متابعة.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "SylvesterInertiaAndCompleteGraphSpectrum",
+      "title": "قانون Sylvester للقصور الذاتي، وطيف مصفوفة جوار الغراف التام",
+      "authors": "J. J. Sylvester (1852) وأدبيات الطيف البياني",
+      "year": "1852",
+      "venue": "نتيجتان كلاسيكيتان — لم يُثبَّت مصدر بعينه بعد",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة لا إسنادًا. قانون Sylvester: التطابق المتجانس يحفظ القصور الذاتي. وطيف J−I لغراف K_k هو {k−1، و−1 بتضاعف k−1}. كلاهما في كل كتاب مقرَّر، ولم أقرأ مصدرًا بعينه، فلا يصلح إسنادًا لحالة موثقة.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Weising2024ArtinSymmetricFunctions",
       "title": "Artin Symmetric Functions",
       "authors": "Milo Bechtloff Weising",
@@ -115,8 +526,8 @@
       "venue": "arXiv:2409.09643v3 — نسخة أولية، لا مرجع دورية",
       "doi": "10.48550/arXiv.2409.09643",
       "url": "https://arxiv.org/abs/2409.09643",
-      "reading_status": "DISCOVERED",
-      "notes": "أقرب إطار وجدته إلى CLAIM-0001: حلقة دوال متناظرة مفهرسة بالمثاليات الأولية، وفكّ في أساس Hall–Littlewood، وتحويلات Mellin إلى جداءات دوال L لأرتين. نسخة أولية — لا تُعامل معاملة المحكَّم.",
+      "reading_status": "ABSTRACT-READ",
+      "notes": "الملخّص وصفحة arXiv فقط. نسخة أولية بلا مرجع دورية.",
       "bibliography_key": null
     },
     {
@@ -127,17 +538,35 @@
       "venue": "arXiv:2505.18504 — نسخة أولية، لا مرجع دورية",
       "doi": "10.48550/arXiv.2505.18504",
       "url": "https://arxiv.org/abs/2505.18504",
-      "reading_status": "DISCOVERED",
-      "notes": "أخطر ورقة على ادعاء الجِدّة في CLAIM-0003: أبراج أسّية plethystic متكرّرة، وعلاقات تكرار صريحة لمعاملات الفكّ في الأساس الأحادي، وسلوك تقاربي توبيري. أولوية القراءة الأولى.",
+      "reading_status": "FULLY-READ",
+      "notes": "قُرئ النصّ الكامل (v2، 2025-09-21). الحكم على بند المتابعة الأول في GATE-PVFC-SD-001: المتغيّرات صورية بحتة، ولا تخصيص عند الأوليات، ولا ذكر لسلاسل ديريشليه ولا زيتا ولا الدوال الضربية. التخصيص الوحيد ψ:Λ→ℚ[[p₁]] أحاديُّ المتغيّر. وتظهر مجاميع القواسم σ_{ℓ(μ)-1}(gcd(μ)) في مفكوك المجاميع القوّية (Prop. 2.15)، وهي مكوّن حسابي لا تخصيصًا عند الأوليات. ومبرهنة Hardy–Littlewood التوبيرية تُستعمل على معاملات التقييد لا على دوال حسابية. فالمساحة المتبقية لـCLAIM-0003 لم تسقط بهذه الورقة. ولا تزال نسخةً أولية بلا مرجع دورية.",
       "bibliography_key": null
     }
   ],
   "gate_references": [
     {
+      "gate_key": "GATE-PVFC-JET-001",
+      "reference_key": "Beurling1937GeneralizedPrimes",
+      "relation": "COVERS",
+      "coverage_note": "المبرهنة صحيحة، والميدان الذي تقع فيه قائم منذ 1937 ومقدّمتُه هي عينُ خلاصتها: السلوك التحليلي الشبيه بالأوليات لا يميّز الأوليات. بل إن حيلة «إضافة أوليّ مختار مرارًا منتهية للتحكّم في قيمة زيتا عند نقاط بعينها» تقنيةٌ قياسية هناك، وهي عينُ حجّة القطع والإزاحة في برهان PVFC-09. وصياغة PVFC-09 أضعف: نقطة واحدة s₀ ورتبة منتهية، لا سلوك عالمي."
+    },
+    {
+      "gate_key": "GATE-PVFC-JET-001",
+      "reference_key": "DebruyneSchlagePuchtaVindas2016BeurlingExamples",
+      "relation": "ADJACENT",
+      "coverage_note": "ورقة محكَّمة بعينها في ميدان Beurling، تحلّ محلّ المُدخَل السابق الذي كان «ميدانًا لا ورقةً». لم تُقرأ، ولا تنصّ على PVFC-09 بعينها، فعلاقتها مجاورة لا مغطّية."
+    },
+    {
       "gate_key": "GATE-PVFC-SD-001",
       "reference_key": "BretecheTenenbaum2020Remarks",
       "relation": "ADJACENT",
       "coverage_note": "يعالج التقديرات التقاربية لا بنية برج المعاملات."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Doubilet1972SymmetricFunctionsOccupancy",
+      "relation": "ADJACENT",
+      "coverage_note": "الموضع المعياري لصيغة PVFC-01 (انتقال الأساس عبر موبيوس شبكة التقسيمات). لم يُقرأ — بند متابعة أولوي."
     },
     {
       "gate_key": "GATE-PVFC-SD-001",
@@ -171,6 +600,12 @@
     },
     {
       "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "LiuSmith2021UpDownOperatorsYoung",
+      "relation": "COVERS",
+      "coverage_note": "يُسند تضايف الصعود والهبوط (PVFC-03) وعلاقة التبديل (PVFC-04). محكَّمة ومقروءة، فترفع الحالتين من LITERATURE-UNCLEAR."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
       "reference_key": "Macdonald1995SymmetricFunctions",
       "relation": "PARTIAL",
       "coverage_note": "الأصل النظري للتخصيص عند الأوليات."
@@ -183,6 +618,18 @@
     },
     {
       "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Savage2021SymmetricFunctionsNotes",
+      "relation": "PARTIAL",
+      "coverage_note": "يُسند كون {m_λ} أساسًا كلاسيكيًا، وهو ما يجعل D_λ تخصيصَ عنصرِ أساس لا كائنًا جديدًا. غير محكَّم، فلا يحمل أكثر من ذلك."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "Stanley1988DifferentialPosets",
+      "relation": "ADJACENT",
+      "coverage_note": "الموضع الطبيعي لـPVFC-03 وPVFC-04. لم يُقرأ."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
       "reference_key": "Weising2024ArtinSymmetricFunctions",
       "relation": "PARTIAL",
       "coverage_note": "يغطي طرف الدوال المتناظرة المخصَّصة عند الأوليات، ولا يمسّ معاملات Selberg–Delange."
@@ -192,7 +639,588 @@
       "reference_key": "Weising2025HigherOrderBell",
       "relation": "PARTIAL",
       "coverage_note": "يغطي بنية البرج ومعاملات الفكّ وعلاقات التكرار، ولا يُخصّص عند x_p = p^{-s} ولا يمسّ Selberg–Delange."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "relation": "COVERS",
+      "coverage_note": "البند 14 ص982 يبني التماثل نفسه حرفًا بحرف: متجه الأُسُس، ثم α↦Σα(n)∏x_i^{a_i}، وحفظُ الجمع، وP(α·β)=P(α)P(β). لا فجوة."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "Elliott2008RingStructures",
+      "relation": "ADJACENT",
+      "coverage_note": "يمضي أبعد: بنية حلقية عبر متجهات Witt، الجمع فيها التفافُ ديريشليه. يؤكّد أن الميدان مطروق منذ عقود."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-001",
+      "reference_key": "MacHenry2010ConvolutionRingSymmetric",
+      "relation": "ADJACENT",
+      "coverage_note": "خط موازٍ عبر متعدّدات Schur الخطّافية. لم يُقرأ بعد."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "relation": "COVERS",
+      "coverage_note": "البند 14 ص982 يعطي التماثل الوحيد بمتجه الأُسُس ويصرّح بأن الجمع محفوظ. وFND-03 هي عينُ كون التطابق تماثلَ أحاديات، وFND-02 هي تتمّته الزمرية على ℚ_{>0}."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "relation": "COVERS",
+      "coverage_note": "المقدمة ص68 تنصّ على FND-04 بلفظها، وتسمّيها «the divisor lattice»، وتصفها بـ«well known» مرّتين. وFND-05 تتبعها مباشرةً: d|n ⟺ 0 ≤ ν_p(d) ≤ ν_p(n) لكل p، فالقواسم فترةٌ في الشبكة، وعددُها ∏(a_i+1)=τ(n)."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "CochainComplexAndCubicalCohomology",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـCALC-01. بند متابعة."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "relation": "PARTIAL",
+      "coverage_note": "يغطّي القاعدة الشبكية (gcd=min) التي تتبعها CONE-01/02 وFACE-01 في سطر واحد، ولا يغطّي GLUE ولا FM ولا CALC ولا TAU."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "JakovcevicStor2015DPR1Eigen",
+      "relation": "COVERS",
+      "coverage_note": "يُسند بنية DPR1 والمعادلة السرّية، فيرفع FM-01/02. ويكشف شرط تمايز الأُسُس الذي أغفله الأرشيف."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "MarshallOlkinArnold2011Majorization",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـTAU-01/SHAPE-01: تقعّر Schur للجداء. بند متابعة."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "SylvesterInertiaAndCompleteGraphSpectrum",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـFM-01/02، وبندُ متابعة لا إسناد."
     }
   ],
-  "links": []
+  "links": [
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "SUPPORTS",
+      "to_type": "claim",
+      "to_key": "CLAIM-ADD-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-04",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-04",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-04",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-05",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-05",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-GOLDBACH-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-04",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-04",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-04",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-05",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-05",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-09",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-09",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVFC-09",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-JET-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FACE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FACE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FACE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FM-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FM-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-04",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-04",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-04",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-05",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-05",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-06",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-06",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-06",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-GLUE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-GLUE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-GLUE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-SHAPE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-TAU-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "pvg_document",
+      "from_key": "90_SESSION_MEMORY_2026-08-01_v2",
+      "relation": "EXAMINES",
+      "to_type": "gate",
+      "to_key": "GATE-PVFC-SD-001",
+      "note": "القسم 23 يوازن بين ما تبيّن وجوده في الأدبيات وما يختلف في مسار PVG، وهو سؤال البوابة نفسه. حكم البوابة PARTIAL ولا يزال معلّقًا على قراءة arXiv:2505.18504."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_1_3d_interactive.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-01",
+      "note": "النسخة ثلاثية الأبعاد من الليف نفسه: (1) إلى (2) أو (1,1)."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_1_interactive.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-01",
+      "note": "الليف الأساسي (1) وأول تفرّع له، مع خيار إظهار معادلة ديريشليه."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_levels_1_to_3_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-05",
+      "note": "تولّد الألياف بعمليتَي الولادة والرفع، وهما مادة وحدة birth–jet."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvfc_fiber_levels_1_to_3_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVFC-06",
+      "note": "ومستوياتها الثلاثة تقابل الحد الأول والثاني والثالث. (تصحيح: نُسبت هذه الصفحة سابقًا إلى PVFC-02 بلا سند من نصّها.)"
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_flow_dynamics.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-SHAPE-01",
+      "note": "تعرض انتشار الكتلة وحركة مركزها نحو الاتزان على الطبقات."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_information_surface_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": "ومن ارتفاعاته أيضًا انحناء التفاعل K□."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_2_3_information_surface_3d.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FACE-01",
+      "note": "أحد ارتفاعات السطح هو العمق min(a,b) نصًّا."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_three_faces_2_3_5.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-01",
+      "note": "تعرض الوجوه الثلاثة 2–3 و2–5 و3–5 مجتمعةً."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_three_faces_2_3_5.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-GLUE-01",
+      "note": "وتُظهر المحاور المشتركة بين الوجوه، وهي موضوع شرط التوافق."
+    },
+    {
+      "from_type": "visual",
+      "from_key": "pvg_vector_fields_face_2_3.html",
+      "relation": "DEPICTS",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": "الصفحة ترسم المشتقة المختلطة f(6n)−f(2n)−f(3n)+f(n) ونمطها اللوغاريتمي، وهو عين المقدار الذي تنصّ النتيجة على انعدامه."
+    }
+  ]
 }

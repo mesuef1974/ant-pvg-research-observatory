@@ -24,15 +24,22 @@ from .models import (
     GateVerdict,
     LiteratureGate,
     ModelSynthesisNote,
+    ObservatoryReference,
+    PvgResult,
     ReadingStatus,
     SourceLayer,
 )
 
 _RESULT_KEY = re.compile(r"ANT-[A-Z]+-\d+-\d+")
 _NOTE_KEY = re.compile(r"MS-[A-Z]+-\d+")
+# الحدّ ``(?<![\w-])`` لا ``\b``: انظر التعليل في ``pvg.RESULT_KEY``.
+_PVG_KEY = re.compile(r"(?<![\w-])(?:PVG-[A-Z]+-\d+|PVFC-\d+|ADD-\d+)(?![\w-])")
 
 #: حالات الادعاء التي تعني أن المعلومة موثقة، فتستوجب إسنادًا.
 ANCHORED_STATUSES = frozenset({ClaimStatus.KNOWN, ClaimStatus.KNOWN_EQUIVALENT})
+
+#: حالات تزعم أن العبارة مبرهنة، سواء في الأدبيات أو هنا.
+PROOF_ASSERTING_STATUSES = ANCHORED_STATUSES | {ClaimStatus.PROVED_HERE}
 
 
 def _fail(detail: str) -> None:
@@ -47,6 +54,24 @@ def referenced_result_keys(*texts: str | None) -> set[str]:
 
 def referenced_note_keys(*texts: str | None) -> set[str]:
     return set(_NOTE_KEY.findall(" ".join(t or "" for t in texts)))
+
+
+#: حالات المرجع التي تعني أنك قرأته فعلًا، فيصلح إسنادًا.
+READ_STATUSES = frozenset({ReadingStatus.FULLY_READ, ReadingStatus.VERIFIED})
+
+
+def referenced_reference_keys(session: Session, blob: str) -> list[ObservatoryReference]:
+    """المراجع المذكورة بمفاتيحها في نصّ الادعاء.
+
+    المطابقة على المفتاح لا على اسم المؤلف: «Cashwell–Everett 1959» نثرٌ لا
+    يُفحص آليًا، أما ``CashwellEverett1959RingOfNTFunctions`` فيُفحص. وهذا
+    التشدّد مقصود — الإسناد الذي لا تستطيع الآلة التحقق منه ليس إسنادًا.
+    """
+    found = []
+    for row in session.scalars(select(ObservatoryReference)):
+        if re.search(rf"(?<![\w-]){re.escape(row.reference_key)}(?![\w-])", blob):
+            found.append(row)
+    return found
 
 
 def enforce_citation_policy(
@@ -96,10 +121,50 @@ def enforce_citation_policy(
                 "استبدلها بنتيجة معتمدة من الموسوعة أو بمرجع خارجي موثق."
             )
 
-    if claim_status in ANCHORED_STATUSES and not result_keys:
+    pvg_keys = sorted(set(_PVG_KEY.findall(blob)))
+    for key in pvg_keys:
+        row = session.scalars(
+            select(PvgResult).where(PvgResult.result_key == key)
+        ).one_or_none()
+        if row is None:
+            _fail(
+                f"المعرّف {key} غير موجود في سجل نتائج PVG. "
+                "شغّل استيراد المدونة أو صحّح المعرّف."
+            )
+        # الحالة غير المبرهنة تُذكر بحرية؛ المرفوض أن يُبنى عليها ادعاءُ برهان.
+        if not row.is_proven and claim_status in PROOF_ASSERTING_STATUSES:
+            _fail(
+                f"النتيجة {key} حالتها «{row.status}» وليست برهانًا — "
+                "والأرشيف نفسه يقول لا يحل الفحص محل البرهان. "
+                "أنزل حالة الادعاء إلى FINITE_VERIFIED أو OPEN."
+            )
+
+    references = referenced_reference_keys(session, blob)
+    read = [r for r in references if r.reading_status in READ_STATUSES]
+
+    if claim_status in ANCHORED_STATUSES and not result_keys and not read:
+        # مرجعٌ مذكور لكنك لم تقرأه: عنوانٌ لا شهادة. تسميته صراحةً أنفع من
+        # رسالة عامة، لأن العلاج معروف — اقرأه ثم حدّث حالته.
+        if references:
+            unread = "، ".join(
+                f"{r.reference_key} ({r.reading_status.value})" for r in references
+            )
+            _fail(
+                f"المرجع {unread} لم يُقرأ بعد، فلا يصلح إسنادًا لحالة موثقة. "
+                "اقرأه وحدّث حالته إلى FULLY-READ أو VERIFIED، أو أنزل حالة "
+                "الادعاء."
+            )
+        # KNOWN تعني «معروف في الأدبيات». وطبقة PVG غير منشورة، فمهما بلغت
+        # قوة نتيجتها لا تجعل العبارة معروفةً عند أحد سوانا.
+        if pvg_keys:
+            _fail(
+                f"الإسناد الوحيد هنا نتيجةُ PVG ({'، '.join(pvg_keys)})، وهي "
+                "طبقة داخلية غير منشورة فلا تُثبت أن العبارة معروفة في "
+                "الأدبيات. استعمل PROVED_HERE، أو أضف مرجعًا منشورًا مقروءًا."
+            )
         _fail(
             "لا يجوز رفع ادعاء إلى حالة موثقة دون إسناد إلى نتيجة معتمدة في "
-            "الموسوعة أو إلى مرجع خارجي موثق."
+            "الموسوعة أو إلى مرجع خارجي موثق مقروء."
         )
 
     if source_layer is SourceLayer.MODEL_SYNTHESIS and claim_status in ANCHORED_STATUSES:

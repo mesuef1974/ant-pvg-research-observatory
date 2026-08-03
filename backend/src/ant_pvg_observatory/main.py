@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from . import graph
+from . import graph, pvg
 from .config import settings
 from .db import ensure_schema, get_session
 from .encyclopedia import ingestion
@@ -34,6 +34,8 @@ from .models import (
     LiteratureGate,
     ModelSynthesisNote,
     ObservatoryReference,
+    PvgDocument,
+    PvgResult,
     ReadingStatus,
     SourceFile,
     SourceLayer,
@@ -66,6 +68,10 @@ from .schemas import (
     NeighbourhoodView,
     PageIndexSummary,
     PageSearchResponseView,
+    PvgDocumentView,
+    PvgImportSummaryView,
+    PvgResultView,
+    PvgVisualView,
     ReferenceCreate,
     ReferenceUpdate,
     ReferenceView,
@@ -854,6 +860,38 @@ def gate_record(gate_key: str, session: SessionDependency) -> GateRecordView:
         path=f"{graph.GATE_RECORD_DIR}/{gate_key}.md",
         markdown=path.read_text(encoding="utf-8"),
     )
+
+
+@app.post(
+    "/api/pvg/import",
+    response_model=PvgImportSummaryView,
+    tags=["pvg"],
+)
+def import_pvg(session: SessionDependency) -> PvgImportSummaryView:
+    """يستوعب مدونة PVG من ``knowledge/pvg/`` ويتحقق من بصماتها."""
+    return PvgImportSummaryView.model_validate(pvg.import_pvg_corpus(session))
+
+
+@app.get("/api/pvg/documents", response_model=list[PvgDocumentView], tags=["pvg"])
+def list_pvg_documents(session: SessionDependency) -> list[PvgDocument]:
+    return list(session.scalars(select(PvgDocument).order_by(PvgDocument.slug)))
+
+
+@app.get("/api/pvg/results", response_model=list[PvgResultView], tags=["pvg"])
+def list_pvg_results(
+    session: SessionDependency,
+    is_proven: bool | None = None,
+) -> list[PvgResult]:
+    statement = select(PvgResult).order_by(PvgResult.result_key)
+    if is_proven is not None:
+        statement = statement.where(PvgResult.is_proven == is_proven)
+    return list(session.scalars(statement))
+
+
+@app.get("/api/pvg/visuals", response_model=list[PvgVisualView], tags=["pvg"])
+def list_pvg_visuals() -> list[dict]:
+    """المرئيات التفاعلية، تُقدَّم من ``/pvg/`` وتعمل دون اتصال."""
+    return pvg.list_visuals()
 
 
 if STATIC_ROOT.is_dir():

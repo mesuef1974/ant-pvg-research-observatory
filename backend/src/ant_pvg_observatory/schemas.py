@@ -428,3 +428,39 @@ class GateRecordView(BaseModel):
     gate_key: str
     path: str
     markdown: str
+
+
+class PvgImportSummaryView(BaseModel):
+    document_count: int
+    result_count: int
+    proven_count: int
+    manifest_entries: int
+    manifest_mismatches: int
+    visual_count: int
+
+
+class PvgDocumentView(BaseModel):
+    slug: str
+    title: str
+    body: str
+    blocks_json: str
+    sha256: str
+    char_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class PvgResultView(BaseModel):
+    result_key: str
+    statement: str | None
+    status: str | None
+    is_proven: bool
+    source_file: str
+
+    model_config = {"from_attributes": True}
+
+
+class PvgVisualView(BaseModel):
+    name: str
+    url: str
+    bytes: int
