@@ -133,9 +133,9 @@
       "claim_key": "CLAIM-PVG-FM-01",
       "statement": "لمصفوفة الوجوه F=vvᵀ−diag(a_i²): Inertia(F)=(1,k−1,0)، وdet F=(−1)^{k+1}(k−1)(∏a_i)² (PVG-FM-01، PVG-FM-02).",
       "source_layer": "PVG_RESEARCH",
-      "status": "LITERATURE-UNCLEAR",
-      "evidence_note": "النتيجتان صحيحتان، وتختزلان إلى تطابق واحد: F=D_a(J−I)D_a حيث D_a=diag(a_i). فـJ−I مصفوفةُ جوار الغراف التام K_k وطيفُها {k−1، و−1 بتضاعف k−1}، وقانون Sylvester للقصور الذاتي يحفظ التوقيع تحت التطابق المتجانس (عند a_i≠0)، ومنه المحدد det(D_a)²·det(J−I). فُحص التطابق والتوقيع والمحدد حاسوبيًا على 360 حالة، k من 2 إلى 7: مطابقة تامة. راجع GATE-PVG-GEO-001.",
-      "novelty_note": "الاختزال مؤكَّد، والمبرهنتان اللتان يستند إليهما كلاسيكيتان (Sylvester 1852، وطيف K_k)، لكنّي لم أقرأ مصدرًا بعينه لأيٍّ منهما — فلا تُرفع إلى KNOWN. والفحص الحاسوبي يؤكّد الاختزال ولا يحلّ محلّ الاستشهاد: لا يحل الفحص محل البرهان، ولا محل المصدر."
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "مصفوفة الوجوه F = vvᵀ − diag(a_i²) هي مصفوفة **DPR1**: بوضع D = −diag(a²) وρ=1 وz=a في المعادلة (1) من JakovcevicStor2015DPR1Eigen. ومعادلةُ الأرشيف الطيفية 1 = Σ a_i²/(λ+a_i²) هي عينُ المعادلة السرّية (3)، ومتجهُه الذاتي x_i ∝ a_i/(λ+a_i²) هو عينُ (D−λI)⁻¹z.\nفُحص: 1620 قيمة ذاتية من 1620 عند تمايز الأُسُس (scripts/verify_face_matrix_secular.py). والتوقيع والمحدد فُحصا سابقًا 360/360 عبر التطابق F = D_a(J−I)D_a. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة: البنية DPR1 وأدبياتُها قائمة منذ Golub 1973 وBunch–Nielsen–Sorensen 1978، والمعادلة السرّية معياريةٌ فيها. وكانت هذه LITERATURE-UNCLEAR حتى وُجد المصدر وقُرئ.\n**والأهمّ ثغرة كشفها المصدر**: الأرشيف يعطي المعادلة الطيفية بلا شرط، وأدبيات DPR1 تشترط d_i ≠ d_j — أي **تمايز الأُسُس**. فعند تكرار أُسّ بتضاعف m يصير −a² قيمةً ذاتية بتضاعف m−1، وهي قطبٌ للمعادلة السرّية لا جذر، فلا تحكمها. فُحص: 291/291. وهذا لا يمسّ التوقيع ولا المحدد، وكلاهما يصحّ مع التكرار."
     },
     {
       "claim_key": "CLAIM-PVG-FND-01",
@@ -384,6 +384,18 @@
       "url": "https://nntdm.net/papers/nntdm-22/NNTDM-22-3-68-78.pdf",
       "reading_status": "VERIFIED",
       "notes": "قُرئت المقدمة (ص68–69) قراءةً كاملة في ملف PDF الأصلي؛ وبقيّة المقال عن القواسم الأحادية وهي خارج غرضنا. المقدمة تنصّ حرفيًا: «It is well known that the set ℤ₊ of positive integers is a poset under the usual divisibility relation. It is likewise well known that the gcd and the lcm operations serve as the meet and the join on this poset. Thus ℤ₊ is a lattice under the usual divisibility relation, known as the divisor lattice. This lattice is distributive.»\nولها اسم مستقرّ: **the divisor lattice**. وتكرار «well known» مرّتين في سطرين هو بنفسه شهادةٌ على كلاسيكيّتها.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "JakovcevicStor2015DPR1Eigen",
+      "title": "Forward stable eigenvalue decomposition of rank-one modifications of diagonal matrices",
+      "authors": "N. Jakovčević Stor, I. Slapničar, J. L. Barlow",
+      "year": "2015",
+      "venue": "arXiv:1405.7537v2 — نسخة أولية؛ والمؤلفون لهم عمل محكَّم في Lin. Alg. Appl. 464 (2015)",
+      "doi": null,
+      "url": "https://arxiv.org/abs/1405.7537",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت الصفحتان 1–2 في الملف الأصلي. المعادلة (1): A = D + ρ z zᵀ، وتُسمّى «diagonal-plus-rank-one» (DPR1). والمعادلة (3): «The eigenvalues of A are the zeros of the secular function … f(λ) = 1 + ρ Σ ζ_i²/(d_i − λ)».\nوتشترط الورقة صراحةً عدمَ قابلية الاختزال: «ζ_i ≠ 0 … and d_i ≠ d_j, for all i ≠ j».\nنسخة أولية، فلا تُرقَّى إلى محكَّمة؛ وهي تُسند المعادلة السرّية إلى مراجع قياسية (Golub–Van Loan، البند 8.5.3).",
       "bibliography_key": null
     },
     {
@@ -651,6 +663,12 @@
       "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
       "relation": "PARTIAL",
       "coverage_note": "يغطّي القاعدة الشبكية (gcd=min) التي تتبعها CONE-01/02 وFACE-01 في سطر واحد، ولا يغطّي GLUE ولا FM ولا CALC ولا TAU."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "JakovcevicStor2015DPR1Eigen",
+      "relation": "COVERS",
+      "coverage_note": "يُسند بنية DPR1 والمعادلة السرّية، فيرفع FM-01/02. ويكشف شرط تمايز الأُسُس الذي أغفله الأرشيف."
     },
     {
       "gate_key": "GATE-PVG-GEO-001",
