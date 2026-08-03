@@ -61,17 +61,17 @@
       "claim_key": "CLAIM-PVFC-03",
       "statement": "تحت الجداء الداخلي الموزون w(λ)=∏_r m_r(λ)!: يكون L=U* ومن ثم K=U*U ≥ 0 (PVFC-03).",
       "source_layer": "PVG_RESEARCH",
-      "status": "LITERATURE-UNCLEAR",
-      "evidence_note": "النتيجة صحيحة. وتضايفُ مؤثّرَي الصعود والهبوط تحت الجداء الداخلي الطبيعي على التقسيمات هو **بنية المجموعات التفاضلية جزئية الترتيب** — شبكة يونغ نموذجُها، وDU−UD=I علامتُها. راجع Stanley1988DifferentialPosets وGATE-PVFC-SD-001.",
-      "novelty_note": "الترجيح أن التضايف كلاسيكي، والأرشيف يدرج «differential posets وشبكة يونغ» في برنامجه المفتوح فيعرف الوجهة. ولم أقرأ Stanley 1988 فلا تُرفع. وما قد يبقى خاصًّا هو الوزن w(λ)=∏m_r! بعينه: هل هو جداء Hall الداخلي المألوف أم آخر؟ بند متابعة."
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏LiuSmith2021UpDownOperatorsYoung، ص2، محكَّمة (قُرئت): مؤثرات الهبوط **منقولاتُ** مؤثرات الصعود — «the down-operators can be thought of as transposes of the up-operators». والنقل هو التضايف تحت الجداء الداخلي الذي تكون فيه التقسيمات أساسًا متعامدًا، ومنه K=U*U نصفُ معرَّفة موجبة تلقائيًا. وص1 تنسب U وD إلى Stanley في دراسته للمجموعات التفاضلية جزئية الترتيب. راجع GATE-PVFC-SD-001.",
+      "novelty_note": "لا جِدّة في التضايف ولا في K≥0: الأول مقرَّر، والثاني يتبعه في سطر. وكانت هذه `LITERATURE-UNCLEAR` حتى وُجد المصدر وقُرئ.\n**وما يبقى سؤالًا حقيقيًا** هو الوزن w(λ)=∏_r m_r(λ)! بعينه: هل هو الجداء الداخلي الذي تكون فيه التقسيمات متعامدة متجانسة، أم جداء Hall، أم ثالث؟ التضايف يتوقف على هذا الاختيار، والمصدر لا يحسمه لأنه يعمل بأساس متعامد معياري. بند متابعة دقيق."
     },
     {
       "claim_key": "CLAIM-PVFC-04",
       "statement": "مؤثرات الأنماط الصورية تحقق [D,B]=I و[L,R]=y₁∂_{y₁}، و[B,B]=[T,T]=0 و[T_r,B_a]=B_{a+r} (PVFC-04).",
       "source_layer": "PVG_RESEARCH",
-      "status": "LITERATURE-UNCLEAR",
-      "evidence_note": "‏B=y₁ وD=∂_{y₁} يولّدان جبر هايزنبرغ، و[D,B]=I علاقتُه المعرِّفة. والأرشيف يصرّح في بنده الثامن: «هذه مؤثرات تقسيمات كلاسيكية في جوهرها؛ محتوى PVFC هو تخصصها إلى الألياف وسلاسل ديريشليه». راجع Stanley1988DifferentialPosets وGATE-PVFC-SD-001.",
-      "novelty_note": "لا جِدّة ولم تُدَّع — تصريحُ الأرشيف نفسه، ومؤثرات الصعود والهبوط مصنَّفة CLASSICAL في بنده العاشر.\nومع ذلك **ليست KNOWN**: تصريحُ المؤلف عن عمله تقديرُه هو، لا شهادةُ أدبيات. والمرجع المسمَّى (Stanley 1988) لم يُقرأ. وحين رُفعت هذه إلى KNOWN-IN-EQUIVALENT-FORM رفضتها الحوكمة، فأُنزلت — لا لأن القاعدة قاسية بل لأنها محقّة. علاقةُ هايزنبرغ مقرَّرة، وقراءةُ مصدر لها عملُ دقائق، ولم يُنجَز بعد."
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏LiuSmith2021UpDownOperatorsYoung، المبرهنة 1 ص2، محكَّمة (قُرئت): جبر مؤثرات الصعود والهبوط على شبكة يونغ يُقدَّم بعلاقات تربيعية، منها d_i u_j = u_j d_i لـi≠j و**d₁u₁ = id** — وهي نمطُ [D,B]=I نفسُه. والأرشيف يصرّح في بنده الثامن أنها «مؤثرات تقسيمات كلاسيكية في جوهرها». راجع GATE-PVFC-SD-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. والمؤثرات في PVFC مصوغة على ℚ[y_j] لا على شبكة يونغ مباشرةً، فالتطابق **بنيوي لا حرفي**: الجبر واحد، والتحقيق مختلف. وهذا كافٍ لـKNOWN-IN-EQUIVALENT-FORM ولا يزيد."
     },
     {
       "claim_key": "CLAIM-PVFC-05",
@@ -399,6 +399,18 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "LiuSmith2021UpDownOperatorsYoung",
+      "title": "Up- and Down-operators on Young's Lattice",
+      "authors": "Ricky Ini Liu, Christian Smith",
+      "year": "2021",
+      "venue": "Electronic Journal of Combinatorics 28(3) #P3.30 — **محكَّمة**، مفتوحة",
+      "doi": "10.37236/10099",
+      "url": "https://doi.org/10.37236/10099",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت الصفحتان 1–2. المقدمة ص1 تنصّ أن مؤثرات Schur «can also be seen as refinements of the **raising and lowering operators U and D acting on Young's lattice** as defined by Stanley in his study of **differential posets**».\nوص2 تنصّ صراحةً على التضايف: «using the fact that the down-operators can be thought of as **transposes of the up-operators**». وتُدرج العلاقات: d_i u_j = u_j d_i لـi≠j، و**d₁u₁ = id**، وd_{i+1}u_{i+1} = u_i d_i (المبرهنة 1).\nأي أن تضايف الصعود والهبوط على شبكة يونغ، وعلاقةَ التبديل من نمط هايزنبرغ، كلاهما مقرَّر في دورية محكَّمة.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "MacHenry2010ConvolutionRingSymmetric",
       "title": "The Convolution Ring of Arithmetic Functions and Symmetric Polynomials",
       "authors": "Trueman MacHenry, Kieh Wong",
@@ -555,6 +567,12 @@
       "reference_key": "Jing1991VertexOperators",
       "relation": "PARTIAL",
       "coverage_note": "يغطي طرف المؤثرات، ولا يمسّ التخصيص عند x_p = p^{-s}."
+    },
+    {
+      "gate_key": "GATE-PVFC-SD-001",
+      "reference_key": "LiuSmith2021UpDownOperatorsYoung",
+      "relation": "COVERS",
+      "coverage_note": "يُسند تضايف الصعود والهبوط (PVFC-03) وعلاقة التبديل (PVFC-04). محكَّمة ومقروءة، فترفع الحالتين من LITERATURE-UNCLEAR."
     },
     {
       "gate_key": "GATE-PVFC-SD-001",
