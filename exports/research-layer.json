@@ -18,6 +18,30 @@
       "novelty_note": "ليست `KNOWN-IN-EQUIVALENT-FORM` بعد، وإن بدت كذلك: قرأتُ مقدّمة الميدان لا ورقةً بعينها تنصّ على العبارة. ورفعُها إلى «مكافئة لمعلوم» قبل قراءة مصدر محدَّد هو الخطأ الذي تمنعه هذه المنصة. بند المتابعة: تثبيت ورقة Beurling أو خلَف بعينها.\nوقيمة المبرهنة لا تنقص بذلك: سالبةٌ تحدّ مسار البحث بنفسها وتغلق تمييز الأوليات بعدد منتهٍ من العزوم. وما بقي مفتوحًا هو السلوك عند s→1⁺ والحدود الموحّدة في N، وهو خارجها."
     },
     {
+      "claim_key": "CLAIM-PVG-CONE-01",
+      "statement": "n²=π₂₃(n)π₂₅(n)π₃₅(n)، وn=∏ جداءات gcd الثنائية للإسقاطات (PVG-CONE-01، PVG-CONE-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "صياغةٌ مكافئة لحساب الأُسُس على الشبكة المعروفة في Haukkanen2016UnitaryDivisorSemilattice: كلُّ أُسٍّ يظهر في وجهين من الثلاثة بالضبط، فيتضاعف؛ وgcd هو min. الحالة العامة ∏_{وجوه} π_F(n)=n^{k−1}. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. عدُّ ظهور كل أُسٍّ في الوجوه حسابٌ مباشر، والصياغة الهندسية تسمّيه لا تضيف إليه."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FACE-01",
+      "statement": "العمق الوجهي d_{pq}=min(a,b)، وبعد نزع (pq)^d تقع البقية على أحد المحورين (PVG-FACE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "min على متجهات الأُسُس هو gcd، وهذا نصّ Haukkanen2016UnitaryDivisorSemilattice. والعمق هو ν_{pq} لأكبر قوة من الجذر تقسم العدد. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. استخراجُ أكبر قوة للجذر عمليةٌ قياسية."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FM-01",
+      "statement": "لمصفوفة الوجوه F=vvᵀ−diag(a_i²): Inertia(F)=(1,k−1,0)، وdet F=(−1)^{k+1}(k−1)(∏a_i)² (PVG-FM-01، PVG-FM-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "النتيجتان صحيحتان، وتختزلان إلى تطابق واحد: F=D_a(J−I)D_a حيث D_a=diag(a_i). فـJ−I مصفوفةُ جوار الغراف التام K_k وطيفُها {k−1، و−1 بتضاعف k−1}، وقانون Sylvester للقصور الذاتي يحفظ التوقيع تحت التطابق المتجانس (عند a_i≠0)، ومنه المحدد det(D_a)²·det(J−I). فُحص التطابق والتوقيع والمحدد حاسوبيًا على 360 حالة، k من 2 إلى 7: مطابقة تامة. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "الاختزال مؤكَّد، والمبرهنتان اللتان يستند إليهما كلاسيكيتان (Sylvester 1852، وطيف K_k)، لكنّي لم أقرأ مصدرًا بعينه لأيٍّ منهما — فلا تُرفع إلى KNOWN. والفحص الحاسوبي يؤكّد الاختزال ولا يحلّ محلّ الاستشهاد: لا يحل الفحص محل البرهان، ولا محل المصدر."
+    },
+    {
       "claim_key": "CLAIM-PVG-FND-01",
       "statement": "تمثيل الأعداد الصحيحة الموجبة بمتجه أُسُسها الأولية تماثلٌ ℕ≥1 ≅ ⊕_p ℕ₀ (PVG-FND-01).",
       "source_layer": "PVG_RESEARCH",
@@ -26,12 +50,52 @@
       "novelty_note": "لا جِدّة، ولم تُدَّع. هذه المبرهنة الأساسية في الحساب مصوغةً بلغة الشبكات، وعمر الصياغة بهذه العبارة 67 سنة على الأقل."
     },
     {
+      "claim_key": "CLAIM-PVG-FND-02",
+      "statement": "ℚ_{>0} ≅ ⊕_p ℤ، أي زمرة حرة أبيلية على الأوليات (PVG-FND-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982: التوصيف الوحيد لكل صحيح بمتجه أُسُس منتهي الحامل. وℚ_{>0} تتمّةُ ذلك الأحادي الزمرية، فيصير المتجه صحيحَ المركّبات. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. هذه المبرهنة الأساسية في الحساب بلغة الزمر."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-03",
+      "statement": "ν(mn)=ν(m)+ν(n): التقييم تماثلُ أحاديات (PVG-FND-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982: كونُ n ↦ (a₁,a₂,…) توصيفًا وحيدًا يجعل جمع المتجهات هو ضربَ الأعداد. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. بل هذه صيغةُ تعريف التقييم p-adic نفسِه، فالسؤال عن سابقتها سؤالٌ عن سابقة التعريف."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-04",
+      "statement": "القسمة ترتيبٌ جزئي على ℤ₊، وgcd وlcm هما الالتقاء والاتحاد، أي min وmax على متجهات الأُسُس (PVG-FND-04).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "Haukkanen2016UnitaryDivisorSemilattice، المقدمة ص68، محكَّم: «the gcd and the lcm operations serve as the meet and the join on this poset. Thus ℤ₊ is a lattice … known as the divisor lattice. This lattice is distributive.» راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. وللبنية اسمٌ مستقرّ في الأدبيات — «the divisor lattice» — والمصدر يصفها «well known» مرّتين في سطرين."
+    },
+    {
+      "claim_key": "CLAIM-PVG-FND-05",
+      "statement": "قواسم n نقاطُ صندوق: B(n)=∏[0,a_p]∩ℤ، وعددُها ∏(a_p+1)=τ(n) (PVG-FND-05).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN",
+      "evidence_note": "تتبع مباشرةً من Haukkanen2016UnitaryDivisorSemilattice (ترتيب القسمة مركَّبيّ) مع CashwellEverett1959RingOfNTFunctions (متجه الأُسُس): d|n ⟺ 0 ≤ ν_p(d) ≤ ν_p(n) لكل p. راجع GATE-PVG-FND-002.",
+      "novelty_note": "لا جِدّة. وصيغة τ(n)=∏(a_p+1) في كل مقرَّر في نظرية الأعداد."
+    },
+    {
       "claim_key": "CLAIM-PVG-FND-06",
       "statement": "تحت تمثيل متجه الأُسُس، يصير التفاف ديريشليه التفافًا جمعيًا على المخروط ⊕_p ℕ₀ (PVG-FND-06).",
       "source_layer": "PVG_RESEARCH",
       "status": "KNOWN",
       "evidence_note": "CashwellEverett1959RingOfNTFunctions، البند 14 ص982، محكَّم: «addition is preserved, and P(α·β)=P(α)P(β)» حيث P متسلسلة قوى في متغيّرات مفهرسة بالأوليات؛ وضربُ متسلسلات القوى هو التفافُ المعاملات الجمعي. راجع GATE-PVG-FND-001.",
       "novelty_note": "لا جِدّة. وهذه أهمّ حصيلة المسح: النتيجة كانت غير مفحوصة، وقد تبيّن أنها منشورة محكَّمة منذ 1959. عدمُ العثور كان واقعةً عن مسحنا لا عن العالم."
+    },
+    {
+      "claim_key": "CLAIM-PVG-GLUE-01",
+      "statement": "ثلاث نقاط وجهية تلصق إلى نقطة واحدة في المخروط إذا وفقط إذا اتفقت على المحاور المشتركة (PVG-GLUE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "المبرهنة صحيحة (PVG-GLUE-01). وصياغتها «تتفق على التقاطعات ⟺ تلصق» هي **شرط الحُزمة** بعينه — معادلُ المُسوّي (equalizer) على غطاء. والأرشيف يعرف ذلك: بندُه المفتوح هو «صياغة شيقية/حزمية كاملة للّصق». راجع GATE-PVG-GEO-001.",
+      "novelty_note": "الترجيح القوي أنها كلاسيكية (بديهية الحُزمة على الأحادي التآلفي ℕ₀^k في الهندسة التوريّة)، لكنّي لم أقرأ مصدرًا يقولها في هذا السياق. والترجيح ليس دليلًا. بند متابعة: تثبيت مصدر في نظرية الأحاديات التآلفية أو الهندسة التوريّة."
     }
   ],
   "gates": [
@@ -62,6 +126,20 @@
       "research_question": "هل تمثيل ℕ≥1 ≅ ⊕_p ℕ₀ بمتجه الأُسُس، وتحوّلُ التفاف ديريشليه تحته إلى التفاف جمعي على المخروط، موجودان في الأدبيات؟\nالنطاق: حلقة الدوال الحسابية، متسلسلات القوى بعدد قابل للعدّ من المتغيرات، حلقة Witt/القلائد، الدوال المتناظرة الحسابية.",
       "status": "CLOSED",
       "verdict": "KNOWN"
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "title": "أسس PVG الحسابية والشبكية: التقييم، والقسمة ترتيبًا، وصندوق القواسم",
+      "research_question": "أربع نتائج من طبقة الأسس بقيت بلا فحص بعد أن تبيّن أن PVG-FND-01 وPVG-FND-06 هما Cashwell–Everett 1959:\nPVG-FND-02: ℚ_{>0} ≅ ⊕_p ℤ.\nPVG-FND-03: ν(mn)=ν(m)+ν(n).\nPVG-FND-04: القسمة ترتيب، وgcd/lcm هما min/max.\nPVG-FND-05: القواسم نقاط صندوق.\nهل كلٌّ منها في الأدبيات؟",
+      "status": "CLOSED",
+      "verdict": "KNOWN"
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "title": "هندسة المخروط والوجوه ومصفوفة الوجوه",
+      "research_question": "تسع نتائج هندسية على المخروط ℕ₀^k:\nCONE-01: n²=∏ الإسقاطات الوجهية الثلاثة. CONE-02: إعادة البناء بجداءات gcd. FACE-01: عمق الوجه min(a,b). GLUE-01: شرط توافق المحاور المشتركة مكافئ للّصق. FM-01: توقيع (1,k−1,0). FM-02: صيغة المحدد. CALC-01: d²=0. CALC-02: الضربية تكافئ انعدام الانحناء المختلط. TAU-01: تعظيم τ عند التوازن.\nإلى أي مبرهنة كلاسيكية تختزل كلٌّ منها؟",
+      "status": "REVIEW-IN-PROGRESS",
+      "verdict": "PARTIAL"
     }
   ],
   "references": [
@@ -162,6 +240,18 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "title": "Embedding the unitary divisor meet semilattice in a lattice",
+      "authors": "Pentti Haukkanen",
+      "year": "2016",
+      "venue": "Notes on Number Theory and Discrete Mathematics 22(3), 68–78 — محكَّم",
+      "doi": null,
+      "url": "https://nntdm.net/papers/nntdm-22/NNTDM-22-3-68-78.pdf",
+      "reading_status": "VERIFIED",
+      "notes": "قُرئت المقدمة (ص68–69) قراءةً كاملة في ملف PDF الأصلي؛ وبقيّة المقال عن القواسم الأحادية وهي خارج غرضنا. المقدمة تنصّ حرفيًا: «It is well known that the set ℤ₊ of positive integers is a poset under the usual divisibility relation. It is likewise well known that the gcd and the lcm operations serve as the meet and the join on this poset. Thus ℤ₊ is a lattice under the usual divisibility relation, known as the divisor lattice. This lattice is distributive.»\nولها اسم مستقرّ: **the divisor lattice**. وتكرار «well known» مرّتين في سطرين هو بنفسه شهادةٌ على كلاسيكيّتها.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Jing1991VertexOperators",
       "title": "Vertex operators and Hall-Littlewood symmetric functions",
       "authors": "Naihuan Jing",
@@ -207,6 +297,18 @@
       "url": "https://arxiv.org/abs/2604.14596",
       "reading_status": "DISCOVERED",
       "notes": "محجور: لا يُستشهد به ولا يُبنى عليه. إطار «معلوماتي-أنطولوجي»، واستقرار عددي مزعوم بتغيّر 17% على مدى L≤2000 يُقدَّم دليلًا، ولا مرجع دورية. أُدرج هنا لتوثيق تضارب التسمية لا للاعتماد.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "SylvesterInertiaAndCompleteGraphSpectrum",
+      "title": "قانون Sylvester للقصور الذاتي، وطيف مصفوفة جوار الغراف التام",
+      "authors": "J. J. Sylvester (1852) وأدبيات الطيف البياني",
+      "year": "1852",
+      "venue": "نتيجتان كلاسيكيتان — لم يُثبَّت مصدر بعينه بعد",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة لا إسنادًا. قانون Sylvester: التطابق المتجانس يحفظ القصور الذاتي. وطيف J−I لغراف K_k هو {k−1، و−1 بتضاعف k−1}. كلاهما في كل كتاب مقرَّر، ولم أقرأ مصدرًا بعينه، فلا يصلح إسنادًا لحالة موثقة.",
       "bibliography_key": null
     },
     {
@@ -318,6 +420,30 @@
       "reference_key": "MacHenry2010ConvolutionRingSymmetric",
       "relation": "ADJACENT",
       "coverage_note": "خط موازٍ عبر متعدّدات Schur الخطّافية. لم يُقرأ بعد."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "reference_key": "CashwellEverett1959RingOfNTFunctions",
+      "relation": "COVERS",
+      "coverage_note": "البند 14 ص982 يعطي التماثل الوحيد بمتجه الأُسُس ويصرّح بأن الجمع محفوظ. وFND-03 هي عينُ كون التطابق تماثلَ أحاديات، وFND-02 هي تتمّته الزمرية على ℚ_{>0}."
+    },
+    {
+      "gate_key": "GATE-PVG-FND-002",
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "relation": "COVERS",
+      "coverage_note": "المقدمة ص68 تنصّ على FND-04 بلفظها، وتسمّيها «the divisor lattice»، وتصفها بـ«well known» مرّتين. وFND-05 تتبعها مباشرةً: d|n ⟺ 0 ≤ ν_p(d) ≤ ν_p(n) لكل p، فالقواسم فترةٌ في الشبكة، وعددُها ∏(a_i+1)=τ(n)."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
+      "relation": "PARTIAL",
+      "coverage_note": "يغطّي القاعدة الشبكية (gcd=min) التي تتبعها CONE-01/02 وFACE-01 في سطر واحد، ولا يغطّي GLUE ولا FM ولا CALC ولا TAU."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "SylvesterInertiaAndCompleteGraphSpectrum",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـFM-01/02، وبندُ متابعة لا إسناد."
     }
   ],
   "links": [
@@ -355,6 +481,70 @@
     },
     {
       "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CONE-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CONE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FACE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FACE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FACE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FM-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FM-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FM-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
       "from_key": "CLAIM-PVG-FND-01",
       "relation": "DEPENDS-ON",
       "to_type": "pvg_result",
@@ -371,6 +561,70 @@
     },
     {
       "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-04",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-04",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-04",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-05",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-FND-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-FND-05",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-FND-002",
+      "note": null
+    },
+    {
+      "from_type": "claim",
       "from_key": "CLAIM-PVG-FND-06",
       "relation": "DEPENDS-ON",
       "to_type": "pvg_result",
@@ -383,6 +637,22 @@
       "relation": "EXAMINED-BY",
       "to_type": "gate",
       "to_key": "GATE-PVG-FND-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-GLUE-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-GLUE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-GLUE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
       "note": null
     },
     {
