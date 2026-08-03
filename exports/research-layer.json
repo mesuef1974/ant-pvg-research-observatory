@@ -18,6 +18,30 @@
       "novelty_note": "ليست `KNOWN-IN-EQUIVALENT-FORM` بعد، وإن بدت كذلك: قرأتُ مقدّمة الميدان لا ورقةً بعينها تنصّ على العبارة. ورفعُها إلى «مكافئة لمعلوم» قبل قراءة مصدر محدَّد هو الخطأ الذي تمنعه هذه المنصة. بند المتابعة: تثبيت ورقة Beurling أو خلَف بعينها.\nوقيمة المبرهنة لا تنقص بذلك: سالبةٌ تحدّ مسار البحث بنفسها وتغلق تمييز الأوليات بعدد منتهٍ من العزوم. وما بقي مفتوحًا هو السلوك عند s→1⁺ والحدود الموحّدة في N، وهو خارجها."
     },
     {
+      "claim_key": "CLAIM-PVG-CALC-01",
+      "statement": "‏d²=0 على شبكة PVG، فدورانُ حقل التدرج حول كل مربع صفر — ولا يصحّ ذلك لكل حقل، بل للحقول التدرجية وحدها (PVG-CALC-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "‏d²=0 بديهيةُ المركّب المشترك، وشبكة الأُسُس ℤ^k مركّبُ مكعّبات. راجع CochainComplexAndCubicalCohomology وGATE-PVG-GEO-001.",
+      "novelty_note": "الترجيح القاطع أنها تعريفية لا نتيجة، ولم أقرأ مصدرًا بعينه فلا تُرفع. وقيمتها هنا **تصحيحية** أيضًا: الأرشيف يسجّل أن الادعاء القديم بأن كل حقل على PVG عديم الدوران كان خطأ، ويعطي المثال المضاد V=(−b,a)."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CALC-02",
+      "statement": "دالة موجبة f ضربيةٌ ⟺ انعدام انحنائها المختلط اللوغاريتمي D_pD_q log f = 0 لكل p≠q (PVG-CALC-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "انعدامُ الفرق المختلط يعني أن log f ينفصل جمعًا على محاور الأوليات، أي أن f تُحدَّد كليًا بقيمها على قوى الأوليات. وهذا نصّ CashwellEverett1959RingOfNTFunctions، البند 6 ص977 (قُرئ): «α(Πp^a)=Πα(p^a) is multiplicative, α(p^a) being quite arbitrary for each power a … two multiplicative functions identical on all such p^a are equal». راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. الصياغة بلغة «الانحناء المختلط» تسمّي الشرط المعروف ولا تضيف إليه؛ وهي النظير المتقطّع لمعيار الانفصال الكلاسيكي ∂²log f/∂x∂y = 0 ⟺ f = g(x)h(y)."
+    },
+    {
+      "claim_key": "CLAIM-PVG-CALC-03",
+      "statement": "الفرق الثاني المحوري لدالة القواسم الخام ينعدم: D_p^{+2}τ = 0 (PVG-CALC-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "KNOWN-IN-EQUIVALENT-FORM",
+      "evidence_note": "‏τ(p^a·m)=(a+1)τ(m) عند p∤m، وهي خطّية في a، فالفرق الثاني صفر. وصيغة τ=∏(a_p+1) مسنَدة في CLAIM-PVG-FND-05 إلى Haukkanen2016UnitaryDivisorSemilattice. راجع GATE-PVG-GEO-001.",
+      "novelty_note": "لا جِدّة. وقيمة هذه النتيجة **تصحيحية**: الأرشيف يسجّل أن الادعاء القديم بسالبية الانحناء المحوري الخام كان خطأ، وأن السالب يظهر لـlog τ لا لـτ. وتصحيح الذات أنفع من نتيجة جديدة."
+    },
+    {
       "claim_key": "CLAIM-PVG-CONE-01",
       "statement": "n²=π₂₃(n)π₂₅(n)π₃₅(n)، وn=∏ جداءات gcd الثنائية للإسقاطات (PVG-CONE-01، PVG-CONE-02).",
       "source_layer": "PVG_RESEARCH",
@@ -96,6 +120,14 @@
       "status": "LITERATURE-UNCLEAR",
       "evidence_note": "المبرهنة صحيحة (PVG-GLUE-01). وصياغتها «تتفق على التقاطعات ⟺ تلصق» هي **شرط الحُزمة** بعينه — معادلُ المُسوّي (equalizer) على غطاء. والأرشيف يعرف ذلك: بندُه المفتوح هو «صياغة شيقية/حزمية كاملة للّصق». راجع GATE-PVG-GEO-001.",
       "novelty_note": "الترجيح القوي أنها كلاسيكية (بديهية الحُزمة على الأحادي التآلفي ℕ₀^k في الهندسة التوريّة)، لكنّي لم أقرأ مصدرًا يقولها في هذا السياق. والترجيح ليس دليلًا. بند متابعة: تثبيت مصدر في نظرية الأحاديات التآلفية أو الهندسة التوريّة."
+    },
+    {
+      "claim_key": "CLAIM-PVG-TAU-01",
+      "statement": "عند ثبات ω(n)=k وΩ(n)=A، تبلغ τ(n)=∏(a_i+1) أقصاها عند التوزيع المتوازن (q+1)^r q^{k−r} حيث A=kq+r؛ وlog τ مقعَّرة بمعنى Schur (PVG-TAU-01، PVG-SHAPE-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "LITERATURE-UNCLEAR",
+      "evidence_note": "تختزل إلى تقعّر Schur للجداء ∏x_i على الربع الموجب، مع كون التغليب محفوظًا تحت الإزاحة a↦a+1. فُحص استقصاءً تامًّا: 9,681,337 زوجًا مغلِّبًا، k من 2 إلى 5 وΩ حتى 15 — إزاحة التغليب وتقعّر Schur يصحّان في كل الحالات، والشكل الأمثل يطابق (q+1)^r q^{k−r} في كل حالة (scripts/verify_tau_majorization.py). راجع GATE-PVG-GEO-001.",
+      "novelty_note": "الوجهة معروفة — MarshallOlkinArnold2011Majorization — والأرشيف يستعمل مصطلح Schur-concave بنفسه، فالجِدّة غير مدَّعاة. ولم أقرأ الكتاب، فلا تُرفع إلى KNOWN.\nوملاحظة منهجية: مُلخِّصٌ آلي زعم أثناء المسح أن التغليب لا يُحفظ تحت الإزاحة، والفحص الاستقصائي أثبت خطأه. مخرَجُ أداةٍ ليس مصدرًا."
     }
   ],
   "gates": [
@@ -192,6 +224,18 @@
       "bibliography_key": null
     },
     {
+      "reference_key": "CochainComplexAndCubicalCohomology",
+      "title": "بديهية المركّب المشترك d∘d=0 على مركّب المكعّبات",
+      "authors": "أدبيات الطوبولوجيا الجبرية والتفاضل الخارجي المتقطّع",
+      "year": null,
+      "venue": "نتيجة تعريفية — لم يُثبَّت مصدر بعينه بعد",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة. \\(d^2=0\\) بديهيةُ المركّب المشترك، وعلى شبكة \\(\\mathbb Z^k\\) (مركّب مكعّبات) هي واقعة قياسية في الكوهومولوجيا المكعّبية وحساب التفاضل الخارجي المتقطّع. لم أقرأ مصدرًا بعينه.",
+      "bibliography_key": null
+    },
+    {
       "reference_key": "Elliott2008RingStructures",
       "title": "Ring structures on groups of arithmetic functions",
       "authors": "Jesse Elliott",
@@ -285,6 +329,18 @@
       "url": null,
       "reading_status": "DISCOVERED",
       "notes": "لم يُقرأ. البند الثاني في متابعة GATE-PVFC-SD-001: الفصل الخامس (تماثل Satake) قراءةً مباشرة لا نقلًا عن الآخرين. لا يزال مفتوحًا.",
+      "bibliography_key": null
+    },
+    {
+      "reference_key": "MarshallOlkinArnold2011Majorization",
+      "title": "Inequalities: Theory of Majorization and Its Applications",
+      "authors": "Albert W. Marshall, Ingram Olkin, Barry C. Arnold",
+      "year": "2011",
+      "venue": "Springer Series in Statistics، الطبعة الثانية — كتاب معياري",
+      "doi": null,
+      "url": null,
+      "reading_status": "DISCOVERED",
+      "notes": "مُدخَل بوصفه بندَ متابعة لا إسنادًا. المرجع المعياري لتقعّر Schur، وفيه أن الجداء ∏x_i (والدوال المتناظرة الأولية عمومًا) مقعَّرةٌ بمعنى Schur على الربع الموجب — وهذه هي المبرهنة التي تختزل إليها PVG-TAU-01. لم يُقرأ، فلا يصلح إسنادًا.",
       "bibliography_key": null
     },
     {
@@ -435,9 +491,21 @@
     },
     {
       "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "CochainComplexAndCubicalCohomology",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـCALC-01. بند متابعة."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
       "reference_key": "Haukkanen2016UnitaryDivisorSemilattice",
       "relation": "PARTIAL",
       "coverage_note": "يغطّي القاعدة الشبكية (gcd=min) التي تتبعها CONE-01/02 وFACE-01 في سطر واحد، ولا يغطّي GLUE ولا FM ولا CALC ولا TAU."
+    },
+    {
+      "gate_key": "GATE-PVG-GEO-001",
+      "reference_key": "MarshallOlkinArnold2011Majorization",
+      "relation": "ADJACENT",
+      "coverage_note": "الوجهة الصحيحة لـTAU-01/SHAPE-01: تقعّر Schur للجداء. بند متابعة."
     },
     {
       "gate_key": "GATE-PVG-GEO-001",
@@ -477,6 +545,54 @@
       "relation": "EXAMINED-BY",
       "to_type": "gate",
       "to_key": "GATE-PVFC-JET-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-CALC-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-CALC-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
       "note": null
     },
     {
@@ -650,6 +766,30 @@
     {
       "from_type": "claim",
       "from_key": "CLAIM-PVG-GLUE-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-PVG-GEO-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-SHAPE-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "PVG-TAU-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-PVG-TAU-01",
       "relation": "EXAMINED-BY",
       "to_type": "gate",
       "to_key": "GATE-PVG-GEO-001",
