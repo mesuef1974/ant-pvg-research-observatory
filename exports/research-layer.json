@@ -2,6 +2,38 @@
   "format_version": 1,
   "claims": [
     {
+      "claim_key": "CLAIM-ADD-01",
+      "statement": "ι_N : {(a,b) : a+b=N} → G_N، (a,b) ↦ (ν(a),ν(b))، تقابلٌ واحد لواحد؛ فتمثيل ليف الجمع في PVG ليس ضغطًا للمعلومة (ADD-01).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "تتبع مباشرةً من حقن خريطة التقييم، وهي CLAIM-PVG-FND-01 المسنَدة إلى CashwellEverett1959RingOfNTFunctions. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة: نتيجةٌ في سطر من تقابلٍ عمره 67 سنة. وقيمتها **سلبية نافعة**: تمنع وهمًا محتملًا بأن الانتقال إلى إحداثيات PVG يضغط المسألة الجمعية أو يبسّطها. لا يفعل — يعيد ترميزها."
+    },
+    {
+      "claim_key": "CLAIM-ADD-02",
+      "statement": "هوية التفاف الليف: (f *₊ g)(N) = ∫_{G_N} f̂(x)ĝ(y) dμ_N(x,y) حيث μ_N = Σ_a δ_{(ν(a),ν(N−a))} (ADD-02).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "‏μ_N مُعرَّفة مجموعَ كتل ديراك على نقاط الليف، فالتكامل عليها هو المجموع نفسه. الأرشيف يصرّح: «هذه ترجمة دقيقة، وليست تقديرًا تقاربيًا». راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة ولم تُدَّع. تغييرُ ترميز لا مبرهنة، والأرشيف يقولها. وقيمتها تنظيمية: تكتب المجموع الجمعي بلغة القياس على الليف، فتفتح الباب لأدوات تحليلية — ولم تُدخل بعدُ أيَّ أداة."
+    },
+    {
+      "claim_key": "CLAIM-ADD-03",
+      "statement": "rank D_{N,r} = min(N−1, r/gcd(2,r))، ومنه D_{N,r} حقني ⟺ r/gcd(2,r) ≥ N−1 (ADD-03).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "العمودان a وb يتطابقان ⟺ 2(a−b) ≡ 0 (mod r)، فعدد الأعمدة المتمايزة هو min(N−1, r/gcd(2,r)). **فُحص: 437 حالة من 437** (N من 3 إلى 25، r من 1 إلى 19، رتبة عددية) — scripts/verify_addition_fiber_ranks.py. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "المؤثر D_{N,r} من بناء الأرشيف، فلا سابقة تُطلب ولا جِدّة تُدَّعى: NOT-FOUND-YET هنا خاليةٌ من المعنى. المطلوب الصحةُ وحدها، وقد فُحصت."
+    },
+    {
+      "claim_key": "CLAIM-ADD-04",
+      "statement": "للمعايير r₁,…,r_s وL=lcm(rᵢ): rank J_{N;r} = min(N−1, L/gcd(2,L))؛ ولا يُساوى المؤثر المشترك J بالمكدَّس M لأن الهوامش قد تفقد اقتران المعلومات (ADD-04).",
+      "source_layer": "PVG_RESEARCH",
+      "status": "PROVED-HERE",
+      "evidence_note": "**فُحص: 119 حالة من 119** (N من 3 إلى 19، سبع مجموعات معايير منها (3,5) و(6,10) و(3,4,5)) — scripts/verify_addition_fiber_ranks.py. راجع GATE-ADD-FIBER-001.",
+      "novelty_note": "لا جِدّة تُدَّعى. والتمييز بين J المشترك وM المكدَّس هو المضمون الحقيقي هنا، وهو تحذيرٌ منهجي صحيح: الهوامش ليست الاقتران."
+    },
+    {
       "claim_key": "CLAIM-ADD-05",
       "statement": "غولدباخ الثنائي للعدد الزوجي N يكافئ G_N ∩ (P₁×P₁) ≠ ∅، حيث G_N ليفُ الجمع وP₁={e_p} المحلُّ الأولي (ADD-05).",
       "source_layer": "PVG_RESEARCH",
@@ -171,6 +203,13 @@
     }
   ],
   "gates": [
+    {
+      "gate_key": "GATE-ADD-FIBER-001",
+      "title": "ألياف الجمع: الحفظ، والالتفاف، ورتب قنوات الفرق",
+      "research_question": "أربع نتائج على ليف الجمع G_N = {(ν(a), ν(N−a))}:\nADD-01: التقييم على الليف تقابلٌ فلا تُفقد معلومة.\nADD-02: هوية التفاف الليف.\nADD-03: rank D_{N,r} = min(N−1, r/gcd(2,r)).\nADD-04: rank J_{N;r} = min(N−1, L/gcd(2,L))، L=lcm(r_i).\nالمؤثرات من بناء الأرشيف، فالسؤال عن الصحة لا عن السابقة.",
+      "status": "CLOSED",
+      "verdict": "NOT-FOUND-YET"
+    },
     {
       "gate_key": "GATE-ADD-GOLDBACH-001",
       "title": "غولدباخ بوصفه تقاطع الليف الجمعي مع المحل الأولي",
@@ -609,6 +648,78 @@
     }
   ],
   "links": [
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-01",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-01",
+      "relation": "SUPPORTS",
+      "to_type": "claim",
+      "to_key": "CLAIM-ADD-05",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-02",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-02",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-02",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-03",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-03",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-03",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-04",
+      "relation": "DEPENDS-ON",
+      "to_type": "pvg_result",
+      "to_key": "ADD-04",
+      "note": null
+    },
+    {
+      "from_type": "claim",
+      "from_key": "CLAIM-ADD-04",
+      "relation": "EXAMINED-BY",
+      "to_type": "gate",
+      "to_key": "GATE-ADD-FIBER-001",
+      "note": null
+    },
     {
       "from_type": "claim",
       "from_key": "CLAIM-ADD-05",
